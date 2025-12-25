@@ -75,8 +75,8 @@ Algunas funcionalidades pueden estar sujetas a cambios o mejoras futuras.
 
 ## ✨ Autor
 
-Desarrollado por **[David Pedregal Ribas]**  
-Trabajo de Fin de Grado – [Universidad de Oviedo - EII]
+Desarrollado por **David Pedregal Ribas**  
+Trabajo de Fin de Grado – Universidad de Oviedo - Escuela de Ingeniería Informática
 
 ---
 
