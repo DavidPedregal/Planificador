@@ -80,3 +80,8 @@ Trabajo de Fin de Grado – Universidad de Oviedo - Escuela de Ingeniería Infor
 
 ---
 
+## Preparar el entorno
+Para poder importar "ortools", se necesita ejecutar en una terminal:
+```Bash
+pip install ortools
+```
