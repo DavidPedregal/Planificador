@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+
+  app:
+    build: ./PlanificadorApp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - algoritmo
+    environment:
+      ALGORITMO_URL: http://algoritmo:8000
+
+  algoritmo:
+    build: ./PlanificadorAlgoritmo
+    ports:
+      - "8000:8000"
+
+volumes:
+  mongo_data:
