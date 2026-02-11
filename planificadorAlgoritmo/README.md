@@ -117,5 +117,5 @@ El servicio devuelve:
   - Hora de fin
   - Identificador de tarea
 
-> [!Note] Periodo de estudio
+> [!Note]
 > Un periodo de estudio se refiere al intervalo de tiempo en el que se supone que el usuario estudiará. Un ejemplo de esto sería: `15-1-2025; 18:00; 20:00; 1`, en el que `1` es el identificador de la tarea que se va a realizar en ese día y hora.
