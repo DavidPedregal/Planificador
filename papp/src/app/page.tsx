@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import Calendar from "@/app/calendar";
 import TodoApp from "@/app/todoList";
 

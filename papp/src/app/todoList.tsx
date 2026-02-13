@@ -42,7 +42,6 @@ export default function TodoApp() {
     const completedTasks = tasks.filter(t => t.completed);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
             <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
@@ -166,6 +165,5 @@ export default function TodoApp() {
                     )}
                 </div>
             </div>
-        </div>
     );
 }

@@ -3,13 +3,13 @@ from ortools.sat.python import cp_model
 model = cp_model.CpModel()
 
 # Bloques por hora (8h a 22h -> 14 bloques de 1h)
-horas = range(8, 22)
+horas = range(9, 22)
 dias = ["lunes", "martes", "miércoles", "jueves", "viernes"]
 
 # Horas ocupadas (ejemplo)
 ocupadas = {
     "lunes": [(9, 12), (15, 17)],
-    "martes": [(10, 13)],
+    "martes": [(9, 13)],
 }
 
 # Generamos las horas libres por día
