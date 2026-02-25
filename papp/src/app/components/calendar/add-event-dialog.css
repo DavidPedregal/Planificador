@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+.aed-overlay {
+    position: fixed; inset: 0; z-index: 1300;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(8, 8, 14, 0.75);
+    backdrop-filter: blur(6px);
+    animation: aed-fadein 0.18s ease;
+}
+@keyframes aed-fadein { from { opacity: 0 } to { opacity: 1 } }
+
+.aed-dialog {
+    width: 480px; max-width: calc(100vw - 32px); max-height: 90vh;
+    background: #16161f;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,111,247,0.1);
+    display: flex; flex-direction: column;
+    font-family: 'DM Sans', sans-serif;
+    color: #e2e2ee;
+    overflow: hidden;
+    animation: aed-slidein 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+@keyframes aed-slidein {
+    from { opacity: 0; transform: translateY(18px) scale(0.97) }
+    to   { opacity: 1; transform: translateY(0) scale(1) }
+}
+
+/* ── Header ── */
+.aed-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.aed-header-left { display: flex; align-items: center; gap: 10px; }
+.aed-header-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--aed-color, #7c6ff7);
+    box-shadow: 0 0 8px var(--aed-color, #7c6ff7);
+    transition: background 0.25s, box-shadow 0.25s;
+}
+.aed-title {
+    font-size: 1rem; font-weight: 600; letter-spacing: -0.01em;
+    color: #f0f0f8;
+}
+.aed-close {
+    background: none; border: none; cursor: pointer;
+    color: #55556a; padding: 6px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    font-size: 18px; line-height: 1;
+}
+.aed-close:hover { background: rgba(255,255,255,0.06); color: #e2e2ee; }
+
+/* ── Date strip ── */
+.aed-date-strip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 24px;
+    background: rgba(255,255,255,0.025);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.aed-date-field {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(124,111,247,0.08);
+    border: 1px solid rgba(124,111,247,0.2);
+    border-radius: 8px; padding: 5px 10px;
+    flex: 1; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.aed-date-field:focus-within {
+    border-color: #7c6ff7;
+    box-shadow: 0 0 0 3px rgba(124,111,247,0.15);
+}
+.aed-date-icon { font-size: 0.8rem; flex-shrink: 0; }
+.aed-date-input {
+    background: none; border: none; outline: none;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: #a89cf5; width: 100%; cursor: pointer;
+    color-scheme: dark; /* hace que el picker nativo use tema oscuro */
+}
+.aed-date-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(124,111,247,0.1);
+    border: 1px solid rgba(124,111,247,0.2);
+    border-radius: 8px; padding: 5px 10px;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    color: #a89cf5; white-space: nowrap;
+}
+.aed-date-arrow { color: #33334a; font-size: 1rem; }
+
+/* ── Body ── */
+.aed-body {
+    padding: 20px 24px;
+    overflow-y: auto; flex: 1;
+    display: flex; flex-direction: column; gap: 16px;
+}
+.aed-body::-webkit-scrollbar { width: 4px; }
+.aed-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* ── Field ── */
+.aed-field { display: flex; flex-direction: column; gap: 6px; }
+.aed-label {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: #55556a;
+}
+.aed-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    color: #e2e2ee; outline: none; width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.aed-input::placeholder { color: #33334a; }
+.aed-input:focus {
+    border-color: #7c6ff7;
+    box-shadow: 0 0 0 3px rgba(124,111,247,0.15);
+}
+.aed-input.aed-select { cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2355556a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 34px;
+}
+.aed-input.aed-select option { background: #1e1e2a; color: #e2e2ee; }
+
+/* ── Color picker ── */
+.aed-colors {
+    display: flex; gap: 8px; flex-wrap: wrap;
+}
+.aed-color-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+}
+.aed-color-btn:hover { transform: scale(1.15); }
+.aed-color-btn.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+    transform: scale(1.1);
+}
+.aed-color-btn.active::after {
+    content: '✓'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff; font-weight: 700;
+}
+
+/* ── Recurrence ── */
+.aed-recurrence-box {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+.aed-weekdays { display: flex; gap: 6px; }
+.aed-wd-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #8888aa; font-size: 0.72rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+}
+.aed-wd-btn:hover { border-color: #7c6ff7; color: #c4bcf9; }
+.aed-wd-btn.active {
+    background: rgba(124,111,247,0.2);
+    border-color: #7c6ff7; color: #c4bcf9;
+}
+
+.aed-row { display: flex; gap: 10px; align-items: center; }
+.aed-row .aed-input { flex: 1; }
+.aed-row-label { font-size: 0.8rem; color: #55556a; white-space: nowrap; }
+
+.aed-end-options { display: flex; flex-direction: column; gap: 8px; }
+.aed-radio-row {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+}
+.aed-radio {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color 0.15s;
+}
+.aed-radio.checked { border-color: #7c6ff7; }
+.aed-radio.checked::after {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: #7c6ff7;
+}
+.aed-radio-label { font-size: 0.82rem; color: #8888aa; }
+.aed-radio-row:hover .aed-radio-label { color: #c4bcf9; }
+.aed-radio-row:hover .aed-radio { border-color: #7c6ff7; }
+
+/* ── Footer ── */
+.aed-footer {
+    padding: 14px 24px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: flex-end; gap: 8px;
+}
+.aed-btn {
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600;
+    padding: 9px 20px; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s ease; border: none; letter-spacing: -0.01em;
+}
+.aed-btn-cancel {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8888aa;
+}
+.aed-btn-cancel:hover { background: rgba(255,255,255,0.09); color: #c4bcf9; }
+.aed-btn-save {
+    background: #7c6ff7; color: #fff;
+    box-shadow: 0 4px 14px rgba(124,111,247,0.35);
+}
+.aed-btn-save:hover {
+    background: #9d97f9; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124,111,247,0.5);
+}
+.aed-btn-save:active { transform: translateY(0); }
