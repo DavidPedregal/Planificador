@@ -9,10 +9,8 @@ import "./calendar.css";
 
 export default function Calendar() {
     const [open, setOpen] = useState(false);
-    const [selectedRange, setSelectedRange] = useState<{
-        start: Date;
-        end: Date;
-    } | null>(null);
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
 
     const myCalendars: UserCalendar[] = [
         { id: "1", name: "Personal" },
@@ -21,13 +19,10 @@ export default function Calendar() {
     ];
 
     const addEvent = (start: Date, end: Date) => {
-        setSelectedRange({ start, end });
+        setStartDate(start);
+        setEndDate(end);
         setOpen(true);
     };
-
-    function saveEvent(eventTitle: string, calendarId: string, color: string, start: Date, end: Date, recurrence: RecurrenceRule) {
-
-    }
 
     return (
     <>
@@ -56,12 +51,12 @@ export default function Calendar() {
     </div>
         <AddEventDialog
             open={open}
-            start={selectedRange?.start ?? null}
-            end={selectedRange?.end ?? null}
+            start={startDate}
+            end={endDate}
             calendars={myCalendars}
             onClose={() => setOpen(false)}
-            onSave={(data) => {
-                saveEvent( data.eventTitle, data.calendarId, data.color, data.start, data.end, data.recurrence)
+            onSave={() => {
+                // Fetch new events
             }}
          />
   </>

@@ -8,21 +8,12 @@ export interface UserCalendar {
 }
 
 export interface RecurrenceRule {
-    frequency: "none" | "daily" | "weekly" | "monthly" | "yearly";
+    frequency: typeof FREQUENCY_TYPE[keyof typeof FREQUENCY_TYPE];
     interval: number;
     daysOfWeek?: number[]; // 0=Sun … 6=Sat
     endType: "never" | "on" | "after";
     endDate?: string;
     occurrences?: number;
-}
-
-export interface AddEventFormData {
-    eventTitle: string;
-    calendarId: string;
-    color: string;
-    start: Date;
-    end: Date;
-    recurrence: RecurrenceRule;
 }
 
 interface Props {
@@ -31,10 +22,18 @@ interface Props {
     end: Date;
     calendars: UserCalendar[];
     onClose: () => void;
-    onSave: (data: AddEventFormData) => void;
+    onSave: () => void;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
+const FREQUENCY_TYPE = {
+    NONE: "none",
+    DAYS: "day",
+    WEEKS: "week",
+    MONTHS: "month",
+    YEARS: "year",
+}
+
 const EVENT_COLORS = [
     { label: "Índigo",    value: "#7c6ff7" },
     { label: "Cielo",     value: "#38bdf8" },
@@ -50,11 +49,11 @@ const WEEKDAYS = ["D", "L", "M", "X", "J", "V", "S"];
 const WEEKDAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 const FREQ_OPTIONS = [
-    { value: "none",    label: "Sin repetición" },
-    { value: "daily",   label: "Diario" },
-    { value: "weekly",  label: "Semanal" },
-    { value: "monthly", label: "Mensual" },
-    { value: "yearly",  label: "Anual" },
+    { value: FREQUENCY_TYPE.NONE,   label: "Sin repetición" },
+    { value: FREQUENCY_TYPE.DAYS,   label: "Diario" },
+    { value: FREQUENCY_TYPE.WEEKS,  label: "Semanal" },
+    { value: FREQUENCY_TYPE.MONTHS, label: "Mensual" },
+    { value: FREQUENCY_TYPE.YEARS,  label: "Anual" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -63,19 +62,12 @@ function formatDateTimeLocal(d: Date): string {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function formatDisplayDate(d: Date): string {
-    return d.toLocaleString("es-ES", {
-        weekday: "short", day: "numeric", month: "short",
-        hour: "2-digit", minute: "2-digit",
-    });
-}
-
 const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, onSave,}) => {
     const [eventTitle, setEventTitle] = useState("");
     const [calendarId, setCalendarId] = useState(calendars[0]?.id ?? "");
     const [color, setColor] = useState(EVENT_COLORS[0].value);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
-        frequency: "none", interval: 1, daysOfWeek: [],
+        frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [],
         endType: "never", endDate: "", occurrences: 1,
     });
 
@@ -85,7 +77,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
             setEventTitle("");
             setCalendarId(calendars[0]?.id ?? "");
             setColor(EVENT_COLORS[0].value);
-            setRecurrence({ frequency: "none", interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
+            setRecurrence({ frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
         }
     }, [open, calendars]);
 
@@ -100,13 +92,37 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
         }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!eventTitle.trim()) return;
-        onSave({ eventTitle, calendarId, color, start, end, recurrence });
-        onClose();
+
+        const newEvent = {
+            userId: "",
+            title: eventTitle,
+            color,
+            calendarId,
+            startDate: start,
+            finishDate: end,
+            ...(recurrence.frequency !== "none" && {
+                frequency: recurrence.interval,
+                frequencyType: recurrence.frequency,
+                frequencyFinishDate: recurrence.endDate,
+            }),
+        };
+        try {
+            await fetch("http://localhost:8000/events", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newEvent),
+            }).then(data => {console.log(data)});
+
+            onSave();
+            onClose();
+        } catch (error) {
+            console.error("Error guardando evento:", error);
+        }
     };
 
-    const showWeekdays = recurrence.frequency === "weekly";
+    const showWeekdays = recurrence.frequency === FREQUENCY_TYPE.WEEKS;
     const showEndOptions = recurrence.frequency !== "none";
 
     return (

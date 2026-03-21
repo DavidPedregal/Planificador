@@ -24,3 +24,37 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+ :root, [data-theme="dark"] {
+      --bg-base:        #0f0f13;
+      --bg-surface:     #16161f;
+      --bg-elevated:    #1e1e2a;
+      --bg-sidebar:     #13131a;
+      --border:         rgba(255,255,255,0.07);
+      --border-strong:  rgba(255,255,255,0.12);
+      --text-primary:   #e8e8f0;
+      --text-secondary: #8888aa;
+      --text-muted:     #55556a;
+      --accent:         #7c6ff7;
+      --accent-hover:   #9d97f9;
+      --accent-muted:   rgba(124,111,247,0.15);
+      --accent-muted2:  rgba(124,111,247,0.08);
+      --shadow-md:      0 4px 24px rgba(0,0,0,0.5);
+    }
+
+ [data-theme="light"] {
+      --bg-base:        #f4f3f0;
+      --bg-surface:     #ffffff;
+      --bg-elevated:    #f9f8f6;
+      --bg-sidebar:     #eeecea;
+      --border:         rgba(0,0,0,0.07);
+      --border-strong:  rgba(0,0,0,0.12);
+      --text-primary:   #1a1a22;
+      --text-secondary: #6b6b80;
+      --text-muted:     #a0a0b0;
+      --accent:         #7c6ff7;
+      --accent-hover:   #5a4fe0;
+      --accent-muted:   rgba(124,111,247,0.12);
+      --accent-muted2:  rgba(124,111,247,0.06);
+      --shadow-md:      0 4px 20px rgba(0,0,0,0.08);
+    }
