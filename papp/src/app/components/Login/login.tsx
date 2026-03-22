@@ -1,6 +1,7 @@
 "use client";
 
 import { useGoogleLogin } from "@react-oauth/google";
+import { useRouter } from "next/navigation";
 
 const GoogleIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -12,10 +13,18 @@ const GoogleIcon = () => (
 );
 
 export default function Login() {
+    const router = useRouter();
     const login = useGoogleLogin({
-        onSuccess: (response) => {
-            // response.access_token → lo mandas al back
-            console.log(response);
+        onSuccess: async (responseCredentials) =>  {
+            if (responseCredentials.access_token){
+                const response = await fetch("http://localhost:8000/users/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token: responseCredentials.access_token }),
+                });
+                console.log(response);
+                router.push("/home");
+            }
         },
         onError: () => {
             console.log("Login failed!");
