@@ -2,6 +2,7 @@
 
 import { useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
+import { useApp } from "@/context/AppContext";
 
 const GoogleIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -13,6 +14,7 @@ const GoogleIcon = () => (
 );
 
 export default function Login() {
+    const { setUser } = useApp();
     const router = useRouter();
     const login = useGoogleLogin({
         onSuccess: async (responseCredentials) =>  {
@@ -23,8 +25,9 @@ export default function Login() {
                     body: JSON.stringify({ token: responseCredentials.access_token }),
                 });
                 const data = await response.json();
-                console.log("Data", data);
                 localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                setUser(data.user);
                 router.push("/home");
             }
         },

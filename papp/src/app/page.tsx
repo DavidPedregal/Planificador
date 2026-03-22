@@ -6,15 +6,8 @@ import { useState, useEffect } from "react";
 import Login from "@/app/components/Login/login";
 import { config } from "./config/config";
 
-type Theme = "dark" | "light";
-
 export default function Landing() {
     const router = useRouter();
-    const [theme, setTheme] = useState<Theme>("dark");
-
-    useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
-    }, [theme]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -30,34 +23,14 @@ export default function Landing() {
         .catch(() => localStorage.removeItem("token"));
     }, []);
 
-    const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
-
     return (
         <>
             <div className="landing-root">
                 <div className="landing-orb landing-orb-1" />
-                <div className="landing-orb landing-orb-2" />
-
-                {/* ── Nav ── */}
-                <nav className="landing-nav">
-                    <div className="landing-logo">
-                        <span className="landing-logo-dot" />
-                        Menti
-                    </div>
-                    <div className="landing-nav-actions">
-                        <button className="landing-theme-btn" onClick={toggleTheme} title="Cambiar tema">
-                            {theme === "dark" ? "☀️" : "🌙"}
-                        </button>
-                        <Login />
-                    </div>
-                </nav>
+                <div className="landing-orb landing-orb-2" />               
 
                 {/* ── Hero ── */}
                 <section className="landing-hero">
-                    <div className="landing-hero-tag">
-                        <span className="landing-hero-tag-dot" />
-                        Acceso solo por invitación
-                    </div>
                     <h1 className="landing-hero-title">
                         Todo en su<br /><em>lugar y momento</em>
                     </h1>
@@ -176,8 +149,8 @@ export default function Landing() {
 
                 {/* ── Footer ── */}
                 <footer className="landing-footer">
-                    <span className="landing-footer-logo">Planificador</span>
-                    <span className="landing-footer-note">hecho con ☕ — 2025</span>
+                    <span className="landing-footer-logo">Menti</span>
+                    <span className="landing-footer-note">Hecho con ☕ — David Pedregal Ribas</span>
                 </footer>
             </div>
         </>

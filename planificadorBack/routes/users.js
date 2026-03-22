@@ -38,7 +38,14 @@ router.post('/login', async function(req, res) {
         { expiresIn: "7d" }
     );
 
-    return res.status(200).json({ token: user_token });
+    return res.status(200).json(
+      { token: user_token, 
+        user: {
+          id: userId,
+          name: payload.given_name,
+          email: payload.email,
+        } 
+      });
   } catch (error) {
     return res.status(401).send(error.message || 'Authentication failed.');
   }
