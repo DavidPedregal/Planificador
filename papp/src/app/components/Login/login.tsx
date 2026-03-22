@@ -22,7 +22,9 @@ export default function Login() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ token: responseCredentials.access_token }),
                 });
-                console.log(response);
+                const data = await response.json();
+                console.log("Data", data);
+                localStorage.setItem("token", data.token);
                 router.push("/home");
             }
         },
@@ -32,7 +34,7 @@ export default function Login() {
     });
 
     return (
-        <div>
+        <div style={{ display: "flex", justifyContent: "center" }}>
             <button className="landing-google-btn" onClick={() => login()}>
                 <GoogleIcon />
                 Iniciar sesión con Google

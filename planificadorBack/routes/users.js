@@ -1,11 +1,7 @@
 var express = require('express');
-const {OAuth2Client} = require("google-auth-library");
 var router = express.Router();
-
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const User = require("./models/UserModel");
+const jwt = require("jsonwebtoken");
 
 router.post('/login', async function(req, res) {
   const { token } = req.body;
@@ -18,14 +14,32 @@ router.post('/login', async function(req, res) {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (!googleRes.ok) return res.status(401).send('Authentication failed.');
+    if (!googleRes.ok) return res.status(401).send('Not authenticated with Google.');
 
     const payload = await googleRes.json();
-    // payload tiene: sub, name, email, picture...
 
-    return res.status(200).json(payload);
+    let userId;
+    const user = await User.findOne({ email: payload.email });
+    userId = user ? user._id : null;
+    if (!user) {
+      const newUser = new User({
+        email: payload.email, 
+        fullName: payload.name, 
+        name: payload.given_name,
+        familyName: payload.family_name,
+        profilePicture: payload.picture});
+      const savedUser = await newUser.save();
+      userId = savedUser._id;
+    }
+    const user_token = jwt.sign(
+        { userId },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({ token: user_token });
   } catch (error) {
-    return res.status(401).send('Authentication failed.');
+    return res.status(401).send(error.message || 'Authentication failed.');
   }
 });
 

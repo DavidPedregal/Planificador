@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require("mongoose");
-const CalendarEvent = require("./models/CalendarEvent");
+const CalendarEvent = require("./models/CalendarEventModel");
 const router = express.Router();
 
 router.get('/:userId', async function(req, res) {

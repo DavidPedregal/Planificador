@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const {FREQUENCY_TYPE} = require("./enums/enums");
 
-const calendarEvent = new mongoose.Schema({
+const calendarEventModel = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
@@ -44,5 +44,5 @@ const calendarEvent = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const CalendarEvent = mongoose.model("Event", calendarEvent);
+const CalendarEvent = mongoose.model("Event", calendarEventModel);
 module.exports = CalendarEvent;
