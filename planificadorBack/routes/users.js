@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const User = require("./models/UserModel");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middlewares/authmiddleware");
 
 router.post('/login', async function(req, res) {
   const { token } = req.body;
@@ -41,6 +42,10 @@ router.post('/login', async function(req, res) {
   } catch (error) {
     return res.status(401).send(error.message || 'Authentication failed.');
   }
+});
+
+router.get('/verify', authMiddleware, (req, res) => {
+    res.status(200).json({ ok: true });
 });
 
 module.exports = router;

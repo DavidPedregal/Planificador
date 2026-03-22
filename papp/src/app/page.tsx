@@ -1,17 +1,34 @@
 "use client";
 import "./page.css"
+import { useRouter } from "next/navigation";
 
 import { useState, useEffect } from "react";
 import Login from "@/app/components/Login/login";
+import { config } from "./config/config";
 
 type Theme = "dark" | "light";
 
 export default function Landing() {
+    const router = useRouter();
     const [theme, setTheme] = useState<Theme>("dark");
 
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);
     }, [theme]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        fetch(config.backendUrl + "/users/verify", {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(res => {
+            if (res.ok) router.push("/home");
+            else localStorage.removeItem("token");
+        })
+        .catch(() => localStorage.removeItem("token"));
+    }, []);
 
     const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
 
