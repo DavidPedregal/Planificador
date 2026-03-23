@@ -24,7 +24,7 @@ app.use(logger("dev"));
 app.use(express.json());
 
 app.use("/users", usersRouter);
-app.use("/calendar", calendarRouter);
+app.use("/calendars", calendarRouter);
 app.use("/events", eventRouter);
 
 // 404

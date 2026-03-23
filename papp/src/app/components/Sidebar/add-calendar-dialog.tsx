@@ -38,7 +38,7 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
         if (!name.trim()) return;
 
         try {
-            await fetch(config.backendUrl + "/calendar", {
+            await fetch(config.backendUrl + "/calendars", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

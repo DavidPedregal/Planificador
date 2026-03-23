@@ -15,7 +15,7 @@ router.get('/', authMiddleware, async function(req, res) {
         const calendars = await Calendar.find({ userId });
         res.json(calendars);
     } catch (error) {
-        res.status(500).json({ error: "Error obteniendo calendarios" });
+        res.status(500).json({ error: "Error obtaining calendars" });
     }
 });
 
@@ -35,9 +35,28 @@ router.post('/', authMiddleware, async function(req, res) {
         const saved = await newCalendar.save();
         res.status(201).json(saved);        
     } catch (error) {
-        res.status(500).json({ error: "Error obteniendo calendarios" });
+        res.status(500).json({ error: "Error saving calendars" });
     }
 });
 
+router.delete('/:id', authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const calendarId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(404).json({ error: "User not found" });
+    }
+
+    try {
+        const calendar = await Calendar.findOne({ _id: calendarId, userId });
+        if (!calendar) {
+            return res.status(404).json({ error: "Calendar not found" });
+        }
+        await Calendar.deleteOne({ _id: calendarId });
+        res.json({ message: "Calendar deleted" });
+    } catch (error) {
+        res.status(500).json({ error: "Error deleting calendar" });
+    }
+});
 
 module.exports = router;

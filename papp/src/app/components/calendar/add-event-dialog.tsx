@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./add-event-dialog.css";
+import { config } from "@/app/config/config";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-export interface UserCalendar {
-    id: string;
-    name: string;
-}
-
 export interface RecurrenceRule {
     frequency: typeof FREQUENCY_TYPE[keyof typeof FREQUENCY_TYPE];
     interval: number;
@@ -20,7 +16,6 @@ interface Props {
     open: boolean;
     start: Date;
     end: Date;
-    calendars: UserCalendar[];
     onClose: () => void;
     onSave: () => void;
 }
@@ -62,9 +57,10 @@ function formatDateTimeLocal(d: Date): string {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, onSave,}) => {
+const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) => {
     const [eventTitle, setEventTitle] = useState("");
-    const [calendarId, setCalendarId] = useState(calendars[0]?.id ?? "");
+    const [calendars, setCalendars] = useState<{ _id: string, name: string, userId: string }[]>([]);
+    const [calendarId, setCalendarId] = useState("");
     const [color, setColor] = useState(EVENT_COLORS[0].value);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [],
@@ -74,12 +70,27 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
     // Reset when dialog opens
     useEffect(() => {
         if (open) {
+            fetchCalendars();
             setEventTitle("");
-            setCalendarId(calendars[0]?.id ?? "");
+            setCalendarId(calendars[0]?._id ?? "");
             setColor(EVENT_COLORS[0].value);
             setRecurrence({ frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
         }
-    }, [open, calendars]);
+    }, [open]);
+
+    const fetchCalendars = async () => {
+        try {
+            const res = await fetch(config.backendUrl + "/calendars", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const data = await res.json();
+            setCalendars(data);
+            console.log(data);
+            if (data.length > 0) setCalendarId(data[0].id);
+        } catch (error) {
+            console.error("Error fetching calendars:", error);
+        }
+    };
 
     if (!open || !start || !end) return null;
 
@@ -108,7 +119,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
             }),
         };
         try {
-            await fetch("http://localhost:8000/events", {
+            await fetch(config.backendUrl + "/events", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newEvent),
@@ -198,7 +209,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
                                 onChange={e => setCalendarId(e.target.value)}
                             >
                                 {calendars.map(cal => (
-                                    <option key={cal.id} value={cal.id}>{cal.name}</option>
+                                    <option key={cal._id} value={cal._id}>{cal.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -257,7 +268,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
                                         <div className="aed-weekdays">
                                             {WEEKDAYS.map((d, i) => (
                                                 <button
-                                                    key={i}
+                                                    key={`weekday-${i}`}
                                                     className={`aed-wd-btn${recurrence.daysOfWeek?.includes(i) ? " active" : ""}`}
                                                     onClick={() => toggleWeekday(i)}
                                                     title={WEEKDAY_LABELS[i]}

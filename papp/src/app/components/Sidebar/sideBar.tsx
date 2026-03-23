@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useApp } from "@/context/AppContext";
 import "./sideBar.css";
 import AddCalendarDialog from "./add-calendar-dialog";
+import ConfirmDialog from "./confirm-dialog";
 import { config } from "@/app/config/config";
 
 interface Calendar {
@@ -25,31 +26,16 @@ const COLORS = [
 export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
     const { user } = useApp();
     const [calendars, setCalendars] = useState<Calendar[]>([]);
-    const [openMenu, setOpenMenu] = useState<string | null>(null);
-    const [newName, setNewName] = useState("");
-    const [newColor, setNewColor] = useState(COLORS[0]);
     const menuRef = useRef<HTMLDivElement>(null);
     const [addCalendarOpen, setAddCalendarOpen] = useState(false);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) return;
-        fetch(config.backendUrl + `/calendar`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        })
-            .then(res => res.json())
-            .then(data => setCalendars(data.map((c: Omit<Calendar, "visible">) => ({ ...c, visible: true }))));
+        fetchCalendars();
     }, [user]);
 
-    // Cierra el menú si se hace clic fuera
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setOpenMenu(null);
-            }
-        };
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
-    }, []);
 
     const toggleVisibility = (id: string) => {
         const updated = calendars.map(c => c._id === id ? { ...c, visible: !c.visible } : c);
@@ -57,21 +43,33 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
         onCalendarVisibilityChange?.(updated.filter(c => c.visible).map(c => c._id));
     };
 
-    const handleDelete = async (id: string) => {
-        await fetch(config.backendUrl + `/calendar/${id}`, {
+    const handleDelete = (id: string) => {
+        setSelectedCalendarId(id);
+        setDeleteConfirmOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!selectedCalendarId) return;
+        
+        await fetch(config.backendUrl + `/calendars/${selectedCalendarId}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        setCalendars(prev => prev.filter(c => c._id !== id));
-        setOpenMenu(null);
+        setCalendars(prev => prev.filter(c => c._id !== selectedCalendarId));
+        setDeleteConfirmOpen(false);
+        setSelectedCalendarId(null);
     };
 
     const handleEdit = (id: string) => {
         // TODO: abrir dialog de edición
-        setOpenMenu(null);
     };
 
     const fetchCalendars = async () => {
+        fetch(config.backendUrl + `/calendars`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
+            .then(res => res.json())
+            .then(data => setCalendars(data.map((c: Omit<Calendar, "visible">) => ({ ...c, visible: true }))));
     };
 
     return (
@@ -113,29 +111,17 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
                                 </svg>
                             </div>
                             <span className="sidebar-cal-name">{cal.name}</span>
-                            <button
-                                className="sidebar-cal-menu-btn"
-                                onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === cal._id ? null : cal._id); }}
-                            >
-                                ···
+                            
+                            <button className="sidebar-cal-menu-btn" onClick={() => handleEdit(cal._id)}>
+                                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                                    <path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                                </svg>
                             </button>
-
-                            {openMenu === cal._id && (
-                                <div className="sidebar-dropdown">
-                                    <button className="sidebar-dropdown-item" onClick={() => handleEdit(cal._id)}>
-                                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                                            <path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                                        </svg>
-                                        Editar
-                                    </button>
-                                    <button className="sidebar-dropdown-item danger" onClick={() => handleDelete(cal._id)}>
-                                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                                            <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9h8l1-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        Eliminar
-                                    </button>
-                                </div>
-                            )}
+                            <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal._id)}>
+                                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                                    <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9h8l1-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -150,6 +136,20 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
                     open={addCalendarOpen}
                     onClose={() => setAddCalendarOpen(false)}
                     onSave={fetchCalendars}
+                    />
+
+                <ConfirmDialog
+                    open={deleteConfirmOpen}
+                    title="Eliminar calendario"
+                    message="¿Estás seguro de que deseas eliminar este calendario? Esta acción no se puede deshacer."
+                    confirmText="Eliminar"
+                    cancelText="Cancelar"
+                    isDangerous={true}
+                    onConfirm={confirmDelete}
+                    onCancel={() => {
+                        setDeleteConfirmOpen(false);
+                        setSelectedCalendarId(null);
+                    }}
                     />
                 </>
             </div>

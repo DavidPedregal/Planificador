@@ -215,3 +215,37 @@
     box-shadow: 0 6px 20px rgba(124,111,247,0.5);
 }
 .aed-btn-save:active { transform: translateY(0); }
+
+/* ── Confirm Dialog Buttons ── */
+.aed-button {
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600;
+    padding: 9px 20px; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s ease; border: none; letter-spacing: -0.01em;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8888aa;
+}
+.aed-button:hover { background: rgba(255,255,255,0.09); color: #c4bcf9; }
+
+.aed-button.primary {
+    background: #7c6ff7; color: #fff;
+    border-color: #7c6ff7;
+    box-shadow: 0 4px 14px rgba(124,111,247,0.35);
+}
+.aed-button.primary:hover {
+    background: #9d97f9; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124,111,247,0.5);
+}
+.aed-button.primary:active { transform: translateY(0); }
+
+.aed-button.danger {
+    background: rgba(239, 68, 68, 0.15); color: #ff6b6b;
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
+}
+.aed-button.danger:hover {
+    background: rgba(239, 68, 68, 0.25); 
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
+}
+.aed-button.danger:active { transform: translateY(0); }

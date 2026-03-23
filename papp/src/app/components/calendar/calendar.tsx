@@ -2,26 +2,24 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import {DateInput} from "@fullcalendar/core";
 import {useState} from "react";
-import AddEventDialog, {RecurrenceRule, UserCalendar} from "./add-event-dialog";
+import AddEventDialog from "./add-event-dialog";
 import "./calendar.css";
 
 export default function Calendar() {
     const [open, setOpen] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
-
-    const myCalendars: UserCalendar[] = [
-        { id: "1", name: "Personal" },
-        { id: "2", name: "Trabajo" },
-        { id: "3", name: "Familia" },
-    ];
+    const [events, setEvents] = useState([]);
 
     const addEvent = (start: Date, end: Date) => {
         setStartDate(start);
         setEndDate(end);
         setOpen(true);
+    };
+
+    const fetchEvents = () => {
+
     };
 
     return (
@@ -37,7 +35,7 @@ export default function Calendar() {
           center: "title",
           right: "dayGridMonth,timeGridWeek,timeGridDay",
         }}
-        // events={events}
+        events={events}
         dateClick={(info) => {
             addEvent(info.date, new Date(info.date.getTime() + 60 * 60 * 1000));
         }}
@@ -53,7 +51,6 @@ export default function Calendar() {
             open={open}
             start={startDate}
             end={endDate}
-            calendars={myCalendars}
             onClose={() => setOpen(false)}
             onSave={() => {
                 // Fetch new events
