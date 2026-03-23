@@ -96,7 +96,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, calendars, onClose, 
         if (!eventTitle.trim()) return;
 
         const newEvent = {
-            userId: "",
             title: eventTitle,
             color,
             calendarId,

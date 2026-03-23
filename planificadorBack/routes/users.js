@@ -31,6 +31,7 @@ router.post('/login', async function(req, res) {
         profilePicture: payload.picture});
       const savedUser = await newUser.save();
       userId = savedUser._id;
+      createDefaultCalendarForUser(userId);
     }
     const user_token = jwt.sign(
         { userId },
@@ -50,6 +51,12 @@ router.post('/login', async function(req, res) {
     return res.status(401).send(error.message || 'Authentication failed.');
   }
 });
+
+function createDefaultCalendarForUser(userId) {
+  const Calendar = require("./models/CalendarModel");
+  const newCalendar = new Calendar({ userId, name: "Default", color: "#ff0000" });
+  newCalendar.save();
+}
 
 router.get('/verify', authMiddleware, (req, res) => {
     res.status(200).json({ ok: true });
