@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from "react";
 import "./add-event-dialog.css";
 import { config } from "@/app/config/config";
-import { FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
+import { CalendarEvent, FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
     WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
     Calendar} from "./calendarHelper";
 
+
 interface Props {
     open: boolean;
-    start: Date;
-    end: Date;
+    event: CalendarEvent;
     onClose: () => void;
-    onSave: (newEvent: any) => void;
+    onSave: (updatedEvent: any) => void;
 }
 
-const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) => {
-    const [eventTitle, setEventTitle] = useState("");
+const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
+    const [eventTitle, setEventTitle] = useState(event.title);
     const [calendars, setCalendars] = useState<Calendar[]>([]);
-    const [calendarId, setCalendarId] = useState("");
-    const [color, setColor] = useState(EVENT_COLORS[0].value);
+    const [calendarId, setCalendarId] = useState(event.calendarId);
+    const [color, setColor] = useState(event.color);
     const [useCustomColor, setUseCustomColor] = useState(false);
-    // const [estimatedHours, setEstimatedHours] = useState<number | "">("");
-    // const [subject, setSubject] = useState("");
-    // const [subjects, setSubjects] = useState<{ _id: string, name: string }[]>([]);
-    // const [givenDate, setGivenDate] = useState("");
+    const [start, setStart] = useState<Date>(typeof event.start === 'string' ? new Date(event.start) : event.start);
+    const [end, setEnd] = useState<Date>(typeof event.end === 'string' ? new Date(event.end) : event.end);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [],
         endType: "never", endDate: "", occurrences: 1,
@@ -32,16 +30,15 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
     useEffect(() => {
         if (open) {
             fetchCalendars();
-            fetchSubjects();
-            setEventTitle("");
+            setEventTitle(event.title);
+            setCalendarId(event.calendarId);
+            setStart(typeof event.start === 'string' ? new Date(event.start) : event.start);
+            setEnd(typeof event.end === 'string' ? new Date(event.end) : event.end);
+            setColor(event.color);
             setUseCustomColor(false);
-            setColor(EVENT_COLORS[0].value);
-            // setEstimatedHours("");
-            // setSubject("");
-            // setGivenDate("");
             setRecurrence({ frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
         }
-    }, [open]);
+    }, [open, event]);
 
     const fetchCalendars = async () => {
         try {
@@ -50,25 +47,12 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             });
             const data = await res.json();
             setCalendars(data.map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color })));
-            setCalendarId(data[0].id);
         } catch (error) {
             console.error("Error fetching calendars:", error);
         }
     };
 
-    const fetchSubjects = async () => {
-        // try {
-        //     const res = await fetch(config.backendUrl + "/subjects", {
-        //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        //     });
-        //     const data = await res.json();
-        //     setSubjects(data);
-        // } catch (error) {
-        //     console.error("Error fetching subjects:", error);
-        // }
-    };
-
-    if (!open || !start || !end) return null;
+    if (!open) return null;
 
     const toggleWeekday = (day: number) => {
         setRecurrence(r => ({
@@ -91,15 +75,12 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             return selectedCalendar?.color || EVENT_COLORS[0].value;
         };
 
-        const newEvent = {
+        const updatedEvent = {
             title: eventTitle,
             color: getEventColor(),
             calendarId,
             start: start,
             end: end,
-            // estimatedHours: estimatedHours !== "" ? estimatedHours : undefined,
-            // subjectId: subject || undefined,
-            // givenDate: givenDate || undefined,
             ...(recurrence.frequency !== "none" && {
                 frequency: recurrence.interval,
                 frequencyType: recurrence.frequency,
@@ -107,20 +88,20 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             }),
         };
         try {
-            const response = await fetch(config.backendUrl + "/events", {
-                method: "POST",
+            const response = await fetch(config.backendUrl + `/events/${event.id}`, {
+                method: "PUT",
                  headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
-                body: JSON.stringify(newEvent),
+                body: JSON.stringify(updatedEvent),
             });
 
-            const createdEvent = await response.json();
-            onSave(createdEvent);
+            const updated = await response.json();
+            onSave(updated);
             onClose();
         } catch (error) {
-            console.error("Error guardando evento:", error);
+            console.error("Error updating evento:", error);
         }
     };
 
@@ -132,7 +113,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             <div
                 className="aed-overlay"
                 onClick={(e) => e.target === e.currentTarget && onClose()}
-                role="dialog" aria-modal="true" aria-label="Crear evento"
+                role="dialog" aria-modal="true" aria-label="Editar evento"
             >
                 <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
 
@@ -140,7 +121,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                     <div className="aed-header">
                         <div className="aed-header-left">
                             <div className="aed-header-dot" />
-                            <span className="aed-title">Nuevo evento</span>
+                            <span className="aed-title">Editar evento</span>
                         </div>
                         <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
                     </div>
@@ -155,11 +136,11 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                                 value={formatDateTimeLocal(start)}
                                 onChange={e => {
                                     const newStart = new Date(e.target.value);
-                                    start = newStart;
+                                    setStart(newStart);
                                     // Si el fin queda antes que el inicio, lo adelanta 1h automáticamente
-                                    end = end <= newStart
-                                        ? new Date(newStart.getTime() + 60 * 60 * 1000)
-                                        : end;
+                                    if (end <= newStart) {
+                                        setEnd(new Date(newStart.getTime() + 60 * 60 * 1000));
+                                    }
                                 }}
                             />
                         </div>
@@ -170,7 +151,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                                 type="datetime-local"
                                 value={formatDateTimeLocal(end)}
                                 min={formatDateTimeLocal(start)}
-                                onChange={e => end = new Date(e.target.value) }
+                                onChange={e => setEnd(new Date(e.target.value))}
                             />
                         </div>
                     </div>
@@ -208,46 +189,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                                 ))}
                             </select>
                         </div>
-
-                        {/* Tiempo estimado */}
-                        {/* <div className="aed-field">
-                            <label className="aed-label">Tiempo estimado (horas)</label>
-                            <input
-                                className="aed-input"
-                                type="number"
-                                placeholder="Ej: 2.5"
-                                min="0"
-                                step="0.5"
-                                value={estimatedHours}
-                                onChange={e => setEstimatedHours(e.target.value === "" ? "" : parseFloat(e.target.value))}
-                            />
-                        </div> */}
-
-                        {/* Asignatura */}
-                        {/* <div className="aed-field">
-                            <label className="aed-label">Asignatura</label>
-                            <select
-                                className="aed-input aed-select"
-                                value={subject}
-                                onChange={e => setSubject(e.target.value)}
-                            >
-                                <option value="">Ninguna</option>
-                                {subjects.map(subj => (
-                                    <option key={subj._id} value={subj._id}>{subj.name}</option>
-                                ))}
-                            </select>
-                        </div> */}
-
-                        {/* Día asignado */}
-                        {/* <div className="aed-field">
-                            <label className="aed-label">Día asignado</label>
-                            <input
-                                className="aed-input"
-                                type="date"
-                                value={givenDate}
-                                onChange={e => setGivenDate(e.target.value)}
-                            />
-                        </div> */}
 
                         {/* Color */}
                         <div className="aed-field">
@@ -377,7 +318,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                             disabled={!eventTitle.trim()}
                             style={!eventTitle.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >
-                            Guardar evento
+                            Actualizar evento
                         </button>
                     </div>
                 </div>
@@ -386,4 +327,4 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
     );
 };
 
-export default AddEventDialog;
+export default EditEventDialog;
