@@ -9,7 +9,11 @@ import { config } from "@/app/config/config";
 import EditEventDialog from "./edit-event-dialog";
 import { CalendarEvent } from "./calendarHelper";
 
-export default function Calendar() {
+interface CalendarProps {
+    refreshTrigger?: number;
+}
+
+export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -90,7 +94,7 @@ export default function Calendar() {
 
     useEffect(() => {
         fetchEvents();
-    }, []);
+    }, [refreshTrigger]);
 
     return (
     <>

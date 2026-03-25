@@ -43,6 +43,12 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
         }
     }, [open]);
 
+    useEffect(() => {
+        if (calendars.length > 0) {
+            setCalendarId(calendars[0].id);
+        }
+    }, [calendars]);
+
     const fetchCalendars = async () => {
         try {
             const res = await fetch(config.backendUrl + "/calendars", {
@@ -50,7 +56,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             });
             const data = await res.json();
             setCalendars(data.map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color })));
-            setCalendarId(data[0].id);
         } catch (error) {
             console.error("Error fetching calendars:", error);
         }
@@ -198,10 +203,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                             <select
                                 className="aed-input aed-select"
                                 value={calendarId}
-                                onChange={e => {
-                                    setCalendarId(e.target.value);
-                                    console.log("Selected calendar ID:", e.target.value);
-                                }}
+                                onChange={e => setCalendarId(e.target.value)}
                             >
                                 {calendars.map(cal => (
                                     <option key={cal.id} value={cal.id}>{cal.name}</option>

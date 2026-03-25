@@ -53,6 +53,10 @@ router.delete('/:id', authMiddleware, async function(req, res) {
             return res.status(404).json({ error: "Calendar not found" });
         }
         await Calendar.deleteOne({ _id: calendarId });
+        fetch(`${process.env.BACKEND_URL}/events/calendar/${calendarId}`, {
+            headers: { Authorization: `Bearer ${req.headers.authorization?.split(" ")[1]}` },
+            method: 'DELETE'
+        })
         res.json({ message: "Calendar deleted" });
     } catch (error) {
         res.status(500).json({ error: "Error deleting calendar" });

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Calendar from "@/app/components/Calendar/calendar";
-import TodoApp from "@/app/components/TodoList/todoList";
+import Calendar from "@/app/components/calendar/calendar";
+import TodoApp from "@/app/components/todoList/todoList";
 import "./home.css";
 import Sidebar from "../components/Sidebar/sideBar";
 
 
 export default function Home() {
     const [drawerOpen, setDrawerOpen] = useState<"sidebar" | "todo" | null>(null);
+    const [refreshEvents, setRefreshEvents] = useState(0);
 
     const closeDrawer = () => setDrawerOpen(null);
 
@@ -18,13 +19,13 @@ export default function Home() {
 
                 {/* ── Sidebar izquierdo ─────────────────────────────────────────── */}
                 <aside className="home-sidebar" aria-label="Barra lateral">
-                   <Sidebar />
+                   <Sidebar onCalendarDeleted={() => setRefreshEvents(prev => prev + 1)} />
                 </aside>
 
                 {/* ── Calendario (centro) ───────────────────────────────────────── */}
                 <main className="home-calendar" aria-label="Calendario">
                     <div className="home-calendar-inner">
-                        <Calendar />
+                        <Calendar refreshTrigger={refreshEvents} />
                     </div>
                 </main>
 

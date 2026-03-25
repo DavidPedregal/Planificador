@@ -6,16 +6,13 @@ import "./sideBar.css";
 import AddCalendarDialog from "./add-calendar-dialog";
 import ConfirmDialog from "./confirm-dialog";
 import { config } from "@/app/config/config";
-
-interface Calendar {
-    _id: string;
-    name: string;
-    color: string;
-    visible: boolean;
-}
+import { Edit } from "lucide-react";
+import EditCalendarDialog from "./edit-calendar-dialog";
+import { Calendar } from "../calendar/calendarHelper";
 
 interface SidebarProps {
     onCalendarVisibilityChange?: (visibleIds: string[]) => void;
+    onCalendarDeleted?: () => void;
 }
 
 const COLORS = [
@@ -23,12 +20,13 @@ const COLORS = [
     "#e94f8a", "#3b82f6", "#f59e0b",
 ];
 
-export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
+export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted }: SidebarProps) {
     const { user } = useApp();
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const menuRef = useRef<HTMLDivElement>(null);
     const [addCalendarOpen, setAddCalendarOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [editCalendarOpen, setEditCalendarOpen] = useState(false);
     const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -38,9 +36,9 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
 
 
     const toggleVisibility = (id: string) => {
-        const updated = calendars.map(c => c._id === id ? { ...c, visible: !c.visible } : c);
+        const updated = calendars.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
         setCalendars(updated);
-        onCalendarVisibilityChange?.(updated.filter(c => c.visible).map(c => c._id));
+        onCalendarVisibilityChange?.(updated.filter(c => c.visible).map(c => c.id));
     };
 
     const handleDelete = (id: string) => {
@@ -55,9 +53,10 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
             method: "DELETE",
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        setCalendars(prev => prev.filter(c => c._id !== selectedCalendarId));
+        setCalendars(prev => prev.filter(c => c.id !== selectedCalendarId));
         setDeleteConfirmOpen(false);
         setSelectedCalendarId(null);
+        onCalendarDeleted?.();
     };
 
     const handleEdit = (id: string) => {
@@ -100,11 +99,11 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
 
                 <div className="sidebar-calendars" ref={menuRef}>
                     {calendars.map(cal => (
-                        <div key={cal._id} className="sidebar-cal-item">
+                        <div key={cal.id} className="sidebar-cal-item">
                             <div
                                 className={`sidebar-cal-checkbox${cal.visible ? " checked" : ""}`}
                                 style={cal.visible ? { background: cal.color } : {}}
-                                onClick={() => toggleVisibility(cal._id)}
+                                onClick={() => toggleVisibility(cal.id)}
                             >
                                 <svg className="sidebar-cal-checkbox-tick" viewBox="0 0 8 8" fill="none">
                                     <path d="M1 4l2.5 2.5L7 1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -112,12 +111,12 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
                             </div>
                             <span className="sidebar-cal-name">{cal.name}</span>
                             
-                            <button className="sidebar-cal-menu-btn" onClick={() => handleEdit(cal._id)}>
+                            <button className="sidebar-cal-menu-btn" onClick={() => handleEdit(cal.id)}>
                                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
                                     <path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
                                 </svg>
                             </button>
-                            <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal._id)}>
+                            <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal.id)}>
                                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
                                     <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9h8l1-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
@@ -151,6 +150,19 @@ export default function Sidebar({ onCalendarVisibilityChange }: SidebarProps) {
                         setSelectedCalendarId(null);
                     }}
                     />
+                
+                <EditCalendarDialog
+                    open={editCalendarOpen}
+                    calendar={calendars.find(c => c.id === selectedCalendarId) || {
+                        id: "",
+                        name: "",
+                        color: "",
+                        visible: true,
+                    }}
+                    onClose={() => setEditCalendarOpen(false)}
+                    onSave={fetchCalendars}
+                />
+
                 </>
             </div>
         </>

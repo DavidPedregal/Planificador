@@ -79,4 +79,21 @@ router.put('/:id', authMiddleware, async function(req, res) {
     }
 });
 
+router.delete('/calendar/:calendarId', authMiddleware, async function(req, res) {
+
+    const userId = req.userId;
+    const calendarId = req.params.calendarId;
+
+    if (!mongoose.Types.ObjectId.isValid(calendarId)) {
+        return res.status(400).json({ error: "Invalid calendar ID" });
+    }
+
+    try {
+        const deleted = await CalendarEvent.deleteMany({ calendarId, userId });
+        res.json({ message: `${deleted.deletedCount} events deleted successfully` });
+    } catch (error) {
+        res.status(500).json({ error: "Error deleting events" });
+    }
+});
+
 module.exports = router;

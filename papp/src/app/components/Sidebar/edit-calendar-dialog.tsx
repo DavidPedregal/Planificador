@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from "react";
 import "../Calendar/add-event-dialog.css";
 import { config } from "@/app/config/config";
-import { CALENDAR_COLORS } from "../calendar/calendarHelper";
+import { CALENDAR_COLORS, Calendar } from "../calendar/calendarHelper";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Props {
     open: boolean;
+    calendar: Calendar;
     onClose: () => void;
-    onSave: () => void;
+    onSave: (updatedCalendar: Calendar) => void;
 }
 
-const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
-    const [name, setName] = useState("");
-    const [color, setColor] = useState(CALENDAR_COLORS[0].value);
+const EditCalendarDialog: React.FC<Props> = ({ open, calendar, onClose, onSave }) => {
+    const [name, setName] = useState(calendar.name);
+    const [color, setColor] = useState(calendar.color);
 
     useEffect(() => {
         if (open) {
-            setName("");
-            setColor(CALENDAR_COLORS[0].value);
+            setName(calendar.name);
+            setColor(calendar.color);
         }
     }, [open]);
 
@@ -27,8 +28,8 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
         if (!name.trim()) return;
 
         try {
-            await fetch(config.backendUrl + "/calendars", {
-                method: "POST",
+            const response = await fetch(config.backendUrl + `/calendars/${calendar.id}`, {
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -36,7 +37,8 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                 body: JSON.stringify({ name, color }),
             });
 
-            onSave();
+            const updated = await response.json();
+            onSave(updated);
             onClose();
         } catch (error) {
             console.error("Error guardando calendario:", error);
@@ -113,4 +115,4 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
     );
 };
 
-export default AddCalendarDialog;
+export default EditCalendarDialog;

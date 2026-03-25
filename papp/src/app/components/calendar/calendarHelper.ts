@@ -17,6 +17,17 @@ export const EVENT_COLORS = [
     { label: "Lima",      value: "#a3e635" },
 ];
 
+export const CALENDAR_COLORS = [
+    { label: "Índigo",    value: "#7c6ff7" },
+    { label: "Cielo",     value: "#38bdf8" },
+    { label: "Esmeralda", value: "#34d399" },
+    { label: "Ámbar",     value: "#fbbf24" },
+    { label: "Rosa",      value: "#f472b6" },
+    { label: "Coral",     value: "#f76f6f" },
+    { label: "Violeta",   value: "#c084fc" },
+    { label: "Lima",      value: "#a3e635" },
+];
+
 export interface CalendarEvent {
     id: string;
     title: string;
@@ -29,8 +40,8 @@ export interface CalendarEvent {
 export interface Calendar { 
     id: string, 
     name: string, 
-    userId: string, 
-    color: string 
+    color: string,
+    visible: boolean,
 };
 
 export interface RecurrenceRule {
