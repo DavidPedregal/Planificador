@@ -3,8 +3,9 @@ var router = express.Router();
 const User = require("./models/UserModel");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authmiddleware");
+const { authLimiter } = require('../middlewares/rateLimiterMiddleware');
 
-router.post('/login', async function(req, res) {
+router.post('/login', authLimiter, async function(req, res) {
   const { token } = req.body;
 
   if (!token) return res.status(401).send('Authentication failed.');

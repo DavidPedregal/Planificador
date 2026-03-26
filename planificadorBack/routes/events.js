@@ -3,8 +3,9 @@ const mongoose = require("mongoose");
 const CalendarEvent = require("./models/CalendarEventModel");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authmiddleware");
+const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 
-router.get('/', authMiddleware, async function(req, res) {
+router.get('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
     try {
@@ -15,7 +16,7 @@ router.get('/', authMiddleware, async function(req, res) {
     }
 });
 
-router.post('/', authMiddleware, async function(req, res) {
+router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     try {
         const userId = req.userId;
         console.log("Body:", req.body);
@@ -36,7 +37,7 @@ router.post('/', authMiddleware, async function(req, res) {
     }
 });
 
-router.delete('/:id', authMiddleware, async function(req, res) {
+router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
     const eventId = req.params.id;
 
@@ -56,18 +57,38 @@ router.delete('/:id', authMiddleware, async function(req, res) {
     }   
 });
 
-router.put('/:id', authMiddleware, async function(req, res) {
+router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
     const eventId = req.params.id;
 
-    console.log(req.body);
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
         return res.status(400).json({ error: "Invalid event ID" });
+    }
+
+     // Build a safe update object from allowed fields only
+    const allowedFields = ['title', 'start', 'end', 'calendarId', 'description'];
+    const updateData = {};
+    for (const field of allowedFields) {
+        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            updateData[field] = req.body[field];
+        }
+    }
+
+    // If calendarId is being updated, validate it
+    if (Object.prototype.hasOwnProperty.call(updateData, 'calendarId')) {
+        if (!mongoose.Types.ObjectId.isValid(updateData.calendarId)) {
+            return res.status(400).json({ error: "Invalid calendarId" });
+        }
+    }
+	
+    // Disallow empty updates
+    if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: "No valid fields provided for update" });
     }
 
     try {
         const updatedEvent = await CalendarEvent.findOneAndUpdate(
             { _id: eventId },
-            req.body,
+            { $set: updateData },
             { returnDocument: 'after' }
         );
         if (!updatedEvent) {
@@ -79,7 +100,7 @@ router.put('/:id', authMiddleware, async function(req, res) {
     }
 });
 
-router.delete('/calendar/:calendarId', authMiddleware, async function(req, res) {
+router.delete('/calendar/:calendarId', dbLimiter, authMiddleware, async function(req, res) {
 
     const userId = req.userId;
     const calendarId = req.params.calendarId;

@@ -23,6 +23,14 @@ app.use(cors({
 app.use(logger("dev"));
 app.use(express.json());
 
+var RateLimit = require('express-rate-limit');
+var limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, 
+});
+
+app.use(limiter);
+
 app.use("/users", usersRouter);
 app.use("/calendars", calendarRouter);
 app.use("/events", eventRouter);

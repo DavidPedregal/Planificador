@@ -3,13 +3,11 @@ var router = express.Router();
 const mongoose = require("mongoose");
 const Calendar = require("./models/CalendarModel");
 const authMiddleware = require("../middlewares/authmiddleware");
+const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 
-router.get('/', authMiddleware, async function(req, res) {
+router.get('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(404).json({ error: "User not found" });
-    }
 
     try {
         const calendars = await Calendar.find({ userId });
@@ -19,12 +17,9 @@ router.get('/', authMiddleware, async function(req, res) {
     }
 });
 
-router.post('/', authMiddleware, async function(req, res) {
+router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(404).json({ error: "User not found" });
-    }
 
     try {
         if (!req.body.name || !req.body.color) {
@@ -39,12 +34,12 @@ router.post('/', authMiddleware, async function(req, res) {
     }
 });
 
-router.delete('/:id', authMiddleware, async function(req, res) {
+router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
     const calendarId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(404).json({ error: "User not found" });
+    if (!mongoose.Types.ObjectId.isValid(calendarId)) {
+        return res.status(400).json({ error: "Invalid calendar ID" });
     }
 
     try {
