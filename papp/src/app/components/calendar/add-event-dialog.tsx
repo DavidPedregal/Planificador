@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import "./add-event-dialog.css";
 import { config } from "@/app/config/config";
 import { FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
@@ -102,6 +102,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             calendarId,
             start: start,
             end: end,
+            useCalendarColor: !useCustomColor,
             // estimatedHours: estimatedHours !== "" ? estimatedHours : undefined,
             // subjectId: subject || undefined,
             // givenDate: givenDate || undefined,

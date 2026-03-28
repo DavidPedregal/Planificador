@@ -10,6 +10,11 @@ const calendarEventModel = new mongoose.Schema({
         type: String,
         required: true,
     },
+    useCalendarColor: {
+        type: Boolean,
+        required: true,
+        default: true,
+    },
     color: {
         type: String,
         default: "#000000",

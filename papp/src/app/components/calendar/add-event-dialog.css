@@ -215,6 +215,15 @@
     box-shadow: 0 6px 20px rgba(124,111,247,0.5);
 }
 .aed-btn-save:active { transform: translateY(0); }
+.aed-btn-delete {
+    background: #ef4444; color: #fff;
+    box-shadow: 0 4px 14px rgba(239,68,68,0.35);
+}
+.aed-btn-delete:hover {
+    background: #f87171; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(239,68,68,0.5);
+}
+.aed-btn-delete:active { transform: translateY(0); }
 
 /* ── Confirm Dialog Buttons ── */
 .aed-button {

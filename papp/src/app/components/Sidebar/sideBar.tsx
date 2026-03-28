@@ -6,19 +6,16 @@ import "./sideBar.css";
 import AddCalendarDialog from "./add-calendar-dialog";
 import ConfirmDialog from "./confirm-dialog";
 import { config } from "@/app/config/config";
-import { Edit } from "lucide-react";
 import EditCalendarDialog from "./edit-calendar-dialog";
-import { Calendar } from "../calendar/calendarHelper";
+import { Calendar } from "../Calendar/calendarHelper";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { EditIcon, SettingsIcon, } from "lucide-react";
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 
 interface SidebarProps {
     onCalendarVisibilityChange?: (visibleIds: string[]) => void;
     onCalendarDeleted?: () => void;
 }
-
-const COLORS = [
-    "#7c6ff7", "#1d9e75", "#d85a30",
-    "#e94f8a", "#3b82f6", "#f59e0b",
-];
 
 export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted }: SidebarProps) {
     const { user } = useApp();
@@ -60,15 +57,26 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
     };
 
     const handleEdit = (id: string) => {
-        // TODO: abrir dialog de edición
+        setEditCalendarOpen(true);
+        setSelectedCalendarId(id);
     };
 
     const fetchCalendars = async () => {
         fetch(config.backendUrl + `/calendars`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
-            .then(res => res.json())
-            .then(data => setCalendars(data.map((c: Omit<Calendar, "visible">) => ({ ...c, visible: true }))));
+        .then(res => res.json())
+        .then(data => {setCalendars(data.map((cal: any) => (
+            { 
+                id: cal._id, 
+                name: cal.name, 
+                userId: cal.userId, 
+                color: cal.color, 
+                visible: cal.visible
+            }
+            )));
+        })
+        .catch(error => console.error("Error fetching calendars:", error));
     };
 
     return (
@@ -78,17 +86,11 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 {/* ── General ── */}
                 <span className="sidebar-label">General</span>
                 <button className="sidebar-nav-item active">
-                    <svg className="sidebar-nav-icon" viewBox="0 0 16 16" fill="none">
-                        <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M2 13.5c0-2.5 2.7-4.5 6-4.5s6 2 6 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    </svg>
+                    <PersonOutlineIcon/>
                     Perfil
                 </button>
                 <button className="sidebar-nav-item">
-                    <svg className="sidebar-nav-icon" viewBox="0 0 16 16" fill="none">
-                        <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-                        <path d="M8 1v1.5M8 13.5V15M15 8h-1.5M2.5 8H1M12.36 3.64l-1.06 1.06M4.7 11.3l-1.06 1.06M12.36 12.36l-1.06-1.06M4.7 4.7 3.64 3.64" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    </svg>
+                    <SettingsIcon size={"1.25rem"}/>
                     Ajustes
                 </button>
 
@@ -112,14 +114,10 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                             <span className="sidebar-cal-name">{cal.name}</span>
                             
                             <button className="sidebar-cal-menu-btn" onClick={() => handleEdit(cal.id)}>
-                                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                                    <path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                                </svg>
+                                <EditIcon size={"1rem"}/>
                             </button>
                             <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal.id)}>
-                                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                                    <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9h8l1-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                                <DeleteForeverIcon fontSize="small"/>
                             </button>
                         </div>
                     ))}
@@ -159,7 +157,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                         color: "",
                         visible: true,
                     }}
-                    onClose={() => setEditCalendarOpen(false)}
+                    onClose={() => {setEditCalendarOpen(false); setSelectedCalendarId(null);}}
                     onSave={fetchCalendars}
                 />
 

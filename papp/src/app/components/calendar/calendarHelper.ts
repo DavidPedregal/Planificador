@@ -33,6 +33,7 @@ export interface CalendarEvent {
     title: string;
     start: Date | string;
     end: Date | string;
+    useCalendarColor: boolean;
     color: string;
     calendarId: string;
 }

@@ -12,6 +12,10 @@ const calendarModel = new mongoose.Schema({
     color: {
         type: String,
         required: true,
+    },
+    visible: {
+        type: Boolean,
+        default: true,
     }
 }, { timestamps: true });
 

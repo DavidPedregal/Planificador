@@ -65,7 +65,8 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
     }
 
      // Build a safe update object from allowed fields only
-    const allowedFields = ['title', 'start', 'end', 'calendarId', 'description'];
+    const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
+        'useCalendarColor', 'label', 'frequency', 'frequencyType', 'frequencyFinishDate', 'frequencyOccurrencesLeft'];
     const updateData = {};
     for (const field of allowedFields) {
         if (Object.prototype.hasOwnProperty.call(req.body, field)) {

@@ -11,9 +11,10 @@ interface Props {
     event: CalendarEvent;
     onClose: () => void;
     onSave: (updatedEvent: any) => void;
+    onDelete: (deletedEventId: string) => void;
 }
 
-const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
+const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelete}) => {
     const [eventTitle, setEventTitle] = useState(event.title);
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [calendarId, setCalendarId] = useState(event.calendarId);
@@ -35,7 +36,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
             setStart(typeof event.start === 'string' ? new Date(event.start) : event.start);
             setEnd(typeof event.end === 'string' ? new Date(event.end) : event.end);
             setColor(event.color);
-            setUseCustomColor(false);
+            setUseCustomColor(!event.useCalendarColor);
             setRecurrence({ frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
         }
     }, [open, event]);
@@ -81,6 +82,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
             calendarId,
             start: start,
             end: end,
+            useCalendarColor: !useCustomColor,
             ...(recurrence.frequency !== "none" && {
                 frequency: recurrence.interval,
                 frequencyType: recurrence.frequency,
@@ -101,7 +103,22 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
             onSave(updated);
             onClose();
         } catch (error) {
-            console.error("Error updating evento:", error);
+            console.error("Error updating event:", error);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await fetch(config.backendUrl + `/events/${event.id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            onDelete(event.id);
+            onClose();
+        } catch (error) {
+            console.error("Error deleting event:", error);
         }
     };
 
@@ -181,7 +198,6 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
                                 value={calendarId}
                                 onChange={e => {
                                     setCalendarId(e.target.value);
-                                    console.log("Selected calendar ID:", e.target.value);
                                 }}
                             >
                                 {calendars.map(cal => (
@@ -312,6 +328,9 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave,}) => {
                     {/* Footer */}
                     <div className="aed-footer">
                         <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
+                        <button className="aed-btn aed-btn-delete" onClick={handleDelete}>
+                            Eliminar evento
+                        </button>
                         <button
                             className="aed-btn aed-btn-save"
                             onClick={handleSave}

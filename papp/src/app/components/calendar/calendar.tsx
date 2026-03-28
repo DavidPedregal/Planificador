@@ -34,7 +34,8 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             start: info.event.start,
             end: info.event.end,
             color: info.event.backgroundColor,
-            calendarId: info.event.calendarId,
+            calendarId: info.event.extendedProps.calendarId,
+            useCalendarColor: info.event.extendedProps.useCalendarColor,
         });
         setEditDialogOpen(true);
     };
@@ -85,6 +86,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 end: event.end,
                 color: event.color,
                 calendarId: event.calendarId,
+                useCalendarColor: event.useCalendarColor,
             })));
 
         } catch (error) {
@@ -137,6 +139,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                     end: newEvent.end,
                     color: newEvent.color,
                     calendarId: newEvent.calendarId,
+                    useCalendarColor: newEvent.useCalendarColor,
                 }]);
             }}
          />
@@ -150,6 +153,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                     end: new Date(),
                     color: "",
                     calendarId: "",
+                    useCalendarColor: true,
                 }}
                 onClose={() => setEditDialogOpen(false)}
                 onSave={(updatedEvent) => {
@@ -160,7 +164,11 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                         end: updatedEvent.end,
                         color: updatedEvent.color,
                         calendarId: updatedEvent.calendarId,
+                        useCalendarColor: updatedEvent.useCalendarColor,
                     } : ev));
+                }}
+                onDelete={(deletedEventId) => {
+                    setEvents(events.filter(ev => ev.id !== deletedEventId));
                 }}
             />
 
