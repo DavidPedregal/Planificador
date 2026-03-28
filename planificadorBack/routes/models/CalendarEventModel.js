@@ -46,6 +46,16 @@ const calendarEventModel = new mongoose.Schema({
     },
     frequencyOccurrencesLeft : {
         type: Number,
+    },
+    frequencyInterval: {
+        type: Number,
+    },
+    frequencyDaysOfWeek: {
+        type: [Number],
+    },
+    frequencyEndType: {
+        type: String,
+        enum: ["never", "on", "after"],
     }
 }, { timestamps: true });
 

@@ -7,7 +7,7 @@ import AddEventDialog from "./add-event-dialog";
 import "./calendar.css";
 import { config } from "@/app/config/config";
 import EditEventDialog from "./edit-event-dialog";
-import { CalendarEvent } from "./calendarHelper";
+import { Calendar as CalendarInterface, CalendarEvent } from "./calendarHelper";
 
 interface CalendarProps {
     refreshTrigger?: number;
@@ -20,6 +20,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [calendars, setCalendars] = useState<CalendarInterface[]>([]);
 
     const addEvent = (start: Date, end: Date) => {
         setStartDate(start);
@@ -72,7 +73,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
         }).catch(error => console.error("Error updating event:", error));
     };
 
-    const fetchEvents = async () => {
+    const fetchEvents = async (calendarsList: CalendarInterface[]) => {
         try {
             const res = await fetch(config.backendUrl + "/events", {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -84,18 +85,53 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 title: event.title,
                 start: event.start,
                 end: event.end,
-                color: event.color,
+                color: setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList),
                 calendarId: event.calendarId,
                 useCalendarColor: event.useCalendarColor,
             })));
-
+            console.log("Events fetched:", data);
         } catch (error) {
             console.error("Error fetching events:", error);
         }   
     };
 
+    const setEventColor = (useCalendarColor: boolean, eventColor: string, calendarId: string, calendarsList?: CalendarInterface[]) => {
+        const calendarsToUse = calendarsList || calendars;
+        if (useCalendarColor) {
+            return calendarsToUse.find(cal => cal.id === calendarId)?.color || "#7c6ff7"; // Default to indigo if calendar not found
+        } else {
+            return eventColor || "#7c6ff7"; // Default to indigo if event color not set
+        }
+    }
+
+    const fetchCalendars = async () => {
+        try {
+            const res = await fetch(config.backendUrl + "/calendars", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const data = await res.json();
+            
+            const mappedCalendars = data.map((cal: any) => ({
+                id: cal._id, // Use _id from backend as id
+                name: cal.name,
+                color: cal.color,
+                visible: cal.visible,
+            }));
+            setCalendars(mappedCalendars);
+            console.log("Calendars fetched:", data);
+            return mappedCalendars;
+        } catch (error) {
+            console.error("Error fetching calendars:", error);
+            return [];
+        }   
+    };
+
     useEffect(() => {
-        fetchEvents();
+        const loadData = async () => {
+            const calendarsList = await fetchCalendars();
+            await fetchEvents(calendarsList);
+        };
+        loadData();
     }, [refreshTrigger]);
 
     return (
@@ -162,7 +198,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                         title: updatedEvent.title,
                         start: updatedEvent.start,
                         end: updatedEvent.end,
-                        color: updatedEvent.color,
+                        color: setEventColor(updatedEvent.useCalendarColor, updatedEvent.color, updatedEvent.calendarId),
                         calendarId: updatedEvent.calendarId,
                         useCalendarColor: updatedEvent.useCalendarColor,
                     } : ev));

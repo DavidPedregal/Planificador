@@ -158,7 +158,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                         visible: true,
                     }}
                     onClose={() => {setEditCalendarOpen(false); setSelectedCalendarId(null);}}
-                    onSave={fetchCalendars}
+                    onSave={() => {fetchCalendars(); onCalendarDeleted?.();}}
                 />
 
                 </>

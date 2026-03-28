@@ -53,6 +53,7 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
         });
         res.json({ message: "Calendar deleted" });
     } catch (error) {
+        console.log(error.message);
         res.status(500).json({ error: "Error deleting calendar" });
     }
 });

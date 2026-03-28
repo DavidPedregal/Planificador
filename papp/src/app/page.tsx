@@ -18,9 +18,15 @@ export default function Landing() {
         })
         .then(res => {
             if (res.ok) router.push("/home");
-            else localStorage.removeItem("token");
+            else {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+            }
         })
-        .catch(() => localStorage.removeItem("token"));
+        .catch(() => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+        });
     }, []);
 
     return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import "./add-event-dialog.css";
 import { config } from "@/app/config/config";
 import { FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
@@ -19,10 +19,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
     const [calendarId, setCalendarId] = useState("");
     const [color, setColor] = useState(EVENT_COLORS[0].value);
     const [useCustomColor, setUseCustomColor] = useState(false);
-    // const [estimatedHours, setEstimatedHours] = useState<number | "">("");
-    // const [subject, setSubject] = useState("");
-    // const [subjects, setSubjects] = useState<{ _id: string, name: string }[]>([]);
-    // const [givenDate, setGivenDate] = useState("");
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [],
         endType: "never", endDate: "", occurrences: 1,
@@ -32,13 +28,10 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
     useEffect(() => {
         if (open) {
             fetchCalendars();
-            fetchSubjects();
             setEventTitle("");
             setUseCustomColor(false);
             setColor(EVENT_COLORS[0].value);
-            // setEstimatedHours("");
-            // setSubject("");
-            // setGivenDate("");
+            
             setRecurrence({ frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
         }
     }, [open]);
@@ -59,18 +52,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
         } catch (error) {
             console.error("Error fetching calendars:", error);
         }
-    };
-
-    const fetchSubjects = async () => {
-        // try {
-        //     const res = await fetch(config.backendUrl + "/subjects", {
-        //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        //     });
-        //     const data = await res.json();
-        //     setSubjects(data);
-        // } catch (error) {
-        //     console.error("Error fetching subjects:", error);
-        // }
     };
 
     if (!open || !start || !end) return null;
@@ -103,9 +84,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
             start: start,
             end: end,
             useCalendarColor: !useCustomColor,
-            // estimatedHours: estimatedHours !== "" ? estimatedHours : undefined,
-            // subjectId: subject || undefined,
-            // givenDate: givenDate || undefined,
             ...(recurrence.frequency !== "none" && {
                 frequency: recurrence.interval,
                 frequencyType: recurrence.frequency,
@@ -211,46 +189,6 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                                 ))}
                             </select>
                         </div>
-
-                        {/* Tiempo estimado */}
-                        {/* <div className="aed-field">
-                            <label className="aed-label">Tiempo estimado (horas)</label>
-                            <input
-                                className="aed-input"
-                                type="number"
-                                placeholder="Ej: 2.5"
-                                min="0"
-                                step="0.5"
-                                value={estimatedHours}
-                                onChange={e => setEstimatedHours(e.target.value === "" ? "" : parseFloat(e.target.value))}
-                            />
-                        </div> */}
-
-                        {/* Asignatura */}
-                        {/* <div className="aed-field">
-                            <label className="aed-label">Asignatura</label>
-                            <select
-                                className="aed-input aed-select"
-                                value={subject}
-                                onChange={e => setSubject(e.target.value)}
-                            >
-                                <option value="">Ninguna</option>
-                                {subjects.map(subj => (
-                                    <option key={subj._id} value={subj._id}>{subj.name}</option>
-                                ))}
-                            </select>
-                        </div> */}
-
-                        {/* Día asignado */}
-                        {/* <div className="aed-field">
-                            <label className="aed-label">Día asignado</label>
-                            <input
-                                className="aed-input"
-                                type="date"
-                                value={givenDate}
-                                onChange={e => setGivenDate(e.target.value)}
-                            />
-                        </div> */}
 
                         {/* Color */}
                         <div className="aed-field">

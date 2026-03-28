@@ -19,7 +19,6 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res) {
 router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     try {
         const userId = req.userId;
-        console.log("Body:", req.body);
 
         if (!mongoose.Types.ObjectId.isValid(req.body.calendarId)) {
             return res.status(400).json({ error: "Invalid calendarId" });

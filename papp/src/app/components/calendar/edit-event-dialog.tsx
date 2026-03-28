@@ -4,6 +4,8 @@ import { config } from "@/app/config/config";
 import { CalendarEvent, FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
     WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
     Calendar} from "./calendarHelper";
+import ConfirmDialog from "../Sidebar/confirm-dialog";
+import { set } from "mongoose";
 
 
 interface Props {
@@ -26,6 +28,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
         frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [],
         endType: "never", endDate: "", occurrences: 1,
     });
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     // Reset when dialog opens
     useEffect(() => {
@@ -117,6 +120,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             });
             onDelete(event.id);
             onClose();
+            setConfirmDeleteOpen(false);
         } catch (error) {
             console.error("Error deleting event:", error);
         }
@@ -328,7 +332,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                     {/* Footer */}
                     <div className="aed-footer">
                         <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
-                        <button className="aed-btn aed-btn-delete" onClick={handleDelete}>
+                        <button className="aed-btn aed-btn-delete" onClick={() => setConfirmDeleteOpen(true)}>
                             Eliminar evento
                         </button>
                         <button
@@ -342,6 +346,15 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={confirmDeleteOpen}
+                title="Eliminar evento"
+                message="¿Estás seguro de que quieres eliminar este evento?"
+                onConfirm={handleDelete}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
+
         </>
     );
 };
