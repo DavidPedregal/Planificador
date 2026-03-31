@@ -36,6 +36,7 @@ export interface CalendarEvent {
     useCalendarColor: boolean;
     color: string;
     calendarId: string;
+    recurrenceRule: RecurrenceRule;
 }
 
 export interface Calendar { 
@@ -46,12 +47,12 @@ export interface Calendar {
 };
 
 export interface RecurrenceRule {
-    frequency: typeof FREQUENCY_TYPE[keyof typeof FREQUENCY_TYPE];
-    interval: number;
-    daysOfWeek?: number[]; // 0=Sun … 6=Sat
-    endType: "never" | "on" | "after";
-    endDate?: string;
-    occurrences?: number;
+    frequencyType: typeof FREQUENCY_TYPE[keyof typeof FREQUENCY_TYPE];
+    frequencyInterval: number;
+    frequencyDaysOfWeek?: number[]; // 0=Sun … 6=Sat
+    frequencyEndType: "never" | "on" | "after";
+    frequencyEndDate?: string;
+    frequencyOccurrencesLeft?: number;
 }
 
 export const WEEKDAYS = ["D", "L", "M", "X", "J", "V", "S"];
@@ -70,3 +71,64 @@ export function formatDateTimeLocal(d: Date | string): string {
     const date = typeof d === 'string' ? new Date(d) : d;
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+export const mapToFullCalendarEvent = (event: any, color: string) => {
+    const base = {
+        id: event._id,
+        title: event.title,
+        backgroundColor: color,
+        borderColor: color,
+        extendedProps: {
+            calendarId: event.calendarId,
+            useCalendarColor: event.useCalendarColor,
+            recurrenceRule: {
+                frequencyType: event.frequencyType,
+                frequencyInterval: event.frequencyInterval,
+                frequencyDaysOfWeek: event.frequencyDaysOfWeek,
+                frequencyEndType: event.frequencyEndType,
+                frequencyEndDate: event.frequencyEndDate,
+                frequencyOccurrencesLeft: event.frequencyOccurrencesLeft,
+            }
+        }
+    };
+
+    // Sin recurrencia
+    if (!event.frequencyType || event.frequencyType === "none") {
+        return { ...base, start: event.start, end: event.end };
+    }
+
+    // Con recurrencia — construye el objeto rrule
+    const FREQ_MAP: Record<string, string> = {
+        day:   "daily",
+        week:  "weekly",
+        month: "monthly",
+        year:  "yearly",
+    };
+
+    const rrule: any = {
+        freq: FREQ_MAP[event.frequencyType],
+        dtstart: event.start,
+        interval: event.frequencyInterval || 1,
+    };
+
+    if (event.frequencyDaysOfWeek?.length) {
+        const DAYS = ["su", "mo", "tu", "we", "th", "fr", "sa"];
+        rrule.byweekday = event.frequencyDaysOfWeek.map((d: number) => DAYS[d]);
+    }
+
+    if (event.frequencyEndType === "on" && event.frequencyEndDate) {
+        rrule.until = new Date(event.frequencyEndDate);
+    } else if (event.frequencyEndType === "after" && event.frequencyOccurrencesLeft) {
+        rrule.count = event.frequencyOccurrencesLeft;
+    }
+
+    const duration = new Date(event.end).getTime() - new Date(event.start).getTime();
+    const hours = Math.floor(duration / 3600000);
+    const minutes = Math.floor((duration % 3600000) / 60000);
+
+    return {
+        ...base,
+        rrule,
+        duration: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
+    };
+};

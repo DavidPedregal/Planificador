@@ -2,16 +2,18 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import rrulePlugin from '@fullcalendar/rrule';
 import {useEffect, useState} from "react";
 import AddEventDialog from "./add-event-dialog";
 import "./calendar.css";
 import { config } from "@/app/config/config";
 import EditEventDialog from "./edit-event-dialog";
-import { Calendar as CalendarInterface, CalendarEvent } from "./calendarHelper";
+import { Calendar as CalendarInterface, CalendarEvent, FREQUENCY_TYPE, mapToFullCalendarEvent } from "./calendarHelper";
 
 interface CalendarProps {
     refreshTrigger?: number;
 }
+
 
 export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -19,7 +21,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
-    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [events, setEvents] = useState<any[]>([]);
     const [calendars, setCalendars] = useState<CalendarInterface[]>([]);
 
     const addEvent = (start: Date, end: Date) => {
@@ -29,6 +31,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     };
 
     const handleEventClick = (info: any) => {
+        console.log("Event clicked:", info.event);
         setSelectedEvent({
             id: info.event.id,
             title: info.event.title,
@@ -37,6 +40,14 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             color: info.event.backgroundColor,
             calendarId: info.event.extendedProps.calendarId,
             useCalendarColor: info.event.extendedProps.useCalendarColor,
+            recurrenceRule: {
+                frequencyType: info.event.extendedProps.recurrenceRule?.frequencyType || FREQUENCY_TYPE.NONE,
+                frequencyInterval: info.event.extendedProps.recurrenceRule?.frequencyInterval || 1,
+                frequencyDaysOfWeek: info.event.extendedProps.recurrenceRule?.frequencyDaysOfWeek || [],
+                frequencyEndType: info.event.extendedProps.recurrenceRule?.frequencyEndType || "never",
+                frequencyEndDate: info.event.extendedProps.recurrenceRule?.frequencyEndDate || "",
+                frequencyOccurrencesLeft: info.event.extendedProps.recurrenceRule?.frequencyOccurrencesLeft || 1,
+            }
         });
         setEditDialogOpen(true);
     };
@@ -79,16 +90,12 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             const data = await res.json();
+            console.log("Raw events data:", data);
             
-            setEvents(data.map((event: any) => ({
-                id: event._id, // Use _id from backend as id
-                title: event.title,
-                start: event.start,
-                end: event.end,
-                color: setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList),
-                calendarId: event.calendarId,
-                useCalendarColor: event.useCalendarColor,
-            })));
+            setEvents(data.map((event: any) => {
+                const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList);
+                return mapToFullCalendarEvent(event, color);
+            }));
             console.log("Events fetched:", data);
         } catch (error) {
             console.error("Error fetching events:", error);
@@ -138,7 +145,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     <>
     <div className="calendar-wrapper">
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, rrulePlugin]}
         initialView="timeGridWeek"
         slotMinTime="08:00:00"
         slotMaxTime="22:00:00"
@@ -168,15 +175,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             end={endDate}
             onClose={() => setAddDialogOpen(false)}
             onSave={(newEvent) => {
-                setEvents([...events, {
-                    id: newEvent._id,
-                    title: newEvent.title,
-                    start: newEvent.start,
-                    end: newEvent.end,
-                    color: newEvent.color,
-                    calendarId: newEvent.calendarId,
-                    useCalendarColor: newEvent.useCalendarColor,
-                }]);
+                setEvents([...events, mapToFullCalendarEvent(newEvent, setEventColor(newEvent.useCalendarColor, newEvent.color, newEvent.calendarId))]);
             }}
          />
 
@@ -190,18 +189,19 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                     color: "",
                     calendarId: "",
                     useCalendarColor: true,
+                    recurrenceRule: {
+                        frequencyType: "none",
+                        frequencyInterval: 1,
+                        frequencyDaysOfWeek: [],
+                        frequencyEndType: "never",
+                        frequencyEndDate: "",
+                        frequencyOccurrencesLeft: 1,
+                    },
                 }}
                 onClose={() => setEditDialogOpen(false)}
                 onSave={(updatedEvent) => {
-                    setEvents(events.map(ev => ev.id === updatedEvent._id ? {
-                        id: updatedEvent._id,
-                        title: updatedEvent.title,
-                        start: updatedEvent.start,
-                        end: updatedEvent.end,
-                        color: setEventColor(updatedEvent.useCalendarColor, updatedEvent.color, updatedEvent.calendarId),
-                        calendarId: updatedEvent.calendarId,
-                        useCalendarColor: updatedEvent.useCalendarColor,
-                    } : ev));
+                    const updatedFullCalendarEvent = mapToFullCalendarEvent(updatedEvent, setEventColor(updatedEvent.useCalendarColor, updatedEvent.color, updatedEvent.calendarId));
+                    setEvents(events.map(ev => ev.id === updatedEvent._id ? updatedFullCalendarEvent : ev));
                 }}
                 onDelete={(deletedEventId) => {
                     setEvents(events.filter(ev => ev.id !== deletedEventId));

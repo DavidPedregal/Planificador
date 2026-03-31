@@ -25,8 +25,8 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
     const [start, setStart] = useState<Date>(typeof event.start === 'string' ? new Date(event.start) : event.start);
     const [end, setEnd] = useState<Date>(typeof event.end === 'string' ? new Date(event.end) : event.end);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
-        frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [],
-        endType: "never", endDate: "", occurrences: 1,
+        frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
+        frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
     });
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
@@ -40,7 +40,14 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             setEnd(typeof event.end === 'string' ? new Date(event.end) : event.end);
             setColor(event.color);
             setUseCustomColor(!event.useCalendarColor);
-            setRecurrence({ frequency: FREQUENCY_TYPE.NONE, interval: 1, daysOfWeek: [], endType: "never", endDate: "", occurrences: 1 });
+            setRecurrence(event.recurrenceRule || { 
+                frequencyType: FREQUENCY_TYPE.NONE, 
+                frequencyInterval: 1, 
+                frequencyDaysOfWeek: [], 
+                frequencyEndType: "never", 
+                frequencyEndDate: "", 
+                frequencyOccurrencesLeft: 1 
+            });
         }
     }, [open, event]);
 
@@ -61,9 +68,9 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
     const toggleWeekday = (day: number) => {
         setRecurrence(r => ({
             ...r,
-            daysOfWeek: r.daysOfWeek?.includes(day)
-                ? r.daysOfWeek.filter(d => d !== day)
-                : [...(r.daysOfWeek ?? []), day],
+            frequencyDaysOfWeek: r.frequencyDaysOfWeek?.includes(day)
+                ? r.frequencyDaysOfWeek.filter(d => d !== day)
+                : [...(r.frequencyDaysOfWeek ?? []), day],
         }));
     };
 
@@ -86,11 +93,12 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             start: start,
             end: end,
             useCalendarColor: !useCustomColor,
-            ...(recurrence.frequency !== "none" && {
-                frequency: recurrence.interval,
-                frequencyType: recurrence.frequency,
-                frequencyFinishDate: recurrence.endDate,
-            }),
+            frequencyType: recurrence.frequencyType,
+            frequencyInterval: recurrence.frequencyInterval,
+            frequencyDaysOfWeek: recurrence.frequencyDaysOfWeek,
+            frequencyEndType: recurrence.frequencyEndType,
+            frequencyEndDate: recurrence.frequencyEndDate,
+            frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
         };
         try {
             const response = await fetch(config.backendUrl + `/events/${event.id}`, {
@@ -126,8 +134,8 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
         }
     };
 
-    const showWeekdays = recurrence.frequency === FREQUENCY_TYPE.WEEKS;
-    const showEndOptions = recurrence.frequency !== "none";
+    const showWeekdays = recurrence.frequencyType === FREQUENCY_TYPE.WEEKS;
+    const showEndOptions = recurrence.frequencyType !== FREQUENCY_TYPE.NONE;
 
     return (
         <>
@@ -245,26 +253,26 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                 <select
                                     className="aed-input aed-select"
                                     style={{ margin: 0 }}
-                                    value={recurrence.frequency}
-                                    onChange={e => setRecurrence(r => ({ ...r, frequency: e.target.value as RecurrenceRule["frequency"] }))}
+                                    value={recurrence.frequencyType}
+                                    onChange={e => setRecurrence(r => ({ ...r, frequencyType: e.target.value as RecurrenceRule["frequencyType"] }))}
                                 >
                                     {FREQ_OPTIONS.map(o => (
                                         <option key={o.value} value={o.value}>{o.label}</option>
                                     ))}
                                 </select>
 
-                                {recurrence.frequency !== "none" && (
+                                {recurrence.frequencyType !== FREQUENCY_TYPE.NONE && (
                                     <div className="aed-row">
                                         <span className="aed-row-label">Cada</span>
                                         <input
                                             className="aed-input"
                                             type="number" min={1} max={99}
-                                            value={recurrence.interval}
-                                            onChange={e => setRecurrence(r => ({ ...r, interval: Math.max(1, +e.target.value) }))}
+                                            value={recurrence.frequencyInterval}
+                                            onChange={e => setRecurrence(r => ({ ...r, frequencyInterval: Math.max(1, +e.target.value) }))}
                                             style={{ width: 64, flex: "none", textAlign: "center" }}
                                         />
                                         <span className="aed-row-label">
-                      {{ daily: "día(s)", weekly: "semana(s)", monthly: "mes(es)", yearly: "año(s)" }[recurrence.frequency]}
+                      {{ daily: "día(s)", weekly: "semana(s)", monthly: "mes(es)", yearly: "año(s)" }[recurrence.frequencyType]}
                     </span>
                                     </div>
                                 )}
@@ -276,7 +284,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                             {WEEKDAYS.map((d, i) => (
                                                 <button
                                                     key={`weekday-${i}`}
-                                                    className={`aed-wd-btn${recurrence.daysOfWeek?.includes(i) ? " active" : ""}`}
+                                                    className={`aed-wd-btn${recurrence.frequencyDaysOfWeek?.includes(i) ? " active" : ""}`}
                                                     onClick={() => toggleWeekday(i)}
                                                     title={WEEKDAY_LABELS[i]}
                                                 >{d}</button>
@@ -292,29 +300,29 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                             {(["never", "on", "after"] as const).map(type => (
                                                 <label key={type} className="aed-radio-row">
                                                     <div
-                                                        className={`aed-radio${recurrence.endType === type ? " checked" : ""}`}
-                                                        onClick={() => setRecurrence(r => ({ ...r, endType: type }))}
+                                                        className={`aed-radio${recurrence.frequencyEndType === type ? " checked" : ""}`}
+                                                        onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}
                                                     />
-                                                    <span className="aed-radio-label" onClick={() => setRecurrence(r => ({ ...r, endType: type }))}>
+                                                    <span className="aed-radio-label" onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}>
                             {{ never: "Nunca", on: "El día", after: "Después de" }[type]}
                           </span>
-                                                    {type === "on" && recurrence.endType === "on" && (
+                                                    {type === "on" && recurrence.frequencyEndType === "on" && (
                                                         <input
                                                             className="aed-input"
                                                             type="date"
-                                                            value={recurrence.endDate}
+                                                            value={recurrence.frequencyEndDate}
                                                             min={formatDateTimeLocal(start).slice(0, 10)}
-                                                            onChange={e => setRecurrence(r => ({ ...r, endDate: e.target.value }))}
+                                                            onChange={e => setRecurrence(r => ({ ...r, frequencyEndDate: e.target.value }))}
                                                             style={{ marginLeft: 8, flex: 1 }}
                                                         />
                                                     )}
-                                                    {type === "after" && recurrence.endType === "after" && (
+                                                    {type === "after" && recurrence.frequencyEndType === "after" && (
                                                         <div className="aed-row" style={{ marginLeft: 8, flex: 1 }}>
                                                             <input
                                                                 className="aed-input"
                                                                 type="number" min={1} max={999}
-                                                                value={recurrence.occurrences}
-                                                                onChange={e => setRecurrence(r => ({ ...r, occurrences: Math.max(1, +e.target.value) }))}
+                                                                value={recurrence.frequencyOccurrencesLeft}
+                                                                onChange={e => setRecurrence(r => ({ ...r, frequencyOccurrencesLeft: Math.max(1, +e.target.value) }))}
                                                                 style={{ width: 64, flex: "none", textAlign: "center" }}
                                                             />
                                                             <span className="aed-row-label">ocurrencias</span>
