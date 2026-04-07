@@ -31,6 +31,7 @@ export const CALENDAR_COLORS = [
 export interface CalendarEvent {
     id: string;
     title: string;
+    label?: string;
     start: Date | string;
     end: Date | string;
     useCalendarColor: boolean;
@@ -44,6 +45,11 @@ export interface Calendar {
     name: string, 
     color: string,
     visible: boolean,
+};
+
+export interface Subject { 
+    id: string, 
+    name: string, 
 };
 
 export interface RecurrenceRule {
@@ -78,6 +84,7 @@ export const mapToFullCalendarEvent = (event: any, color: string) => {
         title: event.title,
         backgroundColor: color,
         borderColor: color,
+        label: event.label ? event.label : "",
         extendedProps: {
             calendarId: event.calendarId,
             useCalendarColor: event.useCalendarColor,

@@ -31,7 +31,6 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     };
 
     const handleEventClick = (info: any) => {
-        console.log("Event clicked:", info.event);
         setSelectedEvent({
             id: info.event.id,
             title: info.event.title,
@@ -40,6 +39,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             color: info.event.backgroundColor,
             calendarId: info.event.extendedProps.calendarId,
             useCalendarColor: info.event.extendedProps.useCalendarColor,
+            label: info.event.extendedProps.label || "",
             recurrenceRule: {
                 frequencyType: info.event.extendedProps.recurrenceRule?.frequencyType || FREQUENCY_TYPE.NONE,
                 frequencyInterval: info.event.extendedProps.recurrenceRule?.frequencyInterval || 1,
@@ -90,13 +90,11 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             const data = await res.json();
-            console.log("Raw events data:", data);
             
             setEvents(data.map((event: any) => {
                 const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList);
                 return mapToFullCalendarEvent(event, color);
             }));
-            console.log("Events fetched:", data);
         } catch (error) {
             console.error("Error fetching events:", error);
         }   
@@ -125,7 +123,6 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 visible: cal.visible,
             }));
             setCalendars(mappedCalendars);
-            console.log("Calendars fetched:", data);
             return mappedCalendars;
         } catch (error) {
             console.error("Error fetching calendars:", error);

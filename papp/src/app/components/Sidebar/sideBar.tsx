@@ -7,7 +7,9 @@ import AddCalendarDialog from "./add-calendar-dialog";
 import ConfirmDialog from "./confirm-dialog";
 import { config } from "@/app/config/config";
 import EditCalendarDialog from "./edit-calendar-dialog";
-import { Calendar } from "../Calendar/calendarHelper";
+import { Calendar, Subject } from "../Calendar/calendarHelper";
+import AddSubjectDialog from "./add-subject-dialog";
+import EditSubjectDialog from "./edit-subject-dialog";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { EditIcon, SettingsIcon, } from "lucide-react";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -20,15 +22,21 @@ interface SidebarProps {
 export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted }: SidebarProps) {
     const { user } = useApp();
     const [calendars, setCalendars] = useState<Calendar[]>([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
     const menuRef = useRef<HTMLDivElement>(null);
     const [addCalendarOpen, setAddCalendarOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [editCalendarOpen, setEditCalendarOpen] = useState(false);
     const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
+    const [addSubjectOpen, setAddSubjectOpen] = useState(false);
+    const [editSubjectOpen, setEditSubjectOpen] = useState(false);
+    const [deleteSubjectConfirmOpen, setDeleteSubjectConfirmOpen] = useState(false);
+    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) return;
         fetchCalendars();
+        fetchSubjects();
     }, [user]);
 
 
@@ -79,6 +87,47 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
         .catch(error => console.error("Error fetching calendars:", error));
     };
 
+    const fetchSubjects = async () => {
+        try {
+            const res = await fetch(config.backendUrl + `/subjects`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const data = await res.json();
+            setSubjects(data.map((subj: any) => ({
+                id: subj._id,
+                name: subj.name,
+            })));
+        } catch (error) {
+            console.error("Error fetching subjects:", error);
+        }
+    };
+
+    const handleDeleteSubject = (id: string) => {
+        setSelectedSubjectId(id);
+        setDeleteSubjectConfirmOpen(true);
+    };
+
+    const confirmDeleteSubject = async () => {
+        if (!selectedSubjectId) return;
+
+        try {
+            await fetch(config.backendUrl + `/subjects/${selectedSubjectId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            setSubjects(prev => prev.filter(s => s.id !== selectedSubjectId));
+            setDeleteSubjectConfirmOpen(false);
+            setSelectedSubjectId(null);
+        } catch (error) {
+            console.error("Error deleting subject:", error);
+        }
+    };
+
+    const handleEditSubject = (id: string) => {
+        setEditSubjectOpen(true);
+        setSelectedSubjectId(id);
+    };
+
     return (
         <>
             <div className="sidebar">
@@ -99,7 +148,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 {/* ── Calendarios ── */}
                 <span className="sidebar-label">Mis calendarios</span>
 
-                <div className="sidebar-calendars" ref={menuRef}>
+                <div className="sidebar-calendars">
                     {calendars.map(cal => (
                         <div key={cal.id} className="sidebar-cal-item">
                             <div
@@ -127,6 +176,31 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 <>
                 <button className="sidebar-add-btn" onClick={() => setAddCalendarOpen(true)}>
                     + Nuevo calendario
+                </button>
+
+                <div className="sidebar-divider" />
+
+                {/* ── Mis asignaturas ── */}
+                <span className="sidebar-label">Mis asignaturas</span>
+
+                <div className="sidebar-subjects" ref={menuRef}>
+                    {subjects.map(subj => (
+                        <div key={subj.id} className="sidebar-subj-item">
+                            <span className="sidebar-subj-name">{subj.name}</span>
+                            
+                            <button className="sidebar-subj-menu-btn" onClick={() => handleEditSubject(subj.id)}>
+                                <EditIcon size={"1rem"}/>
+                            </button>
+                            <button className="sidebar-subj-menu-btn danger" onClick={() => handleDeleteSubject(subj.id)}>
+                                <DeleteForeverIcon fontSize="small"/>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {/* ── Añadir asignatura ── */}
+                <button className="sidebar-add-btn" onClick={() => setAddSubjectOpen(true)}>
+                    + Nueva asignatura
                 </button>
 
                 <AddCalendarDialog
@@ -161,6 +235,35 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                     onSave={() => {fetchCalendars(); onCalendarDeleted?.();}}
                 />
 
+                <AddSubjectDialog
+                    open={addSubjectOpen}
+                    onClose={() => setAddSubjectOpen(false)}
+                    onSave={fetchSubjects}
+                />
+
+                <EditSubjectDialog
+                    open={editSubjectOpen}
+                    subject={subjects.find(s => s.id === selectedSubjectId) || {
+                        id: "",
+                        name: "",
+                    }}
+                    onClose={() => {setEditSubjectOpen(false); setSelectedSubjectId(null);}}
+                    onSave={fetchSubjects}
+                />
+
+                <ConfirmDialog
+                    open={deleteSubjectConfirmOpen}
+                    title="Eliminar asignatura"
+                    message="¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer."
+                    confirmText="Eliminar"
+                    cancelText="Cancelar"
+                    isDangerous={true}
+                    onConfirm={confirmDeleteSubject}
+                    onCancel={() => {
+                        setDeleteSubjectConfirmOpen(false);
+                        setSelectedSubjectId(null);
+                    }}
+                />
                 </>
             </div>
         </>

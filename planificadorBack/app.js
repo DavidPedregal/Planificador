@@ -8,8 +8,10 @@ const cors = require("cors");
 
 const connectDB = require("./config/db");
 const usersRouter = require("./routes/users");
-const calendarRouter = require("./routes/calendar");
+const calendarRouter = require("./routes/calendars");
 const eventRouter = require("./routes/events");
+const taskRouter = require("./routes/tasks");
+const subjectRouter = require("./routes/subjects");
 
 connectDB().then();
 
@@ -34,6 +36,8 @@ app.use(limiter);
 app.use("/users", usersRouter);
 app.use("/calendars", calendarRouter);
 app.use("/events", eventRouter);
+app.use("/tasks", taskRouter);
+app.use("/subjects", subjectRouter);
 
 // 404
 app.use((req, res, next) => {

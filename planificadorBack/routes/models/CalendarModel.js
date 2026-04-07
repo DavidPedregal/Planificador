@@ -17,7 +17,7 @@ const calendarModel = new mongoose.Schema({
         type: Boolean,
         default: true,
     }
-}, { timestamps: true });
+});
 
 const Calendar = mongoose.model("Calendar", calendarModel);
 module.exports =  Calendar;

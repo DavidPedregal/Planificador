@@ -64,9 +64,9 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
         return res.status(400).json({ error: "Invalid event ID" });
     }
 
-     // Build a safe update object from allowed fields only
     const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
-        'useCalendarColor', 'label', 'frequency', 'frequencyType', 'frequencyFinishDate', 'frequencyOccurrencesLeft'];
+        'useCalendarColor', 'label', 'frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
+        'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
     const updateData = {};
     for (const field of allowedFields) {
         if (Object.prototype.hasOwnProperty.call(req.body, field)) {

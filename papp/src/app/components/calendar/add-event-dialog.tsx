@@ -15,6 +15,7 @@ interface Props {
 
 const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) => {
     const [eventTitle, setEventTitle] = useState("");
+    const [label, setLabel] = useState("");
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [calendarId, setCalendarId] = useState("");
     const [color, setColor] = useState(EVENT_COLORS[0].value);
@@ -29,6 +30,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
         if (open) {
             fetchCalendars();
             setEventTitle("");
+            setLabel("");
             setUseCustomColor(false);
             setColor(EVENT_COLORS[0].value);
             
@@ -57,12 +59,18 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
     if (!open || !start || !end) return null;
 
     const toggleWeekday = (day: number) => {
-        setRecurrence(r => ({
-            ...r,
-            frequencyDaysOfWeek: r.frequencyDaysOfWeek?.includes(day)
-                ? r.frequencyDaysOfWeek.filter(d => d !== day)
-                : [...(r.frequencyDaysOfWeek ?? []), day],
-        }));
+        setRecurrence(r => {
+            // Ensure frequencyDaysOfWeek is always an array
+            const currentDays = Array.isArray(r.frequencyDaysOfWeek) ? r.frequencyDaysOfWeek : [];
+            const newDays = currentDays.includes(day)
+                ? currentDays.filter(d => d !== day)
+                : [...currentDays, day];
+            
+            return {
+                ...r,
+                frequencyDaysOfWeek: newDays,
+            };
+        });
     };
 
     const handleSave = async () => {
@@ -79,6 +87,7 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
 
         const newEvent = {
             title: eventTitle,
+            label: label || undefined,
             color: getEventColor(),
             calendarId,
             start: start,
@@ -189,6 +198,18 @@ const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) =
                                     <option key={cal.id} value={cal.id}>{cal.name}</option>
                                 ))}
                             </select>
+                        </div>
+
+                        {/* Etiqueta */}
+                        <div className="aed-field">
+                            <label className="aed-label">Etiqueta</label>
+                            <input
+                                className="aed-input"
+                                type="text"
+                                placeholder="Añadir etiqueta (opcional)…"
+                                value={label}
+                                onChange={e => setLabel(e.target.value)}
+                            />
                         </div>
 
                         {/* Color */}

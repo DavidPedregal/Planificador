@@ -54,7 +54,7 @@ const calendarEventModel = new mongoose.Schema({
         type: String,
         enum: ["never", "on", "after"],
     }
-}, { timestamps: true });
+});
 
 const CalendarEvent = mongoose.model("Event", calendarEventModel);
 module.exports = CalendarEvent;

@@ -18,6 +18,7 @@ interface Props {
 
 const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelete}) => {
     const [eventTitle, setEventTitle] = useState(event.title);
+    const [label, setLabel] = useState(event.label || "");
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [calendarId, setCalendarId] = useState(event.calendarId);
     const [color, setColor] = useState(event.color);
@@ -35,19 +36,28 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
         if (open) {
             fetchCalendars();
             setEventTitle(event.title);
+            setLabel(event.label || "");
             setCalendarId(event.calendarId);
             setStart(typeof event.start === 'string' ? new Date(event.start) : event.start);
             setEnd(typeof event.end === 'string' ? new Date(event.end) : event.end);
             setColor(event.color);
             setUseCustomColor(!event.useCalendarColor);
-            setRecurrence(event.recurrenceRule || { 
-                frequencyType: FREQUENCY_TYPE.NONE, 
-                frequencyInterval: 1, 
-                frequencyDaysOfWeek: [], 
-                frequencyEndType: "never", 
-                frequencyEndDate: "", 
-                frequencyOccurrencesLeft: 1 
-            });
+            
+            // Load recurrence rule - handle both nested and flat property structures
+            const frequencyDaysOfWeekData = (event as any).frequencyDaysOfWeek || event.recurrenceRule?.frequencyDaysOfWeek;
+            const daysArray = Array.isArray(frequencyDaysOfWeekData) 
+                ? frequencyDaysOfWeekData 
+                : (frequencyDaysOfWeekData ? [] : []);
+            
+            const recurrenceRule = event.recurrenceRule || {
+                frequencyType: (event as any).frequencyType || FREQUENCY_TYPE.NONE,
+                frequencyInterval: (event as any).frequencyInterval || 1,
+                frequencyDaysOfWeek: daysArray,
+                frequencyEndType: (event as any).frequencyEndType || "never",
+                frequencyEndDate: (event as any).frequencyEndDate || "",
+                frequencyOccurrencesLeft: (event as any).frequencyOccurrencesLeft || 1,
+            };
+            setRecurrence(recurrenceRule);
         }
     }, [open, event]);
 
@@ -66,12 +76,18 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
     if (!open) return null;
 
     const toggleWeekday = (day: number) => {
-        setRecurrence(r => ({
-            ...r,
-            frequencyDaysOfWeek: r.frequencyDaysOfWeek?.includes(day)
-                ? r.frequencyDaysOfWeek.filter(d => d !== day)
-                : [...(r.frequencyDaysOfWeek ?? []), day],
-        }));
+        setRecurrence(r => {
+            // Ensure frequencyDaysOfWeek is always an array
+            const currentDays = Array.isArray(r.frequencyDaysOfWeek) ? r.frequencyDaysOfWeek : [];
+            const newDays = currentDays.includes(day)
+                ? currentDays.filter(d => d !== day)
+                : [...currentDays, day];
+            
+            return {
+                ...r,
+                frequencyDaysOfWeek: newDays,
+            };
+        });
     };
 
     const handleSave = async () => {
@@ -88,6 +104,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
 
         const updatedEvent = {
             title: eventTitle,
+            label: label || undefined,
             color: getEventColor(),
             calendarId,
             start: start,
@@ -216,6 +233,18 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                     <option key={cal.id} value={cal.id}>{cal.name}</option>
                                 ))}
                             </select>
+                        </div>
+
+                        {/* Label */}
+                        <div className="aed-field">
+                            <label className="aed-label">Etiqueta</label>
+                            <input
+                                className="aed-input"
+                                type="text"
+                                placeholder="Añadir etiqueta (opcional)…"
+                                value={label}
+                                onChange={e => setLabel(e.target.value)}
+                            />
                         </div>
 
                         {/* Color */}
