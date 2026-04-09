@@ -4,10 +4,10 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import rrulePlugin from '@fullcalendar/rrule';
 import {useEffect, useState} from "react";
-import AddEventDialog from "./add-event-dialog";
+import AddEventDialog from "../Event/add-event-dialog";
 import "./calendar.css";
 import { config } from "@/app/config/config";
-import EditEventDialog from "./edit-event-dialog";
+import EditEventDialog from "../Event/edit-event-dialog";
 import { Calendar as CalendarInterface, CalendarEvent, FREQUENCY_TYPE, mapToFullCalendarEvent } from "./calendarHelper";
 
 interface CalendarProps {

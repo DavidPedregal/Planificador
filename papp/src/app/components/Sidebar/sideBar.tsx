@@ -165,9 +165,11 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                             <button className="sidebar-cal-menu-btn" onClick={() => handleEdit(cal.id)}>
                                 <EditIcon size={"1rem"}/>
                             </button>
-                            <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal.id)}>
-                                <DeleteForeverIcon fontSize="small"/>
-                            </button>
+                            {calendars.length > 1 && (
+                                <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal.id)}>
+                                    <DeleteForeverIcon fontSize="small"/>
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>

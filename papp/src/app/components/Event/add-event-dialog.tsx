@@ -1,65 +1,48 @@
 import React, { useState, useEffect } from "react";
 import "./add-event-dialog.css";
 import { config } from "@/app/config/config";
-import { CalendarEvent, FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
+import { FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
     WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
-    Calendar} from "./calendarHelper";
-import ConfirmDialog from "../Sidebar/confirm-dialog";
-import { set } from "mongoose";
-
+    Calendar} from "../Calendar/calendarHelper";
 
 interface Props {
     open: boolean;
-    event: CalendarEvent;
+    start: Date;
+    end: Date;
     onClose: () => void;
-    onSave: (updatedEvent: any) => void;
-    onDelete: (deletedEventId: string) => void;
+    onSave: (newEvent: any) => void;
 }
 
-const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelete}) => {
-    const [eventTitle, setEventTitle] = useState(event.title);
-    const [label, setLabel] = useState(event.label || "");
+const AddEventDialog: React.FC<Props> = ({open, start, end, onClose, onSave,}) => {
+    const [eventTitle, setEventTitle] = useState("");
+    const [label, setLabel] = useState("");
     const [calendars, setCalendars] = useState<Calendar[]>([]);
-    const [calendarId, setCalendarId] = useState(event.calendarId);
-    const [color, setColor] = useState(event.color);
+    const [calendarId, setCalendarId] = useState("");
+    const [color, setColor] = useState(EVENT_COLORS[0].value);
     const [useCustomColor, setUseCustomColor] = useState(false);
-    const [start, setStart] = useState<Date>(typeof event.start === 'string' ? new Date(event.start) : event.start);
-    const [end, setEnd] = useState<Date>(typeof event.end === 'string' ? new Date(event.end) : event.end);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
         frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
     });
-    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     // Reset when dialog opens
     useEffect(() => {
         if (open) {
             fetchCalendars();
-            setEventTitle(event.title);
-            setLabel(event.label || "");
-            setCalendarId(event.calendarId);
-            setStart(typeof event.start === 'string' ? new Date(event.start) : event.start);
-            setEnd(typeof event.end === 'string' ? new Date(event.end) : event.end);
-            setColor(event.color);
-            setUseCustomColor(!event.useCalendarColor);
+            setEventTitle("");
+            setLabel("");
+            setUseCustomColor(false);
+            setColor(EVENT_COLORS[0].value);
             
-            // Load recurrence rule - handle both nested and flat property structures
-            const frequencyDaysOfWeekData = (event as any).frequencyDaysOfWeek || event.recurrenceRule?.frequencyDaysOfWeek;
-            const daysArray = Array.isArray(frequencyDaysOfWeekData) 
-                ? frequencyDaysOfWeekData 
-                : (frequencyDaysOfWeekData ? [] : []);
-            
-            const recurrenceRule = event.recurrenceRule || {
-                frequencyType: (event as any).frequencyType || FREQUENCY_TYPE.NONE,
-                frequencyInterval: (event as any).frequencyInterval || 1,
-                frequencyDaysOfWeek: daysArray,
-                frequencyEndType: (event as any).frequencyEndType || "never",
-                frequencyEndDate: (event as any).frequencyEndDate || "",
-                frequencyOccurrencesLeft: (event as any).frequencyOccurrencesLeft || 1,
-            };
-            setRecurrence(recurrenceRule);
+            setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
         }
-    }, [open, event]);
+    }, [open]);
+
+    useEffect(() => {
+        if (calendars.length > 0) {
+            setCalendarId(calendars[0].id);
+        }
+    }, [calendars]);
 
     const fetchCalendars = async () => {
         try {
@@ -73,7 +56,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
         }
     };
 
-    if (!open) return null;
+    if (!open || !start || !end) return null;
 
     const toggleWeekday = (day: number) => {
         setRecurrence(r => {
@@ -102,7 +85,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             return selectedCalendar?.color || EVENT_COLORS[0].value;
         };
 
-        const updatedEvent = {
+        const newEvent = {
             title: eventTitle,
             label: label || undefined,
             color: getEventColor(),
@@ -118,36 +101,20 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
         };
         try {
-            const response = await fetch(config.backendUrl + `/events/${event.id}`, {
-                method: "PUT",
+            const response = await fetch(config.backendUrl + "/events", {
+                method: "POST",
                  headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
-                body: JSON.stringify(updatedEvent),
+                body: JSON.stringify(newEvent),
             });
 
-            const updated = await response.json();
-            onSave(updated);
+            const createdEvent = await response.json();
+            onSave(createdEvent);
             onClose();
         } catch (error) {
-            console.error("Error updating event:", error);
-        }
-    };
-
-    const handleDelete = async () => {
-        try {
-            await fetch(config.backendUrl + `/events/${event.id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-            onDelete(event.id);
-            onClose();
-            setConfirmDeleteOpen(false);
-        } catch (error) {
-            console.error("Error deleting event:", error);
+            console.error("Error guardando evento:", error);
         }
     };
 
@@ -159,7 +126,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             <div
                 className="aed-overlay"
                 onClick={(e) => e.target === e.currentTarget && onClose()}
-                role="dialog" aria-modal="true" aria-label="Editar evento"
+                role="dialog" aria-modal="true" aria-label="Crear evento"
             >
                 <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
 
@@ -167,7 +134,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                     <div className="aed-header">
                         <div className="aed-header-left">
                             <div className="aed-header-dot" />
-                            <span className="aed-title">Editar evento</span>
+                            <span className="aed-title">Nuevo evento</span>
                         </div>
                         <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
                     </div>
@@ -182,11 +149,11 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                 value={formatDateTimeLocal(start)}
                                 onChange={e => {
                                     const newStart = new Date(e.target.value);
-                                    setStart(newStart);
+                                    start = newStart;
                                     // Si el fin queda antes que el inicio, lo adelanta 1h automáticamente
-                                    if (end <= newStart) {
-                                        setEnd(new Date(newStart.getTime() + 60 * 60 * 1000));
-                                    }
+                                    end = end <= newStart
+                                        ? new Date(newStart.getTime() + 60 * 60 * 1000)
+                                        : end;
                                 }}
                             />
                         </div>
@@ -197,7 +164,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                 type="datetime-local"
                                 value={formatDateTimeLocal(end)}
                                 min={formatDateTimeLocal(start)}
-                                onChange={e => setEnd(new Date(e.target.value))}
+                                onChange={e => end = new Date(e.target.value) }
                             />
                         </div>
                     </div>
@@ -225,9 +192,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                             <select
                                 className="aed-input aed-select"
                                 value={calendarId}
-                                onChange={e => {
-                                    setCalendarId(e.target.value);
-                                }}
+                                onChange={e => setCalendarId(e.target.value)}
                             >
                                 {calendars.map(cal => (
                                     <option key={cal.id} value={cal.id}>{cal.name}</option>
@@ -235,7 +200,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                             </select>
                         </div>
 
-                        {/* Label */}
+                        {/* Etiqueta */}
                         <div className="aed-field">
                             <label className="aed-label">Etiqueta</label>
                             <input
@@ -369,31 +334,19 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                     {/* Footer */}
                     <div className="aed-footer">
                         <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
-                        <button className="aed-btn aed-btn-delete" onClick={() => setConfirmDeleteOpen(true)}>
-                            Eliminar evento
-                        </button>
                         <button
                             className="aed-btn aed-btn-save"
                             onClick={handleSave}
                             disabled={!eventTitle.trim()}
                             style={!eventTitle.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >
-                            Actualizar evento
+                            Guardar evento
                         </button>
                     </div>
                 </div>
             </div>
-
-            <ConfirmDialog
-                open={confirmDeleteOpen}
-                title="Eliminar evento"
-                message="¿Estás seguro de que quieres eliminar este evento?"
-                onConfirm={handleDelete}
-                onCancel={() => setConfirmDeleteOpen(false)}
-            />
-
         </>
     );
 };
 
-export default EditEventDialog;
+export default AddEventDialog;

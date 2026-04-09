@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "../Calendar/add-event-dialog.css";
+import "../Event/add-event-dialog.css";
 import { config } from "@/app/config/config";
-import { CALENDAR_COLORS } from "../Calendar/calendarHelper";
 
 interface Props {
     open: boolean;
