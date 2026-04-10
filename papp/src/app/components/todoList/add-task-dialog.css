@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+/* ── Overlay ── */
+.atd-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Dialog ── */
+.atd-dialog {
+  background: var(--bg-surface, #16161f);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  width: 100%; max-width: 500px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  animation: dialog-in 0.2s ease-out;
+}
+
+@keyframes dialog-in {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95) translateY(-8px);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Header ── */
+.atd-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--bg-surface, #16161f);
+}
+
+.atd-header-left {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.atd-header-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent, #7c6ff7);
+  flex-shrink: 0;
+}
+
+.atd-title {
+  font-size: 1rem; font-weight: 600;
+  color: var(--text-primary, #e8e8f0);
+  letter-spacing: -0.01em;
+}
+
+.atd-close {
+  background: none; border: none;
+  font-size: 1.2rem; color: var(--text-muted, #55556a);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.atd-close:hover {
+  background: var(--bg-elevated, rgba(255,255,255,0.04));
+  color: var(--text-primary, #e8e8f0);
+}
+
+/* ── Body ── */
+.atd-body {
+  flex: 1; overflow-y: auto;
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.atd-body::-webkit-scrollbar { width: 3px; }
+.atd-body::-webkit-scrollbar-thumb {
+  background: var(--border, rgba(255,255,255,0.1));
+  border-radius: 2px;
+}
+
+/* ── Field ── */
+.atd-field {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.atd-label {
+  font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted, #55556a);
+}
+
+.atd-input {
+  padding: 10px 12px;
+  background: var(--bg-elevated, #1e1e2a);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-primary, #e8e8f0);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.atd-input::placeholder { color: var(--text-muted, #55556a); }
+
+.atd-input:focus {
+  border-color: var(--accent, #7c6ff7);
+  box-shadow: 0 0 0 3px var(--accent-muted, rgba(124,111,247,0.15));
+}
+
+.atd-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.atd-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2355556a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+/* ── Recurrence Box ── */
+.atd-recurrence-box {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 12px;
+  background: var(--bg-elevated, #1e1e2a);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 8px;
+}
+
+.atd-row {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.atd-row-label {
+  font-size: 0.85rem;
+  color: var(--text-primary, #e8e8f0);
+  white-space: nowrap;
+}
+
+/* ── Weekdays ── */
+.atd-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+}
+
+.atd-wd-btn {
+  padding: 8px 4px;
+  background: var(--bg-surface, #16161f);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 6px;
+  color: var(--text-muted, #55556a);
+  font-size: 0.75rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.atd-wd-btn:hover {
+  border-color: var(--accent, #7c6ff7);
+  color: var(--accent, #7c6ff7);
+}
+
+.atd-wd-btn.active {
+  background: var(--accent, #7c6ff7);
+  border-color: var(--accent, #7c6ff7);
+  color: #fff;
+}
+
+/* ── Radio options ── */
+.atd-end-options {
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.atd-radio-row {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+}
+
+.atd-radio {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--border, rgba(255,255,255,0.2));
+  background: none;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.atd-radio:hover {
+  border-color: var(--accent, #7c6ff7);
+}
+
+.atd-radio.checked {
+  background: var(--accent, #7c6ff7);
+  border-color: var(--accent, #7c6ff7);
+}
+
+.atd-radio.checked::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+}
+
+.atd-radio-label {
+  font-size: 0.85rem;
+  color: var(--text-primary, #e8e8f0);
+  cursor: pointer;
+}
+
+/* ── Footer ── */
+.atd-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+  display: flex; align-items: center; gap: 12px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  background: var(--bg-surface, #16161f);
+}
+
+.atd-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.atd-btn-cancel {
+  background: transparent;
+  color: var(--text-primary, #e8e8f0);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+
+.atd-btn-cancel:hover {
+  background: var(--bg-elevated, rgba(255,255,255,0.04));
+  border-color: var(--border, rgba(255,255,255,0.12));
+}
+
+.atd-btn-save {
+  background: var(--accent, #7c6ff7);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(124,111,247,0.25);
+}
+
+.atd-btn-save:hover:not(:disabled) {
+  background: var(--accent-hover, #9d97f9);
+  box-shadow: 0 4px 12px rgba(124,111,247,0.35);
+  transform: translateY(-1px);
+}
+
+.atd-btn-save:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.atd-btn-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

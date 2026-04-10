@@ -4,26 +4,22 @@ import React, { useEffect, useState } from "react";
 import { Check, Sun, EditIcon } from "lucide-react";
 import { config } from "@/app/config/config";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import AddTaskDialog from "./add-task-dialog";
 import "./todoList.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Task {
     id: number;
-    text: string;
+    title: string;
     completed: boolean;
+    estimatedTime: number;
+    finishDate: Date;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function TodoApp() {
+export default function TodoList() {
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [newTask, setNewTask] = useState("");
-
-    const addTask = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!newTask.trim()) return;
-        setTasks(t => [...t, { id: Date.now(), text: newTask.trim(), completed: false }]);
-        setNewTask("");
-    };
+    const [addDialogOpen, setAddDialogOpen] = useState(false);
 
     const toggleTask = (id: number) => setTasks(t => t.map(x => x.id === id ? { ...x, completed: !x.completed } : x));
     const editTask  = (id: number) => console.log("Edit task:", id);
@@ -75,9 +71,9 @@ export default function TodoApp() {
                         )}
 
                         {/* Add task */}
-                        <form className="todo-form" onSubmit={addTask}>
-                            <button className="todo-add-btn" type="submit">Añadir</button>
-                        </form>
+                        <div className="todo-form">
+                            <button className="todo-add-btn" onClick={() => setAddDialogOpen(true)}>Añadir</button>
+                        </div>
                     </div>
                     <p className="todo-header-date">{todayLabel}</p>
                 </div>
@@ -124,6 +120,15 @@ export default function TodoApp() {
                         </>
                     )}
                 </div>
+
+            <AddTaskDialog
+                open={addDialogOpen}
+                onClose={() => setAddDialogOpen(false)}
+                onSave={(newTask) => {
+                    setTasks([...tasks, newTask]);
+                    setAddDialogOpen(false);
+                }}
+            />
             </div>
         );
     }
@@ -146,7 +151,13 @@ function TaskItem({ task, onToggle, onEdit, onDelete }: {
                 {task.completed && <Check size={12} />}
             </button>
 
-            <span className="todo-text">{task.text}</span>
+            <div className="todo-content">
+                <span className="todo-text">{task.title}</span>
+                <div className="todo-meta">
+                    <span className="todo-time">⏱ {task.estimatedTime}m</span>
+                    <span className="todo-date">📅 {new Date(task.finishDate).toLocaleDateString("es-ES")}</span>
+                </div>
+            </div>
 
             <button
                 className="todo-edit"

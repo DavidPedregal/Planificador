@@ -20,11 +20,21 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
     try {
-        if (!req.body.name) {
-            return res.status(400).json({ error: "Name is required" });
+        const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate', 'frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
+        const updateData = {};
+        for (const field of allowedFields) {
+            if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+                updateData[field] = req.body[field];
+            }
         }
 
-        const newTask = new TaskModel({ userId, name: req.body.name });
+        if (req.body.subjectId) {
+            if (!mongoose.Types.ObjectId.isValid(req.body.subjectId)) {
+                return res.status(400).json({ error: "Invalid subjectId" });
+            }
+        }
+
+        const newTask = new TaskModel({ userId, subjectId: req.body.subjectId, ...updateData });
         const saved = await newTask.save();
         res.status(201).json(saved);        
     } catch (error) {

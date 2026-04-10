@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Calendar from "@/app/components/Calendar/calendar";
-import TodoApp from "@/app/components/TodoList/todoList";
+import Calendar from "@/app/components/calendar/calendar";
+import TodoList from "@/app/components/todoList/todoList";
 import "./home.css";
 import Sidebar from "../components/Sidebar/sideBar";
 
@@ -32,7 +32,7 @@ export default function Home() {
                 {/* ── To do-list (derecha) ───────────────────────────────────────── */}
                 <aside className="home-todo" aria-label="Lista de tareas">
                     <div className="home-todo-inner">
-                        <TodoApp />
+                        <TodoList />
                     </div>
                 </aside>
             </div>
@@ -86,7 +86,7 @@ export default function Home() {
                         <button className="mobile-drawer-close" onClick={closeDrawer}>✕</button>
                     </div>
                     <div className="mobile-drawer-body" style={{ padding: 0 }}>
-                        <TodoApp />
+                        <TodoList />
                     </div>
                 </div>
             )}

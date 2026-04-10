@@ -6,6 +6,10 @@ const taskModel = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
+    subjectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject"
+    },
     title: {
         type: String,
         required: true,
@@ -15,6 +19,10 @@ const taskModel = new mongoose.Schema({
     },
     estimatedTime: {
         type: Number,
+        required: true,
+    },
+    finishDate: {
+        type: Date,
         required: true,
     },
     givenDate: {
@@ -27,6 +35,10 @@ const taskModel = new mongoose.Schema({
     },
     frequencyInterval: {
         type: Number,
+    },
+    completed: {
+        type: Boolean,
+        default: false,
     },
 });
 

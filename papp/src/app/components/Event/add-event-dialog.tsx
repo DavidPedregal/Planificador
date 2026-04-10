@@ -3,7 +3,7 @@ import "./add-event-dialog.css";
 import { config } from "@/app/config/config";
 import { FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
     WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
-    Calendar} from "../Calendar/calendarHelper";
+    Calendar} from "../calendar/calendarHelper";
 
 interface Props {
     open: boolean;
