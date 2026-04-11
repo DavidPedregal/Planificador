@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./add-event-dialog.css";
+import EastIcon from '@mui/icons-material/East';
 import { config } from "@/app/config/config";
 import { CalendarEvent, FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
     WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
@@ -26,7 +27,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
     const [end, setEnd] = useState<Date>(typeof event.end === 'string' ? new Date(event.end) : event.end);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
-        frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
+        frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
     });
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
@@ -73,6 +74,24 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
     };
 
     if (!open) return null;
+
+    const getDateString = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const getTimeString = (date: Date): string => {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+
+    const createDateFromParts = (dateStr: string, timeStr: string): Date => {
+        if (!dateStr || !timeStr) return new Date();
+        return new Date(`${dateStr}T${timeStr}`);
+    };
 
     const toggleWeekday = (day: number) => {
         setRecurrence(r => {
@@ -177,26 +196,52 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                             <span className="aed-date-icon">⏱</span>
                             <input
                                 className="aed-date-input"
-                                type="datetime-local"
-                                value={formatDateTimeLocal(start)}
+                                type="date"
+                                value={getDateString(start)}
                                 onChange={e => {
-                                    const newStart = new Date(e.target.value);
+                                    const newStart = createDateFromParts(e.target.value, getTimeString(start));
                                     setStart(newStart);
-                                    // Si el fin queda antes que el inicio, lo adelanta 1h automáticamente
                                     if (end <= newStart) {
                                         setEnd(new Date(newStart.getTime() + 60 * 60 * 1000));
                                     }
                                 }}
                             />
                         </div>
-                        <span className="aed-date-arrow">→</span>
+                        <span className="aed-date-arrow"><EastIcon /></span>
                         <div className="aed-date-field">
                             <input
                                 className="aed-date-input"
-                                type="datetime-local"
-                                value={formatDateTimeLocal(end)}
-                                min={formatDateTimeLocal(start)}
-                                onChange={e => setEnd(new Date(e.target.value))}
+                                type="date"
+                                value={getDateString(end)}
+                                min={getDateString(start)}
+                                onChange={e => setEnd(createDateFromParts(e.target.value, getTimeString(end)))}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Time strip */}
+                    <div className="aed-date-strip">
+                        <div className="aed-date-field">
+                            <input
+                                className="aed-date-input"
+                                type="time"
+                                value={getTimeString(start)}
+                                onChange={e => {
+                                    const newStart = createDateFromParts(getDateString(start), e.target.value);
+                                    setStart(newStart);
+                                    if (end <= newStart) {
+                                        setEnd(new Date(newStart.getTime() + 60 * 60 * 1000));
+                                    }
+                                }}
+                            />
+                        </div>
+                        <span className="aed-date-arrow"><EastIcon /></span>
+                        <div className="aed-date-field">
+                            <input
+                                className="aed-date-input"
+                                type="time"
+                                value={getTimeString(end)}
+                                onChange={e => setEnd(createDateFromParts(getDateString(end), e.target.value))}
                             />
                         </div>
                     </div>
@@ -325,14 +370,14 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                                     <div className="aed-field">
                                         <span className="aed-label">Finaliza</span>
                                         <div className="aed-end-options">
-                                            {(["never", "on", "after"] as const).map(type => (
+                                            {(["on", "after"] as const).map(type => (
                                                 <label key={type} className="aed-radio-row">
                                                     <div
                                                         className={`aed-radio${recurrence.frequencyEndType === type ? " checked" : ""}`}
                                                         onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}
                                                     />
                                                     <span className="aed-radio-label" onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}>
-                            {{ never: "Nunca", on: "El día", after: "Después de" }[type]}
+                            {{ on: "El día", after: "Después de" }[type]}
                           </span>
                                                     {type === "on" && recurrence.frequencyEndType === "on" && (
                                                         <input

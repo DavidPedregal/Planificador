@@ -29,6 +29,12 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
             return res.status(400).json({ error: "Title, start, end and calendarId are required" });
         }
 
+        const startDate = new Date(req.body.start);
+        const endDate = new Date(req.body.end);
+        if (endDate <= startDate) {
+            return res.status(400).json({ error: "End date must be after start date" });
+        }
+
         const newCalendar = new CalendarEvent({ userId, ...req.body });
         const saved = await newCalendar.save();
         res.status(201).json(saved);
@@ -78,6 +84,19 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
     if (Object.prototype.hasOwnProperty.call(updateData, 'calendarId')) {
         if (!mongoose.Types.ObjectId.isValid(updateData.calendarId)) {
             return res.status(400).json({ error: "Invalid calendarId" });
+        }
+    }
+
+    // Validate that end date is after start date
+    if (Object.prototype.hasOwnProperty.call(updateData, 'start') || Object.prototype.hasOwnProperty.call(updateData, 'end')) {
+        const startDate = updateData.start || req.body.start;
+        const endDate = updateData.end || req.body.end;
+        if (startDate && endDate) {
+            const startDateTime = new Date(startDate);
+            const endDateTime = new Date(endDate);
+            if (endDateTime <= startDateTime) {
+                return res.status(400).json({ error: "End date must be after start date" });
+            }
         }
     }
 	

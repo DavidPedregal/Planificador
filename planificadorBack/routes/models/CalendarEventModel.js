@@ -52,8 +52,11 @@ const calendarEventModel = new mongoose.Schema({
     },
     frequencyEndType: {
         type: String,
-        enum: ["never", "on", "after"],
-    }
+        enum: ["on", "after"],
+    },
+    groupId: {
+        type: String,
+    },
 });
 
 const CalendarEvent = mongoose.model("Event", calendarEventModel);
