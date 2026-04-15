@@ -133,8 +133,9 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
                 body: JSON.stringify(newEvent),
             });
 
-            const createdEvent = await response.json();
-            onSave(createdEvent);
+            const createdEvents = await response.json();
+            console.log("Evento creado:", createdEvents);
+            onSave(createdEvents);
             onClose();
         } catch (error) {
             console.error("Error guardando evento:", error);

@@ -6,17 +6,20 @@ import { CalendarEvent, FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS,
     WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
     Calendar} from "../Calendar/calendarHelper";
 import ConfirmDialog from "../Sidebar/confirm-dialog";
+import RecurrenceChoiceDialog from "./recurrence-choice-dialog";
 
 
 interface Props {
     open: boolean;
     event: CalendarEvent;
     onClose: () => void;
-    onSave: (updatedEvent: any) => void;
-    onDelete: (deletedEventId: string) => void;
+    onSave: () => void;
+    onDelete: () => void;
 }
 
 const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelete}) => {
+    if (!open) return null;
+
     const [eventTitle, setEventTitle] = useState(event.title);
     const [label, setLabel] = useState(event.label || "");
     const [calendars, setCalendars] = useState<Calendar[]>([]);
@@ -30,6 +33,9 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
         frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
     });
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
+    const [pendingAction, setPendingAction] = useState<"update" | "delete" | null>(null);
+    const [pendingEventData, setPendingEventData] = useState<any>(null);
 
     // Reset when dialog opens
     useEffect(() => {
@@ -72,8 +78,6 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             console.error("Error fetching calendars:", error);
         }
     };
-
-    if (!open) return null;
 
     const getDateString = (date: Date): string => {
         const year = date.getFullYear();
@@ -135,33 +139,65 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             frequencyEndDate: recurrence.frequencyEndDate,
             frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
         };
+
+        // If event has recurrence, ask user whether to update only this event or all events
+        if (recurrence.frequencyType !== FREQUENCY_TYPE.NONE) {
+            setPendingEventData(updatedEvent);
+            setPendingAction("update");
+            setRecurrenceChoiceOpen(true);
+        } else {
+            // No recurrence, save directly
+            await performUpdate(updatedEvent, false);
+        }
+    };
+
+    const performUpdate = async (updatedEvent: any, updateAll: boolean) => {
         try {
-            const response = await fetch(config.backendUrl + `/events/${event.id}`, {
+            let url = config.backendUrl + `/events/${event.id}`;
+            if (updateAll) {
+                url = config.backendUrl + `/events/all/${event.id}`;
+            }
+            const response = await fetch(url, {
                 method: "PUT",
-                 headers: {
+                headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
                 body: JSON.stringify(updatedEvent),
             });
 
-            const updated = await response.json();
-            onSave(updated);
+            await response.json();
+            onSave();
             onClose();
         } catch (error) {
             console.error("Error updating event:", error);
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClicked = async () => {
+        // If event has recurrence, ask user whether to delete only this event or all events
+        if (event.recurrenceRule.frequencyType !== FREQUENCY_TYPE.NONE) {
+            console.log("Evento recurrente, mostrando opciones de eliminación");
+            setPendingAction("delete");
+            setRecurrenceChoiceOpen(true);
+        } else {
+            setConfirmDeleteOpen(true);
+        }
+    };
+
+    const performDelete = async (deleteAll: boolean) => {
         try {
-            await fetch(config.backendUrl + `/events/${event.id}`, {
+            let url = config.backendUrl + `/events/${event.id}`;
+            if (deleteAll) {
+                url = config.backendUrl + `/events/all/${event.id}`;
+            }
+            await fetch(url, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-            onDelete(event.id);
+            onDelete();
             onClose();
             setConfirmDeleteOpen(false);
         } catch (error) {
@@ -413,7 +449,7 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                     {/* Footer */}
                     <div className="aed-footer">
                         <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
-                        <button className="aed-btn aed-btn-delete" onClick={() => setConfirmDeleteOpen(true)}>
+                        <button className="aed-btn aed-btn-delete" onClick={handleDeleteClicked}>
                             Eliminar evento
                         </button>
                         <button
@@ -432,8 +468,38 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                 open={confirmDeleteOpen}
                 title="Eliminar evento"
                 message="¿Estás seguro de que quieres eliminar este evento?"
-                onConfirm={handleDelete}
+                onConfirm={() => performDelete(false)}
                 onCancel={() => setConfirmDeleteOpen(false)}
+            />
+
+            <RecurrenceChoiceDialog
+                open={recurrenceChoiceOpen}
+                action={pendingAction || "update"}
+                onChooseSingle={() => {
+                    if (pendingAction === "update" && pendingEventData) {
+                        performUpdate(pendingEventData, false);
+                    } else if (pendingAction === "delete") {
+                        performDelete(false);
+                    }
+                    setRecurrenceChoiceOpen(false);
+                    setPendingAction(null);
+                    setPendingEventData(null);
+                }}
+                onChooseAll={() => {
+                    if (pendingAction === "update" && pendingEventData) {
+                        performUpdate(pendingEventData, true);
+                    } else if (pendingAction === "delete") {
+                        performDelete(true);
+                    }
+                    setRecurrenceChoiceOpen(false);
+                    setPendingAction(null);
+                    setPendingEventData(null);
+                }}
+                onCancel={() => {
+                    setRecurrenceChoiceOpen(false);
+                    setPendingAction(null);
+                    setPendingEventData(null);
+                }}
             />
 
         </>

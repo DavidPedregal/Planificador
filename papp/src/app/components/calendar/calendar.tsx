@@ -170,8 +170,13 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             start={startDate}
             end={endDate}
             onClose={() => setAddDialogOpen(false)}
-            onSave={(newEvent) => {
-                setEvents([...events, mapToFullCalendarEvent(newEvent, setEventColor(newEvent.useCalendarColor, newEvent.color, newEvent.calendarId))]);
+            onSave={(newEvents) => {
+                // Ensure newEvents is always an array (backend may return single object or array)
+                const eventsArray = Array.isArray(newEvents) ? newEvents : [newEvents];
+                const newFullCalendarEvents = eventsArray.map((newEvent: any) => 
+                    mapToFullCalendarEvent(newEvent, setEventColor(newEvent.useCalendarColor, newEvent.color, newEvent.calendarId))
+            );
+                setEvents([...events, ...newFullCalendarEvents]);
             }}
          />
 
@@ -195,12 +200,11 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                     },
                 }}
                 onClose={() => setEditDialogOpen(false)}
-                onSave={(updatedEvent) => {
-                    const updatedFullCalendarEvent = mapToFullCalendarEvent(updatedEvent, setEventColor(updatedEvent.useCalendarColor, updatedEvent.color, updatedEvent.calendarId));
-                    setEvents(events.map(ev => ev.id === updatedEvent._id ? updatedFullCalendarEvent : ev));
+                onSave={() => {
+                    fetchCalendars();
                 }}
-                onDelete={(deletedEventId) => {
-                    setEvents(events.filter(ev => ev.id !== deletedEventId));
+                onDelete={() => {
+                    fetchCalendars();
                 }}
             />
 
