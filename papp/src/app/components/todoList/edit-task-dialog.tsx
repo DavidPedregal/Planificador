@@ -11,11 +11,23 @@ interface Subject {
 
 interface Props {
     open: boolean;
+    taskId: number | null;
     onClose: () => void;
     onSave: (newTask: any) => void;
 }
 
-const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
+interface Task {
+    id: number;
+    title: string;
+    description: string;
+    completed: boolean;
+    estimatedTime: number;
+    finishDate: Date;
+    givenDate: Date;
+    subjectId?: string;
+}
+
+const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [estimatedTime, setEstimatedTime] = useState(30);
@@ -23,30 +35,11 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
     const [givenDate, setGivenDate] = useState("");
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
         frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
     });
-
-    // Reset when dialog opens
-    useEffect(() => {
-        if (open) {
-            fetchSubjects();
-            const today = new Date().toISOString().split('T')[0];
-            setTitle("");
-            setDescription("");
-            setEstimatedTime(30);
-            setFinishDate(today);
-            setGivenDate(today);
-            setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
-        }
-    }, [open]);
-
-    useEffect(() => {
-        if (subjects.length > 0) {
-            setSubjectId("");
-        }
-    }, [subjects]);
 
     const fetchSubjects = async () => {
         try {
@@ -60,7 +53,40 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
         }
     };
 
-    if (!open) return null;
+    const fetchTask = async (id: number) => {
+        try {
+            const res = await fetch(config.backendUrl + `/tasks/${id}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const data = await res.json();
+            setTitle(data.title);
+            setDescription(data.description || "");
+            setEstimatedTime(data.estimatedTime);
+            setFinishDate(data.finishDate.split('T')[0]);
+            setGivenDate(data.givenDate.split('T')[0]);
+            setSubjectId(data.subjectId || "");
+            setRecurrence({
+                frequencyType: data.frequencyType || FREQUENCY_TYPE.NONE,
+                frequencyInterval: data.frequencyInterval || 1,
+                frequencyDaysOfWeek: data.frequencyDaysOfWeek || [],
+                frequencyEndType: data.frequencyEndType || "on",
+                frequencyEndDate: data.frequencyEndDate || "",
+                frequencyOccurrencesLeft: data.frequencyOccurrencesLeft || 1,
+            });
+        } catch (error) {
+            console.error("Error fetching task:", error);
+        }
+    };
+
+    // Reset when dialog opens
+    useEffect(() => {
+        if (open) {
+            fetchSubjects();
+            if (taskId) {
+                fetchTask(taskId);
+            }
+        }
+    }, [open, taskId]);
 
     const toggleWeekday = (day: number) => {
         setRecurrence(r => {
@@ -80,7 +106,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
     const handleSave = async () => {
         if (!title.trim()) return;
 
-        const newTask = {
+        const updatedTask = {
             title: title,
             description: description || undefined,
             estimatedTime,
@@ -94,33 +120,37 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
             frequencyEndDate: recurrence.frequencyEndDate,
             frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
         };
+
+        console.log("Updating task with data:", updatedTask);
         try {
-            const response = await fetch(config.backendUrl + "/tasks", {
-                method: "POST",
+            const response = await fetch(config.backendUrl + `/tasks/${taskId}`, {
+                method: "PUT",
                  headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
-                body: JSON.stringify(newTask),
+                body: JSON.stringify(updatedTask),
             });
 
-            const createdTask = await response.json();
-            onSave(createdTask);
+            const updatedTaskData = await response.json();
+            onSave(updatedTaskData);
             onClose();
         } catch (error) {
-            console.error("Error guardando tarea:", error);
+            console.error("Error actualizando tarea:", error);
         }
     };
 
     const showWeekdays = recurrence.frequencyType === FREQUENCY_TYPE.WEEKS;
     const showEndOptions = recurrence.frequencyType !== FREQUENCY_TYPE.NONE;
 
+    if (!open) return null;
+
     return (
         <>
             <div
                 className="atd-overlay"
                 onClick={(e) => e.target === e.currentTarget && onClose()}
-                role="dialog" aria-modal="true" aria-label="Crear tarea"
+                role="dialog" aria-modal="true" aria-label="Editar tarea"
             >
                 <div className="atd-dialog">
 
@@ -128,7 +158,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                     <div className="atd-header">
                         <div className="atd-header-left">
                             <div className="atd-header-dot" />
-                            <span className="atd-title">Nueva tarea</span>
+                            <span className="atd-title">Editar tarea</span>
                         </div>
                         <button className="atd-close" onClick={onClose} aria-label="Cerrar">✕</button>
                     </div>
@@ -311,7 +341,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                             disabled={!title.trim()}
                             style={!title.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >
-                            Guardar tarea
+                            Actualizar tarea
                         </button>
                     </div>
                 </div>
@@ -320,4 +350,4 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
     );
 };
 
-export default AddTaskDialog;
+export default EditTaskDialog;

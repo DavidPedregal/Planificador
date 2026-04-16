@@ -33,8 +33,21 @@ const taskModel = new mongoose.Schema({
         type : String,
         enum : Object.values(FREQUENCY_TYPE),
     },
+    frequencyEndDate : {
+        type: Date,
+    },
+    frequencyOccurrencesLeft : {
+        type: Number,
+    },
     frequencyInterval: {
         type: Number,
+    },
+    frequencyDaysOfWeek: {
+        type: [Number],
+    },
+    frequencyEndType: {
+        type: String,
+        enum: ["on", "after"],
     },
     completed: {
         type: Boolean,

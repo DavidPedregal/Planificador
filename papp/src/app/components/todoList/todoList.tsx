@@ -6,6 +6,8 @@ import { config } from "@/app/config/config";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddTaskDialog from "./add-task-dialog";
 import "./todoList.css";
+import ConfirmDialog from "../Sidebar/confirm-dialog";
+import EditTaskDialog from "./edit-task-dialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Task {
@@ -16,14 +18,64 @@ interface Task {
     finishDate: Date;
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function mapTask(data: any): Task {
+    return {
+        id: data._id, // Use _id from backend as id
+        title: data.title,
+        completed: data.completed,
+        finishDate: new Date(data.finishDate),
+        estimatedTime: data.estimatedTime,
+    };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function TodoList() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [addDialogOpen, setAddDialogOpen] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
-    const toggleTask = (id: number) => setTasks(t => t.map(x => x.id === id ? { ...x, completed: !x.completed } : x));
-    const editTask  = (id: number) => console.log("Edit task:", id);
-    const deleteTask = (id: number) => setTasks(t => t.filter(x => x.id !== id));
+    const handleToggleTask = async (id: number) => {
+        try {
+            let url = config.backendUrl + `/tasks/toggle/${id}`;
+            await fetch(url, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            setTasks(t => t.map(x => x.id === id ? { ...x, completed: !x.completed } : x));
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
+    };
+
+    const handleEditTask  = (id: number) => {
+        setSelectedTaskId(id);
+        setEditDialogOpen(true);
+    };
+
+    const handleDeleteTask = (id: number) => {
+        setConfirmDeleteOpen(true);
+        setSelectedTaskId(id);
+    };
+
+    const deleteTask = async () => {
+        try {
+            let url = config.backendUrl + `/tasks/${selectedTaskId}`;
+            await fetch(url, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            setTasks(t => t.filter(x => x.id !== selectedTaskId));
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
+    }
 
     const pending   = tasks.filter(t => !t.completed);
     const completed = tasks.filter(t => t.completed);
@@ -33,22 +85,19 @@ export default function TodoList() {
     });
 
     const fetchTasks = async () => {
-      try {
-          const res = await fetch(config.backendUrl + "/tasks", {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
-          const data = await res.json();
-          
-          const mappedTasks = data.map((cal: any) => ({
-              id: cal._id, // Use _id from backend as id
-              name: cal.name,
-              color: cal.color,
-              visible: cal.visible,
-          }));
-          setTasks(mappedTasks);
-      } catch (error) {
-          console.error("Error fetching tasks:", error);
-      }   
+        try {
+            const res = await fetch(config.backendUrl + "/tasks", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const data = await res.json();
+            
+            const mappedTasks = data.map((task: any) => (
+                mapTask(task)
+            )).sort((a: Task, b: Task) => a.finishDate.getTime() - b.finishDate.getTime());
+            setTasks(mappedTasks);
+        } catch (error) {
+            console.error("Error fetching tasks:", error);
+        }   
     };
 
 
@@ -65,7 +114,7 @@ export default function TodoList() {
                         <div className="todo-header-icon">
                             <Sun size={15} />
                         </div>
-                        <span className="todo-header-title">Mi día</span>
+                        <span className="todo-header-title">Tareas</span>
                         {pending.length > 0 && (
                             <span className="todo-count-pill">{pending.length}</span>
                         )}
@@ -93,9 +142,9 @@ export default function TodoList() {
                                 <TaskItem
                                     key={task.id}
                                     task={task}
-                                    onToggle={toggleTask}
-                                    onEdit={editTask}
-                                    onDelete={deleteTask}
+                                    onToggle={handleToggleTask}
+                                    onEdit={handleEditTask}
+                                    onDelete={handleDeleteTask}
                                 />
                             ))}
 
@@ -110,9 +159,9 @@ export default function TodoList() {
                                         <TaskItem
                                             key={task.id}
                                             task={task}
-                                            onToggle={toggleTask}
-                                            onEdit={editTask}
-                                            onDelete={deleteTask}
+                                            onToggle={handleToggleTask}
+                                            onEdit={handleEditTask}
+                                            onDelete={handleDeleteTask}
                                         />
                                     ))}
                                 </>
@@ -121,14 +170,37 @@ export default function TodoList() {
                     )}
                 </div>
 
-            <AddTaskDialog
-                open={addDialogOpen}
-                onClose={() => setAddDialogOpen(false)}
-                onSave={(newTask) => {
-                    setTasks([...tasks, newTask]);
-                    setAddDialogOpen(false);
-                }}
-            />
+                <AddTaskDialog
+                    open={addDialogOpen}
+                    onClose={() => setAddDialogOpen(false)}
+                    onSave={(newTask) => {
+                        setTasks([...tasks, mapTask(newTask)]);
+                        setAddDialogOpen(false);
+                    }}
+                />
+
+                <ConfirmDialog
+                    open={confirmDeleteOpen}
+                    title="Eliminar tarea"
+                    message="¿Estás seguro de que quieres eliminar esta tarea?"
+                    isDangerous={true}
+                    onCancel={() => setConfirmDeleteOpen(false)}
+                    onConfirm={() => {
+                        deleteTask();
+                        setConfirmDeleteOpen(false);
+                    }}
+                 />
+
+                <EditTaskDialog
+                    open={editDialogOpen}
+                    taskId={selectedTaskId}
+                    onClose={() => setEditDialogOpen(false)}
+                    onSave={(updatedTask) => {
+                        const updatedTaskMapped = mapTask(updatedTask);
+                        setTasks(tasks.map(t => t.id === updatedTaskMapped.id ? updatedTaskMapped : t));
+                        setEditDialogOpen(false);
+                    }}
+                />
             </div>
         );
     }
@@ -155,7 +227,7 @@ function TaskItem({ task, onToggle, onEdit, onDelete }: {
                 <span className="todo-text">{task.title}</span>
                 <div className="todo-meta">
                     <span className="todo-time">⏱ {task.estimatedTime}m</span>
-                    <span className="todo-date">📅 {new Date(task.finishDate).toLocaleDateString("es-ES")}</span>
+                    <span className="todo-date">📅 {task.finishDate.toLocaleDateString("es-ES")}</span>
                 </div>
             </div>
 

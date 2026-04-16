@@ -16,6 +16,25 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res) {
     }
 });
 
+router.get('/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    try {
+        const task = await TaskModel.findOne({ _id: taskId, userId });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
+        res.json(task);
+    } catch (error) {
+        res.status(500).json({ error: "Error obteniendo tareas" });
+    }
+});
+
 router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
@@ -34,7 +53,10 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
             }
         }
 
-        const newTask = new TaskModel({ userId, subjectId: req.body.subjectId, ...updateData });
+        updateData.userId = userId;
+        updateData.subjectId = req.body.subjectId || null;
+
+        const newTask = new TaskModel(updateData);
         const saved = await newTask.save();
         res.status(201).json(saved);        
     } catch (error) {
@@ -84,6 +106,27 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
         task.title = req.body.title;
         const updated = await task.save();
         res.json(updated);
+    } catch (error) {
+        res.status(500).json({ error: "Error updating task" });
+    }
+});
+
+router.put('/toggle/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    try {
+        const task = await TaskModel.findOne({ _id: taskId, userId });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
+        task.completed = !task.completed;
+        const updated = await task.save();
+        res.status(200).json(updated);
     } catch (error) {
         res.status(500).json({ error: "Error updating task" });
     }
