@@ -6,6 +6,119 @@ const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 const { FREQUENCY_TYPE } = require("./models/enums/enums");
 
+
+/**
+ * Validate event data for creation or update
+ * @param {Object} data - The event data to validate
+ * @param {Object} options - Validation options
+ * @param {boolean} options.isCreation - Whether this is for POST (creation) or PUT (update)
+ * @param {Object} options.existingEvent - The original event (for updates)
+ * @returns {Object} { valid: boolean, error: string|null, data: Object }
+ */
+function validateEventData(data, options = {}) {
+    const { isCreation = false, existingEvent = null } = options;
+    const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
+        'useCalendarColor', 'label'];
+    
+    // For creation, require certain fields
+    if (isCreation) {
+        if (!data.title || !data.start || !data.end || !data.calendarId) {
+            return {
+                valid: false,
+                error: "Title, start, end and calendarId are required"
+            };
+        }
+    }
+
+    // Filter to allowed fields (for updates)
+    const updateData = {};
+    for (const field of allowedFields) {
+        if (Object.prototype.hasOwnProperty.call(data, field)) {
+            updateData[field] = data[field];
+        }
+    }
+
+    // For updates, ensure at least one field is provided
+    if (!isCreation && Object.keys(updateData).length === 0) {
+        return {
+            valid: false,
+            error: "No valid fields provided for update"
+        };
+    }
+
+    // Validate calendarId format if provided
+    if (Object.prototype.hasOwnProperty.call(updateData, 'calendarId')) {
+        if (!mongoose.Types.ObjectId.isValid(updateData.calendarId)) {
+            return {
+                valid: false,
+                error: "Invalid calendarId"
+            };
+        }
+    } else if (isCreation && !mongoose.Types.ObjectId.isValid(data.calendarId)) {
+        return {
+            valid: false,
+            error: "Invalid calendarId"
+        };
+    }
+
+    // Determine which dates to validate against
+    const startDate = updateData.start || data.start || existingEvent?.start;
+    const endDate = updateData.end || data.end || existingEvent?.end;
+
+    // Validate that end date is after start date (if both are provided)
+    if (startDate && endDate) {
+        const startDateTime = new Date(startDate);
+        const endDateTime = new Date(endDate);
+        if (endDateTime <= startDateTime) {
+            return {
+                valid: false,
+                error: "End date must be after start date"
+            };
+        }
+    }
+
+    return {
+        valid: true,
+        error: null,
+        data: isCreation ? data : updateData
+    };
+}
+
+/**
+ * 
+ */
+function getChangedFields(newData, originalEvent) {
+    // Detectar únicamente los campos que han cambiado
+    const allowedFields = ['title', 'calendarId', 'description', 'color', 'useCalendarColor', 'label'];
+    const changedFields = {};
+    for (const field of allowedFields) {
+        if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;
+        const incoming = String(newData[field]);
+        const original = String(originalEvent[field]);
+        if (incoming !== original) {
+            changedFields[field] = newData[field];
+        }
+    }
+
+    const dateFields = new Set(['start', 'end']);
+
+    for (const field of allowedFields) {
+        if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;
+        
+        const incoming = dateFields.has(field)
+            ? new Date(newData[field]).toISOString()
+            : newData[field];
+        const original = dateFields.has(field)
+            ? new Date(originalEvent[field]).toISOString()
+            : originalEvent[field];
+
+        if (incoming !== original) {
+            changedFields[field] = newData[field];
+        }
+    }
+    return changedFields;
+}
+
 /**
  * Generate recurring events based on the recurrence rule
  * @param {Object} baseEvent - The base event to generate recurrences from
@@ -132,22 +245,14 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     try {
         const userId = req.userId;
 
-        if (!mongoose.Types.ObjectId.isValid(req.body.calendarId)) {
-            return res.status(400).json({ error: "Invalid calendarId" });
-        }
-
-        if (!req.body.title || !req.body.start || !req.body.end || !req.body.calendarId) {
-            return res.status(400).json({ error: "Title, start, end and calendarId are required" });
-        }
-
-        const startDate = new Date(req.body.start);
-        const endDate = new Date(req.body.end);
-        if (endDate <= startDate) {
-            return res.status(400).json({ error: "End date must be after start date" });
+        // Validate input data
+        const validation = validateEventData(req.body, { isCreation: true });
+        if (!validation.valid) {
+            return res.status(400).json({ error: validation.error });
         }
 
         // Create base event with userId
-        const baseEvent = { userId, ...req.body };
+        const baseEvent = { userId, ...validation.data };
 
         // Generate all recurring events if applicable
         const eventsToCreate = generateRecurringEvents(baseEvent);
@@ -177,109 +282,66 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
         return res.status(400).json({ error: "Invalid event ID" });
     }
 
-    // Only allow these fields for single event update
-    const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
-        'useCalendarColor', 'label'];
-    
-    const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
-                                'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
-    // Allow start/end updates with validation
-    const updateData = {};
-    for (const field of allowedFields) {
-        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-            updateData[field] = req.body[field];
-        }
-    }
-
-    for (const field of recurrenceFields) {
-        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-            updateData[field] = req.body[field] ? req.body[field] : null; // Allow clearing recurrence by setting to null/empty
-        }
-    }
-
-    updateData.userId = userId; // Ensure userId is included for event creation if needed
-
-    // If calendarId is being updated, validate it
-    if (Object.prototype.hasOwnProperty.call(updateData, 'calendarId')) {
-        if (!mongoose.Types.ObjectId.isValid(updateData.calendarId)) {
-            return res.status(400).json({ error: "Invalid calendarId" });
-        }
-    }
-
-    // Validate that end date is after start date
-    if (Object.prototype.hasOwnProperty.call(updateData, 'start') || Object.prototype.hasOwnProperty.call(updateData, 'end')) {
-        const startDate = updateData.start || req.body.start;
-        const endDate = updateData.end || req.body.end;
-        if (startDate && endDate) {
-            const startDateTime = new Date(startDate);
-            const endDateTime = new Date(endDate);
-            if (endDateTime <= startDateTime) {
-                return res.status(400).json({ error: "End date must be after start date" });
-            }
-        }
-    }
-	
-    // Disallow empty updates
-    if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ error: "No valid fields provided for update" });
+    // Validate input data
+    const validation = validateEventData(req.body, { isCreation: false });
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
     }
 
     try {
-        // Fetch the original event to check for recurrence
+        // Update the event
+        const updated = await CalendarEvent.findOneAndUpdate(
+            { _id: eventId, userId },
+            { $set: validation.data },
+            { new: true }
+        );
+        
+        if (!updated) {
+            return res.status(404).json({ error: "Event not found" });
+        }
+
+        res.status(200).json({ message: "Event updated successfully", event: updated });
+    } catch (error) {
+        console.error("Error updating event:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/forward/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const eventId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        return res.status(400).json({ error: "Invalid event ID" });
+    }
+
+    const validation = validateEventData(req.body, { isCreation: false });
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+    }
+
+    try {
         const originalEvent = await CalendarEvent.findOne({ _id: eventId, userId });
         if (!originalEvent) {
             return res.status(404).json({ error: "Event not found" });
         }
 
-        updateData.groupId = originalEvent.groupId; // Preserve groupId for recurrence
+        const changedFields = getChangedFields(validation.data, originalEvent);
 
-        let isRecurrenceChange = false;
-        for (const field of recurrenceFields) {
-            // Only check if the field is actually being updated
-            if (Object.prototype.hasOwnProperty.call(updateData, field)) {
-                const updateValue = updateData[field];
-                const originalValue = originalEvent[field];
-                
-                // Handle array comparison
-                if (Array.isArray(updateValue) && Array.isArray(originalValue)) {
-                    if (JSON.stringify(updateValue.sort()) !== JSON.stringify(originalValue.sort())) {
-                        isRecurrenceChange = true;
-                        break;
-                    }
-                } else if (updateValue !== originalValue) {
-                    isRecurrenceChange = true;
-                    break;
-                }
-            }
-        }
-        
-        const hasOriginalRecurrence = originalEvent.frequencyType !== FREQUENCY_TYPE.NONE;
-        
-        if (isRecurrenceChange && hasOriginalRecurrence) {
-            return res.status(400).json({ error: "Recurrence cannot be updated for a single event of the sequence" });
+        if (Object.keys(changedFields).length === 0) {
+            return res.status(200).json({ message: "No changes detected", modifiedCount: 0 });
         }
 
-        // Delete the existing event to create the recurrent events if needed
-        await CalendarEvent.findOneAndDelete({ _id: eventId, userId });
+        const updateQuery = originalEvent.groupId
+            ? { groupId: originalEvent.groupId, userId, start: { $gte: originalEvent.start } }
+            : { _id: eventId, userId };
 
-        let eventsToCreate;
-        if (isRecurrenceChange) {
-            eventsToCreate = generateRecurringEvents(updateData);
-            const groupId = new mongoose.Types.ObjectId().toString();
-    
-            // If multiple events are generated, assign them a common groupId
-            if (eventsToCreate.length > 1) {
-                eventsToCreate.forEach(event => {
-                    event.groupId = groupId;
-                });
-            }
-        } else{
-            eventsToCreate = [updateData];
-        }
+        const result = await CalendarEvent.updateMany(updateQuery, { $set: changedFields });
 
-        // Save all events
-        const saved = await CalendarEvent.insertMany(eventsToCreate);
-        res.status(200).json({ message: "Event updated successfully" });
+        res.json({
+            message: `${result.modifiedCount} event(s) updated successfully`,
+            modifiedCount: result.modifiedCount,
+        });
     } catch (error) {
         console.error("Error updating event:", error);
         res.status(500).json({ error: error.message });
@@ -294,113 +356,35 @@ router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
         return res.status(400).json({ error: "Invalid event ID" });
     }
 
-    const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
-        'useCalendarColor', 'label', 'frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
-        'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
-    const updateData = {};
-    for (const field of allowedFields) {
-        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-            updateData[field] = req.body[field];
-        }
-    }
-
-    // If calendarId is being updated, validate it
-    if (Object.prototype.hasOwnProperty.call(updateData, 'calendarId')) {
-        if (!mongoose.Types.ObjectId.isValid(updateData.calendarId)) {
-            return res.status(400).json({ error: "Invalid calendarId" });
-        }
-    }
-
-    // Validate that end date is after start date
-    if (Object.prototype.hasOwnProperty.call(updateData, 'start') || Object.prototype.hasOwnProperty.call(updateData, 'end')) {
-        const startDate = updateData.start || req.body.start;
-        const endDate = updateData.end || req.body.end;
-        if (startDate && endDate) {
-            const startDateTime = new Date(startDate);
-            const endDateTime = new Date(endDate);
-            if (endDateTime <= startDateTime) {
-                return res.status(400).json({ error: "End date must be after start date" });
-            }
-        }
-    }
-	
-    // Disallow empty updates
-    if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ error: "No valid fields provided for update" });
+    const validation = validateEventData(req.body, { isCreation: false });
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
     }
 
     try {
-        // Find the original event to get its groupId and start date
         const originalEvent = await CalendarEvent.findOne({ _id: eventId, userId });
         if (!originalEvent) {
             return res.status(404).json({ error: "Event not found" });
         }
 
-        // Check if recurrence fields are being modified
-        const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
-                                  'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
-        const isRecurrenceModified = recurrenceFields.some(field => 
-            Object.prototype.hasOwnProperty.call(updateData, field)
-        );
+        const changedFields = getChangedFields(validation.data, originalEvent);
 
-        // Check if start or end dates are being modified
-        const isDateModified = Object.prototype.hasOwnProperty.call(updateData, 'start') || 
-                               Object.prototype.hasOwnProperty.call(updateData, 'end');
-
-        if (isRecurrenceModified || isDateModified) {
-            // Delete all events from this event onwards in the same group
-            await CalendarEvent.deleteMany({ 
-                groupId: originalEvent.groupId, 
-                userId,
-                start: { $gte: originalEvent.start }
-            });
-
-            // Create the updated base event
-            const updatedBaseEvent = { ...originalEvent.toObject(), ...updateData };
-            
-            // Generate new recurring events based on new rule
-            const newEvents = generateRecurringEvents(updatedBaseEvent);
-            
-            // Assign groupId if multiple events
-            if (newEvents.length > 1) {
-                newEvents.forEach(event => {
-                    event.groupId = originalEvent.groupId;
-                });
-            }
-
-            // Insert new events
-            const result = await CalendarEvent.insertMany(newEvents);
-
-            res.json({ 
-                message: `Event and ${result.length - 1} recurring event(s) created successfully`,
-                events: result
-            });
-        } else {
-            // No recurrence or date change, just update normally
-            let updateQuery;
-            
-            if (originalEvent.groupId) {
-                // Update all events in the group
-                updateQuery = { 
-                    groupId: originalEvent.groupId, 
-                    userId
-                };
-            } else {
-                // Single non-recurring event, update only this event
-                updateQuery = {
-                    _id: eventId,
-                    userId
-                };
-            }
-            
-            const result = await CalendarEvent.updateMany(updateQuery, { $set: updateData });
-
-            res.json({ 
-                message: `${result.modifiedCount} event(s) updated successfully`,
-                modifiedCount: result.modifiedCount
-            });
+        if (Object.keys(changedFields).length === 0) {
+            return res.status(200).json({ message: "No changes detected", modifiedCount: 0 });
         }
+
+        const updateQuery = originalEvent.groupId
+            ? { groupId: originalEvent.groupId, userId }
+            : { _id: eventId, userId };
+
+        const result = await CalendarEvent.updateMany(updateQuery, { $set: changedFields });
+
+        res.json({
+            message: `${result.modifiedCount} event(s) updated successfully`,
+            modifiedCount: result.modifiedCount,
+        });
     } catch (error) {
+        console.error("Error updating event:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -440,6 +424,35 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
     } catch (error) {
         res.status(500).json({ error: "Error deleting event" });
     }   
+});
+
+router.delete('/forward/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const eventId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        return res.status(400).json({ error: "Invalid event ID" });
+    }
+
+    try {
+        const event = await CalendarEvent.findOne({ _id: eventId, userId });
+        if (!event) {
+            return res.status(404).json({ error: "Event not found" });
+        }
+
+        const deleteQuery = event.groupId
+            ? { groupId: event.groupId, userId, start: { $gte: event.start } }
+            : { _id: eventId, userId };
+
+        const result = await CalendarEvent.deleteMany(deleteQuery);
+
+        res.json({
+            message: `${result.deletedCount} event(s) deleted successfully`,
+            deletedCount: result.deletedCount,
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error deleting event" });
+    }
 });
 
 router.delete('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
