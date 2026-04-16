@@ -29,13 +29,19 @@ function generateRecurringEvents(baseEvent) {
     const endType = baseEvent.frequencyEndType;
 
     // Helper function to add time duration and create new event
-    function createNextEvent(start, end) {
+    function createNextEvent(start, end, occurrencesLeftValue) {
         const event = {
             ...baseEvent,
             start: new Date(start),
             end: new Date(end),
             _id: undefined // Let MongoDB generate new IDs
         };
+        
+        // Update frequencyOccurrencesLeft if provided
+        if (occurrencesLeftValue !== undefined) {
+            event.frequencyOccurrencesLeft = occurrencesLeftValue;
+        }
+        
         delete event.__v; // Remove version field if exists
         return event;
     }
@@ -103,7 +109,7 @@ function generateRecurringEvents(baseEvent) {
             break;
         }
 
-        events.push(createNextEvent(nextStart, nextEnd));
+        events.push(createNextEvent(nextStart, nextEnd, occurrencesLeft));
         currentStart = nextStart;
         currentEnd = nextEnd;
     }
@@ -173,9 +179,10 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
 
     // Only allow these fields for single event update
     const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
-        'useCalendarColor', 'label', 'frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
-        'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
+        'useCalendarColor', 'label'];
     
+    const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
+                                'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
     // Allow start/end updates with validation
     const updateData = {};
     for (const field of allowedFields) {
@@ -184,13 +191,13 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
         }
     }
 
-    // Handle start/end separately with validation
-    if (Object.prototype.hasOwnProperty.call(req.body, 'start')) {
-        updateData.start = req.body.start;
+    for (const field of recurrenceFields) {
+        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            updateData[field] = req.body[field] ? req.body[field] : null; // Allow clearing recurrence by setting to null/empty
+        }
     }
-    if (Object.prototype.hasOwnProperty.call(req.body, 'end')) {
-        updateData.end = req.body.end;
-    }
+
+    updateData.userId = userId; // Ensure userId is included for event creation if needed
 
     // If calendarId is being updated, validate it
     if (Object.prototype.hasOwnProperty.call(updateData, 'calendarId')) {
@@ -224,12 +231,27 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
             return res.status(404).json({ error: "Event not found" });
         }
 
-        // Check if trying to update recurrence fields on a recurring event
-        const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 
-                                  'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
-        const isRecurrenceChange = recurrenceFields.some(field => 
-            Object.prototype.hasOwnProperty.call(req.body, field)
-        );
+        updateData.groupId = originalEvent.groupId; // Preserve groupId for recurrence
+
+        let isRecurrenceChange = false;
+        for (const field of recurrenceFields) {
+            // Only check if the field is actually being updated
+            if (Object.prototype.hasOwnProperty.call(updateData, field)) {
+                const updateValue = updateData[field];
+                const originalValue = originalEvent[field];
+                
+                // Handle array comparison
+                if (Array.isArray(updateValue) && Array.isArray(originalValue)) {
+                    if (JSON.stringify(updateValue.sort()) !== JSON.stringify(originalValue.sort())) {
+                        isRecurrenceChange = true;
+                        break;
+                    }
+                } else if (updateValue !== originalValue) {
+                    isRecurrenceChange = true;
+                    break;
+                }
+            }
+        }
         
         const hasOriginalRecurrence = originalEvent.frequencyType !== FREQUENCY_TYPE.NONE;
         
@@ -240,21 +262,26 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
         // Delete the existing event to create the recurrent events if needed
         await CalendarEvent.findOneAndDelete({ _id: eventId, userId });
 
-        const eventsToCreate = generateRecurringEvents(originalEvent.toObject());
-
-        const groupId = new mongoose.Types.ObjectId().toString();
-
-        // If multiple events are generated, assign them a common groupId
-        if (eventsToCreate.length > 1) {
-            eventsToCreate.forEach(event => {
-                event.groupId = groupId;
-            });
+        let eventsToCreate;
+        if (isRecurrenceChange) {
+            eventsToCreate = generateRecurringEvents(updateData);
+            const groupId = new mongoose.Types.ObjectId().toString();
+    
+            // If multiple events are generated, assign them a common groupId
+            if (eventsToCreate.length > 1) {
+                eventsToCreate.forEach(event => {
+                    event.groupId = groupId;
+                });
+            }
+        } else{
+            eventsToCreate = [updateData];
         }
 
         // Save all events
         const saved = await CalendarEvent.insertMany(eventsToCreate);
         res.status(200).json({ message: "Event updated successfully" });
     } catch (error) {
+        console.error("Error updating event:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -316,7 +343,11 @@ router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
             Object.prototype.hasOwnProperty.call(updateData, field)
         );
 
-        if (isRecurrenceModified) {
+        // Check if start or end dates are being modified
+        const isDateModified = Object.prototype.hasOwnProperty.call(updateData, 'start') || 
+                               Object.prototype.hasOwnProperty.call(updateData, 'end');
+
+        if (isRecurrenceModified || isDateModified) {
             // Delete all events from this event onwards in the same group
             await CalendarEvent.deleteMany({ 
                 groupId: originalEvent.groupId, 
@@ -345,15 +376,14 @@ router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
                 events: result
             });
         } else {
-            // No recurrence change, just update normally
+            // No recurrence or date change, just update normally
             let updateQuery;
             
             if (originalEvent.groupId) {
-                // Update all events in the group from this event onwards
+                // Update all events in the group
                 updateQuery = { 
                     groupId: originalEvent.groupId, 
-                    userId,
-                    start: { $gte: originalEvent.start }
+                    userId
                 };
             } else {
                 // Single non-recurring event, update only this event

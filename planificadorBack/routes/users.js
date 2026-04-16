@@ -32,7 +32,7 @@ router.post('/login', authLimiter, async function(req, res) {
         profilePicture: payload.picture});
       const savedUser = await newUser.save();
       userId = savedUser._id;
-      createDefaultCalendarForUser(userId);
+      await createDefaultCalendarForUser(userId);
     }
     const user_token = jwt.sign(
         { userId },

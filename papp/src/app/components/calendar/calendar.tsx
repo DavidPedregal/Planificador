@@ -13,6 +13,24 @@ interface CalendarProps {
     refreshTrigger?: number;
 }
 
+const EMPTY_EVENT: CalendarEvent = {
+    id: "",
+    title: "",
+    start: new Date(),
+    end: new Date(),
+    color: "",
+    calendarId: "",
+    useCalendarColor: true,
+    label: "",
+    recurrenceRule: {
+        frequencyType: "none",
+        frequencyInterval: 1,
+        frequencyDaysOfWeek: [],
+        frequencyEndType: "on",
+        frequencyEndDate: "",
+        frequencyOccurrencesLeft: 1,
+    },
+};
 
 export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -178,35 +196,19 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             );
                 setEvents([...events, ...newFullCalendarEvents]);
             }}
-         />
+        />
 
-            <EditEventDialog
-                open={editDialogOpen}
-                event={selectedEvent ? selectedEvent : {
-                    id: "",
-                    title: "",
-                    start: new Date(),
-                    end: new Date(),
-                    color: "",
-                    calendarId: "",
-                    useCalendarColor: true,
-                    recurrenceRule: {
-                        frequencyType: "none",
-                        frequencyInterval: 1,
-                        frequencyDaysOfWeek: [],
-                        frequencyEndType: "on",
-                        frequencyEndDate: "",
-                        frequencyOccurrencesLeft: 1,
-                    },
-                }}
-                onClose={() => setEditDialogOpen(false)}
-                onSave={() => {
-                    fetchCalendars();
-                }}
-                onDelete={() => {
-                    fetchCalendars();
-                }}
-            />
+        <EditEventDialog
+            open={editDialogOpen}
+            event={selectedEvent || EMPTY_EVENT}
+            onClose={() => setEditDialogOpen(false)}
+            onSave={() => {
+                fetchEvents(calendars);
+            }}
+            onDelete={() => {
+                fetchEvents(calendars);
+            }}
+        />
 
 
   </>

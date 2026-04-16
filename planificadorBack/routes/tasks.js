@@ -77,11 +77,11 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
             return res.status(404).json({ error: "Task not found" });
         }
 
-        if (!req.body.name) {
-            return res.status(400).json({ error: "Name is required" });
+        if (!req.body.title) {
+            return res.status(400).json({ error: "Title is required" });
         }
 
-        task.name = req.body.name;
+        task.title = req.body.title;
         const updated = await task.save();
         res.json(updated);
     } catch (error) {

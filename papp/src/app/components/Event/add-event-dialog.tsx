@@ -134,7 +134,6 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
             });
 
             const createdEvents = await response.json();
-            console.log("Evento creado:", createdEvents);
             onSave(createdEvents);
             onClose();
         } catch (error) {

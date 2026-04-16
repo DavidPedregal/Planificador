@@ -267,7 +267,12 @@ describe('PUT /events/all/:id', () => {
     });
 
     it('regenera eventos cuando cambia la recurrencia', async () => {
-        CalendarEvent.findOne.mockResolvedValue(makeEvent({ frequencyType: FREQUENCY_TYPE.DAYS }));
+        CalendarEvent.findOne.mockResolvedValue(makeEvent({ 
+            frequencyType: FREQUENCY_TYPE.DAYS,
+            frequencyEndType: 'after',
+            frequencyOccurrencesLeft: 2,
+            frequencyInterval: 1
+        }));
         CalendarEvent.deleteMany.mockResolvedValue({});
         CalendarEvent.insertMany.mockResolvedValue([makeEvent(), makeEvent()]);
 
@@ -281,31 +286,31 @@ describe('PUT /events/all/:id', () => {
         expect(res.body).toHaveProperty('events');
     });
 
-    // it('devuelve 404 si el evento no existe', async () => {
-    //     CalendarEvent.findOne.mockResolvedValue(null);
+    it('devuelve 404 si el evento no existe', async () => {
+        CalendarEvent.findOne.mockResolvedValue(null);
 
-    //     const res = await request(app)
-    //         .put(`/events/all/${validEventId}`)
-    //         .send({ title: 'x' });
+        const res = await request(app)
+            .put(`/events/all/${validEventId}`)
+            .send({ title: 'x' });
 
-    //     expect(res.statusCode).toBe(404);
-    // });
+        expect(res.statusCode).toBe(404);
+    });
 
-    // it('devuelve 400 si el id no es válido', async () => {
-    //     const res = await request(app)
-    //         .put('/events/all/no-valido')
-    //         .send({ title: 'x' });
+    it('devuelve 400 si el id no es válido', async () => {
+        const res = await request(app)
+            .put('/events/all/no-valido')
+            .send({ title: 'x' });
 
-    //     expect(res.statusCode).toBe(400);
-    // });
+        expect(res.statusCode).toBe(400);
+    });
 
-    // it('devuelve 400 si no hay campos válidos', async () => {
-    //     const res = await request(app)
-    //         .put(`/events/all/${validEventId}`)
-    //         .send({ campoInventado: 'x' });
+    it('devuelve 400 si no hay campos válidos', async () => {
+        const res = await request(app)
+            .put(`/events/all/${validEventId}`)
+            .send({ campoInventado: 'x' });
 
-    //     expect(res.statusCode).toBe(400);
-    // });
+        expect(res.statusCode).toBe(400);
+    });
 });
 
 // ── DELETE /:id ───────────────────────────────────────────────────────────────

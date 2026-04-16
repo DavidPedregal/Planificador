@@ -18,8 +18,6 @@ interface Props {
 }
 
 const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelete}) => {
-    if (!open) return null;
-
     const [eventTitle, setEventTitle] = useState(event.title);
     const [label, setLabel] = useState(event.label || "");
     const [calendars, setCalendars] = useState<Calendar[]>([]);
@@ -177,7 +175,6 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
     const handleDeleteClicked = async () => {
         // If event has recurrence, ask user whether to delete only this event or all events
         if (event.recurrenceRule.frequencyType !== FREQUENCY_TYPE.NONE) {
-            console.log("Evento recurrente, mostrando opciones de eliminación");
             setPendingAction("delete");
             setRecurrenceChoiceOpen(true);
         } else {
@@ -207,6 +204,8 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
 
     const showWeekdays = recurrence.frequencyType === FREQUENCY_TYPE.WEEKS;
     const showEndOptions = recurrence.frequencyType !== FREQUENCY_TYPE.NONE;
+
+    if (!open) return null;
 
     return (
         <>
