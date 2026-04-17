@@ -3,6 +3,7 @@ import "./add-task-dialog.css";
 import { config } from "@/app/config/config";
 import InfoIcon from '@mui/icons-material/Info';
 import Tooltip from "@mui/material/Tooltip";
+import RecurrenceChoiceDialog from "@/app/components/Event/recurrence-choice-dialog";
 
 interface Subject {
     id: string;
@@ -13,7 +14,7 @@ interface Props {
     open: boolean;
     taskId: number | null;
     onClose: () => void;
-    onSave: (newTask: any) => void;
+    onSave: () => void;
 }
 
 const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
@@ -24,6 +25,8 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
     const [givenDate, setGivenDate] = useState("");
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [plannable, setPlannable] = useState(true);
+    const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
 
     const fetchSubjects = async () => {
         try {
@@ -49,6 +52,7 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
             setFinishDate(data.finishDate.split('T')[0]);
             setGivenDate(data.givenDate.split('T')[0]);
             setSubjectId(data.subjectId || "");
+            setPlannable(data.plannable !== false);
         } catch (error) {
             console.error("Error fetching task:", error);
         }
@@ -64,8 +68,24 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
         }
     }, [open, taskId]);
 
+    const handleSave = () => {
+        if (!title.trim()) return;
+        setRecurrenceChoiceOpen(true);
+    };
 
-    const handleSave = async () => {
+    const updateSingleTask = async () => {
+        await updateTask(`/tasks/${taskId}`);
+    };
+
+    const updateTaskFromThis = async () => {
+        await updateTask(`/tasks/forward/${taskId}`);
+    };
+
+    const updateTaskSeries = async () => {
+        await updateTask(`/tasks/all/${taskId}`);
+    };
+
+    const updateTask = async (url: string) => {
         if (!title.trim()) return;
 
         const updatedTask = {
@@ -74,11 +94,12 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
             estimatedTime,
             finishDate,
             givenDate,
-            subjectId
+            subjectId,
+            plannable
         };
 
         try {
-            const response = await fetch(config.backendUrl + `/tasks/${taskId}`, {
+            const response = await fetch(config.backendUrl + url, {
                 method: "PUT",
                  headers: {
                     "Content-Type": "application/json",
@@ -87,8 +108,8 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
                 body: JSON.stringify(updatedTask),
             });
 
-            const updatedTaskData = await response.json();
-            onSave(updatedTaskData);
+            await response.json();
+            onSave();
             onClose();
         } catch (error) {
             console.error("Error actualizando tarea:", error);
@@ -198,6 +219,19 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
                                 ))}
                             </select>
                         </div>
+
+                        {/* Plannable */}
+                        <div className="atd-field">
+                            <label className="atd-label">
+                                <input
+                                    type="checkbox"
+                                    checked={plannable}
+                                    onChange={e => setPlannable(e.target.checked)}
+                                    style={{ marginRight: '8px' }}
+                                />
+                                Incluir en planificación
+                            </label>
+                        </div>
                     </div>
 
                     {/* Footer */}
@@ -213,6 +247,26 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
                         </button>
                     </div>
                 </div>
+
+                <RecurrenceChoiceDialog
+                    open={recurrenceChoiceOpen}
+                    action="update"
+                    title="Actualizar tarea recurrente"
+                    message="¿Quieres actualizar solo esta tarea o todas las tareas de la serie?"
+                    onChooseSingle={() => {
+                        updateSingleTask();
+                        setRecurrenceChoiceOpen(false);
+                    }}
+                    onChooseFromThis={() => {
+                        updateTaskFromThis();
+                        setRecurrenceChoiceOpen(false);
+                    }}
+                    onChooseAll={() => {
+                        updateTaskSeries();
+                        setRecurrenceChoiceOpen(false);
+                    }}
+                    onCancel={() => setRecurrenceChoiceOpen(false)}
+                />
             </div>
         </>
     );

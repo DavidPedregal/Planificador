@@ -25,6 +25,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
     const [givenDate, setGivenDate] = useState("");
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [plannable, setPlannable] = useState(true);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
         frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
@@ -40,6 +41,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
             setEstimatedTime(30);
             setFinishDate(today);
             setGivenDate(today);
+            setPlannable(true);
             setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
         }
     }, [open]);
@@ -89,6 +91,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
             finishDate,
             givenDate,
             subjectId,
+            plannable,
             frequencyType: recurrence.frequencyType,
             frequencyInterval: recurrence.frequencyInterval,
             frequencyDaysOfWeek: recurrence.frequencyDaysOfWeek,
@@ -217,6 +220,19 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                                     <option key={subj.id} value={subj.id}>{subj.name}</option>
                                 ))}
                             </select>
+                        </div>
+
+                        {/* Plannable */}
+                        <div className="atd-field">
+                            <label className="atd-label">
+                                <input
+                                    type="checkbox"
+                                    checked={plannable}
+                                    onChange={e => setPlannable(e.target.checked)}
+                                    style={{ marginRight: '8px' }}
+                                />
+                                Incluir en planificación
+                            </label>
                         </div>
 
                         {/* Periodicidad */}

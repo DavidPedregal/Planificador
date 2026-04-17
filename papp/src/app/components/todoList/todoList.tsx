@@ -204,8 +204,15 @@ export default function TodoList() {
                     open={addDialogOpen}
                     onClose={() => setAddDialogOpen(false)}
                     onSave={(newTasks) => {
-                        const orderedTasks = [...tasks, ...newTasks.map(mapTask)].sort((a: Task, b: Task) => a.finishDate.getTime() - b.finishDate.getTime());
-                        setTasks(orderedTasks);
+                        if (Array.isArray(newTasks)) {
+                            const mappedNewTasks = newTasks.map(mapTask);
+                            const orderedTasks = [...tasks, ...mappedNewTasks].sort((a: Task, b: Task) => a.finishDate.getTime() - b.finishDate.getTime());
+                            setTasks(orderedTasks);
+                        } else {
+                            const newTaskMapped = mapTask(newTasks);
+                            const orderedTasks = [...tasks, newTaskMapped].sort((a: Task, b: Task) => a.finishDate.getTime() - b.finishDate.getTime());
+                            setTasks(orderedTasks);
+                        }
                         setAddDialogOpen(false);
                     }}
                 />
@@ -235,10 +242,8 @@ export default function TodoList() {
                     open={editDialogOpen}
                     taskId={selectedTaskId}
                     onClose={() => setEditDialogOpen(false)}
-                    onSave={(updatedTask) => {
-                        const updatedTaskMapped = mapTask(updatedTask);
-                        setTasks(tasks.map(t => t.id === updatedTaskMapped.id ? updatedTaskMapped : t));
-                        setEditDialogOpen(false);
+                    onSave={() => {
+                        fetchTasks();
                     }}
                 />
             </div>

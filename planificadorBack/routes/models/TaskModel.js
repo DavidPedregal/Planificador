@@ -36,6 +36,9 @@ const taskModel = new mongoose.Schema({
     groupId: {
         type: String,
     },
+    plannable: {
+        type: Boolean,
+    }
 });
 
 const TaskModel = mongoose.model("Task", taskModel);

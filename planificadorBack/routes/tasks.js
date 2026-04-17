@@ -118,7 +118,7 @@ function generateRecurringTasks(baseTask) {
 }
 
 function validateData(data, checkRecurrence = false) {
-    const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate'];
+    const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate', 'subjectId', 'plannable'];
     const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
     const updateData = {};
     for (const field of allowedFields) {
@@ -137,11 +137,48 @@ function validateData(data, checkRecurrence = false) {
 
     if (data.subjectId) {
         if (!mongoose.Types.ObjectId.isValid(data.subjectId)) {
-            return res.status(400).json({ error: "Invalid subjectId" });
+            return {
+                valid: false,
+                error: "Invalid subject ID"
+            };
         }
     }
 
-    return updateData;
+    return {
+        valid: true,
+        error: null,
+        data: updateData
+    };
+}
+
+function getChangedFields(newData, originalEvent) {
+    // Detectar únicamente los campos que han cambiado
+    if (!newData.subjectId){
+        newData.subjectId = null;
+    }
+    const allowedFields = ['title', 'description', 'estimatedTime', 'subjectId', 'plannable'];
+    const changedFields = {};
+    for (const field of allowedFields) {
+        if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;
+        const incoming = String(newData[field]);
+        const original = String(originalEvent[field]);
+        if (incoming !== original) {
+            changedFields[field] = newData[field];
+        }
+    }
+    const dateFields = new Set(['finishDate', 'givenDate']);
+
+    for (const field of dateFields) {
+        if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;
+        
+        const incoming = new Date(newData[field]).toISOString();
+        const original = new Date(originalEvent[field]).toISOString();
+
+        if (incoming !== original) {
+            changedFields[field] = newData[field];
+        }
+    }
+    return changedFields;
 }
 
 router.get('/', dbLimiter, authMiddleware, async function(req, res) {
@@ -241,13 +278,13 @@ router.put('/forward/:id', dbLimiter, authMiddleware, async function(req, res) {
         return res.status(400).json({ error: "Invalid task ID" });
     }
 
-    const validation = validatetaskData(req.body, { isCreation: false });
+    const validation = validateData(req.body);
     if (!validation.valid) {
         return res.status(400).json({ error: validation.error });
     }
 
     try {
-        const originaltask = await Calendartask.findOne({ _id: taskId, userId });
+        const originaltask = await TaskModel.findOne({ _id: taskId, userId });
         if (!originaltask) {
             return res.status(404).json({ error: "task not found" });
         }
@@ -259,10 +296,10 @@ router.put('/forward/:id', dbLimiter, authMiddleware, async function(req, res) {
         }
 
         const updateQuery = originaltask.groupId
-            ? { groupId: originaltask.groupId, userId, start: { $gte: originaltask.start } }
+            ? { groupId: originaltask.groupId, userId, finishDate: { $gte: originaltask.finishDate } }
             : { _id: taskId, userId };
 
-        const result = await Calendartask.updateMany(updateQuery, { $set: changedFields });
+        const result = await TaskModel.updateMany(updateQuery, { $set: changedFields });
 
         res.json({
             message: `${result.modifiedCount} task(s) updated successfully`,
@@ -282,18 +319,19 @@ router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
         return res.status(400).json({ error: "Invalid task ID" });
     }
 
-    const validation = validatetaskData(req.body, { isCreation: false });
+    const validation = validateData(req.body);
     if (!validation.valid) {
         return res.status(400).json({ error: validation.error });
     }
 
     try {
-        const originaltask = await Calendartask.findOne({ _id: taskId, userId });
+        const originaltask = await TaskModel.findOne({ _id: taskId, userId });
         if (!originaltask) {
             return res.status(404).json({ error: "task not found" });
         }
 
         const changedFields = getChangedFields(validation.data, originaltask);
+        console.log("Changed fields for all update:", changedFields);
 
         if (Object.keys(changedFields).length === 0) {
             return res.status(200).json({ message: "No changes detected", modifiedCount: 0 });
@@ -303,7 +341,7 @@ router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
             ? { groupId: originaltask.groupId, userId }
             : { _id: taskId, userId };
 
-        const result = await Calendartask.updateMany(updateQuery, { $set: changedFields });
+        const result = await TaskModel.updateMany(updateQuery, { $set: changedFields });
 
         res.json({
             message: `${result.modifiedCount} task(s) updated successfully`,
