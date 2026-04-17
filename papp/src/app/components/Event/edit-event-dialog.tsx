@@ -320,6 +320,10 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
             <RecurrenceChoiceDialog
                 open={recurrenceChoiceOpen}
                 action={pendingAction || "update"}
+                title={pendingAction === "delete" ? "Eliminar evento recurrente" : "Actualizar evento recurrente"}
+                message={pendingAction === "delete" 
+                    ? "¿Quieres eliminar solo este evento o todos los eventos de la serie?" 
+                    : "¿Quieres actualizar solo este evento o todos los eventos de la serie?"}
                 onChooseSingle={() => {
                     if (pendingAction === "update" && pendingEventData) {
                         performUpdate(pendingEventData, "single");

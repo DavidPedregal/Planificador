@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./add-task-dialog.css";
 import { config } from "@/app/config/config";
-import { FREQUENCY_TYPE, TaskRecurrenceRule, WEEKDAYS, 
+import { FREQUENCY_TYPE, RecurrenceRule, WEEKDAYS, 
     WEEKDAY_LABELS, FREQ_OPTIONS} from "../Calendar/calendarHelper";
 import InfoIcon from '@mui/icons-material/Info';
 import Tooltip from "@mui/material/Tooltip";
@@ -25,9 +25,9 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
     const [givenDate, setGivenDate] = useState("");
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [recurrence, setRecurrence] = useState<TaskRecurrenceRule>({
+    const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
-        frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
+        frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
     });
 
     // Reset when dialog opens
@@ -40,7 +40,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
             setEstimatedTime(30);
             setFinishDate(today);
             setGivenDate(today);
-            setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
+            setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
         }
     }, [open]);
 
@@ -106,8 +106,8 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                 body: JSON.stringify(newTask),
             });
 
-            const createdTask = await response.json();
-            onSave(createdTask);
+            const createdTasks = await response.json();
+            onSave(createdTasks);
             onClose();
         } catch (error) {
             console.error("Error guardando tarea:", error);
@@ -191,7 +191,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                         {/* Fecha de creación */}
                         <div className="atd-field">
                             <label className="atd-label">
-                                Fecha de encargo
+                                Fecha de impartición
                                 <Tooltip title="Fecha en la que se adquirieron los conocimientos para realizar la tarea">
                                     <InfoIcon sx={{ fontSize: '1rem', marginLeft: '6px', cursor: 'help', color: 'var(--accent, #7c6ff7)' }} />
                                 </Tooltip>
@@ -227,7 +227,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                                     className="atd-input atd-select"
                                     style={{ margin: 0 }}
                                     value={recurrence.frequencyType}
-                                    onChange={e => setRecurrence(r => ({ ...r, frequencyType: e.target.value as TaskRecurrenceRule["frequencyType"] }))}
+                                    onChange={e => setRecurrence(r => ({ ...r, frequencyType: e.target.value as RecurrenceRule["frequencyType"] }))}
                                 >
                                     {FREQ_OPTIONS.map(o => (
                                         <option key={o.value} value={o.value}>{o.label}</option>
@@ -270,14 +270,14 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                                     <div className="atd-field">
                                         <span className="atd-label">Finaliza</span>
                                         <div className="atd-end-options">
-                                            {(["never", "on", "after"] as const).map(type => (
+                                            {(["on", "after"] as const).map(type => (
                                                 <label key={type} className="atd-radio-row">
                                                     <div
                                                         className={`atd-radio${recurrence.frequencyEndType === type ? " checked" : ""}`}
                                                         onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}
                                                     />
                                                     <span className="atd-radio-label" onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}>
-                            {{never: "Nunca", on: "El día", after: "Después de" }[type]}
+                            {{on: "El día", after: "Después de ocurrencias" }[type]}
                           </span>
                                                     {type === "on" && recurrence.frequencyEndType === "on" && (
                                                         <input
@@ -297,7 +297,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                                                                 onChange={e => setRecurrence(r => ({ ...r, frequencyOccurrencesLeft: Math.max(1, +e.target.value) }))}
                                                                 style={{ width: 64, flex: "none", textAlign: "center" }}
                                                             />
-                                                            <span className="atd-row-label">ocurrencias</span>
+                                                            <span className="atd-row-label">veces</span>
                                                         </div>
                                                     )}
                                                 </label>

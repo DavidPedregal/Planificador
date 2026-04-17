@@ -4,19 +4,17 @@ import "./recurrence-choice-dialog.css"; // Reuse the confirm dialog styles
 interface Props {
     open: boolean;
     action: "update" | "delete";
+    title: string;
+    message: string;
     onChooseSingle: () => void;
     onChooseFromThis: () => void;
     onChooseAll: () => void;
     onCancel: () => void;
 }
 
-const RecurrenceChoiceDialog: React.FC<Props> = ({ open, action, onChooseSingle, onChooseFromThis, onChooseAll, onCancel }) => {
+const RecurrenceChoiceDialog: React.FC<Props> = ({ open, action, title, message, onChooseSingle, onChooseFromThis, onChooseAll, onCancel }) => {
     if (!open) return null;
 
-    const title = action === "delete" ? "Eliminar evento recurrente" : "Actualizar evento recurrente";
-    const message = action === "delete" 
-        ? "¿Quieres eliminar solo este evento o todos los eventos de la serie?"
-        : "¿Quieres actualizar solo este evento o todos los eventos de la serie?";
     const buttonLabel = action === "delete" ? "Eliminar" : "Actualizar";
 
     return (

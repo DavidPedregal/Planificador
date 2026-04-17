@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./add-task-dialog.css";
 import { config } from "@/app/config/config";
-import { FREQUENCY_TYPE, WEEKDAYS, 
-    WEEKDAY_LABELS, FREQ_OPTIONS,
-    TaskRecurrenceRule} from "../Calendar/calendarHelper";
 import InfoIcon from '@mui/icons-material/Info';
 import Tooltip from "@mui/material/Tooltip";
 
@@ -19,17 +16,6 @@ interface Props {
     onSave: (newTask: any) => void;
 }
 
-interface Task {
-    id: number;
-    title: string;
-    description: string;
-    completed: boolean;
-    estimatedTime: number;
-    finishDate: Date;
-    givenDate: Date;
-    subjectId?: string;
-}
-
 const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -38,11 +24,6 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
     const [givenDate, setGivenDate] = useState("");
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    
-    const [recurrence, setRecurrence] = useState<TaskRecurrenceRule>({
-        frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
-        frequencyEndType: "never", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
-    });
 
     const fetchSubjects = async () => {
         try {
@@ -68,14 +49,6 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
             setFinishDate(data.finishDate.split('T')[0]);
             setGivenDate(data.givenDate.split('T')[0]);
             setSubjectId(data.subjectId || "");
-            setRecurrence({
-                frequencyType: data.frequencyType || FREQUENCY_TYPE.NONE,
-                frequencyInterval: data.frequencyInterval || 1,
-                frequencyDaysOfWeek: data.frequencyDaysOfWeek || [],
-                frequencyEndType: data.frequencyEndType || "never",
-                frequencyEndDate: data.frequencyEndDate || "",
-                frequencyOccurrencesLeft: data.frequencyOccurrencesLeft || 1,
-            });
         } catch (error) {
             console.error("Error fetching task:", error);
         }
@@ -91,20 +64,6 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
         }
     }, [open, taskId]);
 
-    const toggleWeekday = (day: number) => {
-        setRecurrence(r => {
-            // Ensure frequencyDaysOfWeek is always an array
-            const currentDays = Array.isArray(r.frequencyDaysOfWeek) ? r.frequencyDaysOfWeek : [];
-            const newDays = currentDays.includes(day)
-                ? currentDays.filter(d => d !== day)
-                : [...currentDays, day];
-            
-            return {
-                ...r,
-                frequencyDaysOfWeek: newDays,
-            };
-        });
-    };
 
     const handleSave = async () => {
         if (!title.trim()) return;
@@ -115,13 +74,7 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
             estimatedTime,
             finishDate,
             givenDate,
-            subjectId,
-            frequencyType: recurrence.frequencyType,
-            frequencyInterval: recurrence.frequencyInterval,
-            frequencyDaysOfWeek: recurrence.frequencyDaysOfWeek,
-            frequencyEndType: recurrence.frequencyEndType,
-            frequencyEndDate: recurrence.frequencyEndDate,
-            frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
+            subjectId
         };
 
         try {
@@ -141,9 +94,6 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
             console.error("Error actualizando tarea:", error);
         }
     };
-
-    const showWeekdays = recurrence.frequencyType === FREQUENCY_TYPE.WEEKS;
-    const showEndOptions = recurrence.frequencyType !== FREQUENCY_TYPE.NONE;
 
     if (!open) return null;
 
@@ -221,7 +171,7 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
                         {/* Fecha de creación */}
                         <div className="atd-field">
                             <label className="atd-label">
-                                Fecha de encargo
+                                Fecha de impartición
                                 <Tooltip title="Fecha en la que se adquirieron los conocimientos para realizar la tarea">
                                     <InfoIcon sx={{ fontSize: '1rem', marginLeft: '6px', cursor: 'help', color: 'var(--accent, #7c6ff7)' }} />
                                 </Tooltip>
@@ -247,95 +197,6 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
                                     <option key={subj.id} value={subj.id}>{subj.name}</option>
                                 ))}
                             </select>
-                        </div>
-
-                        {/* Periodicidad */}
-                        <div className="atd-field">
-                            <label className="atd-label">Periodicidad</label>
-                            <div className="atd-recurrence-box">
-                                <select
-                                    className="atd-input atd-select"
-                                    style={{ margin: 0 }}
-                                    value={recurrence.frequencyType}
-                                    onChange={e => setRecurrence(r => ({ ...r, frequencyType: e.target.value as TaskRecurrenceRule["frequencyType"] }))}
-                                >
-                                    {FREQ_OPTIONS.map(o => (
-                                        <option key={o.value} value={o.value}>{o.label}</option>
-                                    ))}
-                                </select>
-
-                                {recurrence.frequencyType !== FREQUENCY_TYPE.NONE && (
-                                    <div className="atd-row">
-                                        <span className="atd-row-label">Cada</span>
-                                        <input
-                                            className="atd-input"
-                                            type="number" min={1} max={99}
-                                            value={recurrence.frequencyInterval}
-                                            onChange={e => setRecurrence(r => ({ ...r, frequencyInterval: Math.max(1, +e.target.value) }))}
-                                            style={{ width: 64, flex: "none", textAlign: "center" }}
-                                        />
-                                        <span className="atd-row-label">
-                      {{ daily: "día(s)", weekly: "semana(s)", monthly: "mes(es)", yearly: "año(s)" }[recurrence.frequencyType]}
-                    </span>
-                                    </div>
-                                )}
-
-                                {showWeekdays && (
-                                    <div className="atd-field">
-                                        <span className="atd-label">Días de la semana</span>
-                                        <div className="atd-weekdays">
-                                            {WEEKDAYS.map((d, i) => (
-                                                <button
-                                                    key={`weekday-${i}`}
-                                                    className={`atd-wd-btn${recurrence.frequencyDaysOfWeek?.includes(i) ? " active" : ""}`}
-                                                    onClick={() => toggleWeekday(i)}
-                                                    title={WEEKDAY_LABELS[i]}
-                                                >{d}</button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {showEndOptions && (
-                                    <div className="atd-field">
-                                        <span className="atd-label">Finaliza</span>
-                                        <div className="atd-end-options">
-                                            {(["never", "on", "after"] as const).map(type => (
-                                                <label key={type} className="atd-radio-row">
-                                                    <div
-                                                        className={`atd-radio${recurrence.frequencyEndType === type ? " checked" : ""}`}
-                                                        onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}
-                                                    />
-                                                    <span className="atd-radio-label" onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}>
-                            {{never: "Nunca", on: "El día", after: "Después de" }[type]}
-                          </span>
-                                                    {type === "on" && recurrence.frequencyEndType === "on" && (
-                                                        <input
-                                                            className="atd-input"
-                                                            type="date"
-                                                            value={recurrence.frequencyEndDate}
-                                                            onChange={e => setRecurrence(r => ({ ...r, frequencyEndDate: e.target.value }))}
-                                                            style={{ marginLeft: 8, flex: 1 }}
-                                                        />
-                                                    )}
-                                                    {type === "after" && recurrence.frequencyEndType === "after" && (
-                                                        <div className="atd-row" style={{ marginLeft: 8, flex: 1 }}>
-                                                            <input
-                                                                className="atd-input"
-                                                                type="number" min={1} max={999}
-                                                                value={recurrence.frequencyOccurrencesLeft}
-                                                                onChange={e => setRecurrence(r => ({ ...r, frequencyOccurrencesLeft: Math.max(1, +e.target.value) }))}
-                                                                style={{ width: 64, flex: "none", textAlign: "center" }}
-                                                            />
-                                                            <span className="atd-row-label">ocurrencias</span>
-                                                        </div>
-                                                    )}
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
                         </div>
                     </div>
 

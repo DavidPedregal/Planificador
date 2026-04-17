@@ -4,109 +4,134 @@ const TaskModel = require("./models/TaskModel");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
+const { FREQUENCY_TYPE } = require("./models/enums/enums");
 
-function calculateNextDates(task) {
-    if (!task.frequencyType || task.frequencyType === 'none') {
-        return null;
+/**
+ * Generate recurring tasks based on the recurrence rule
+ * @param {Object} baseTask - The base task to generate recurrences from
+ * @returns {Array} Array of task objects to be created
+ */
+function generateRecurringTasks(baseTask) {
+    const tasks = [baseTask];
+    
+    // If no frequency type or it's "none", return just the base task
+    if (!baseTask.frequencyType || baseTask.frequencyType === FREQUENCY_TYPE.NONE) {
+        return tasks;
     }
 
-    const currentFinishDate = new Date(task.finishDate);
-    const currentGivenDate = new Date(task.givenDate);
-    let newFinishDate = new Date(currentFinishDate);
-    let newGivenDate = new Date(currentGivenDate);
-    const interval = task.frequencyInterval || 1;
+    let currentFinishDate = new Date(baseTask.finishDate);
+    let currentGivenDate = new Date(baseTask.givenDate);
+    let occurrencesLeft = baseTask.frequencyOccurrencesLeft;
+    const endDate = baseTask.frequencyEndDate ? new Date(baseTask.frequencyEndDate) : null;
+    const interval = baseTask.frequencyInterval || 1;
+    const frequencyType = baseTask.frequencyType;
+    const endType = baseTask.frequencyEndType;
+    const daysOfWeek = baseTask.frequencyDaysOfWeek || [];
 
-    switch (task.frequencyType) {
-        case 'day':
-            newFinishDate.setDate(newFinishDate.getDate() + interval);
-            newGivenDate.setDate(newGivenDate.getDate() + interval);
-            break;
-
-        case 'week':
-            newFinishDate.setDate(newFinishDate.getDate() + 7 * interval);
-            newGivenDate.setDate(newGivenDate.getDate() + 7 * interval);
-            break;
-
-        case 'month':
-            newFinishDate.setMonth(newFinishDate.getMonth() + interval);
-            newGivenDate.setMonth(newGivenDate.getMonth() + interval);
-            break;
-
-        case 'year':
-            newFinishDate.setFullYear(newFinishDate.getFullYear() + interval);
-            newGivenDate.setFullYear(newGivenDate.getFullYear() + interval);
-            break;
-
-        default:
-            return null;
-    }
-
-    // Check if we've exceeded the end date
-    if (task.frequencyEndType === 'on' && task.frequencyEndDate) {
-        if (newFinishDate > new Date(task.frequencyEndDate)) {
-            return null;
+    // Helper function to create next task
+    function createNextTask(finishDate, givenDate, occurrencesLeftValue) {
+        const task = {
+            ...baseTask,
+            finishDate: new Date(finishDate),
+            givenDate: new Date(givenDate),
+            _id: undefined // Let MongoDB generate new IDs
+        };
+        
+        // Update frequencyOccurrencesLeft if provided
+        if (occurrencesLeftValue !== undefined) {
+            task.frequencyOccurrencesLeft = occurrencesLeftValue;
         }
-    }
-    // Check if we've exceeded the occurrences limit
-    else if (task.frequencyEndType === 'after' && task.frequencyOccurrencesLeft) {
-        if (task.frequencyOccurrencesLeft <= 1) {
-            return null;
-        }
+        
+        delete task.__v; // Remove version field if exists
+        return task;
     }
 
-    return { newFinishDate, newGivenDate };
+    // Generate recurrences based on frequency type
+    while (true) {
+        let nextFinishDate = new Date(currentFinishDate);
+        let nextGivenDate = new Date(currentGivenDate);
+        
+        // Calculate next occurrence based on frequency type
+        if (frequencyType === FREQUENCY_TYPE.DAYS) {
+            nextFinishDate.setDate(nextFinishDate.getDate() + interval);
+            nextGivenDate.setDate(nextGivenDate.getDate() + interval);
+        } else if (frequencyType === FREQUENCY_TYPE.WEEKS) {
+            if (daysOfWeek.length > 0) {
+                // For weekly with specific days
+                let found = false;
+                
+                // Find next occurrence on the specified days
+                for (let i = 1; i <= 7; i++) {
+                    const checkDate = new Date(nextFinishDate);
+                    checkDate.setDate(checkDate.getDate() + i);
+                    const checkDay = checkDate.getDay();
+                    
+                    if (daysOfWeek.includes(checkDay)) {
+                        nextFinishDate = checkDate;
+                        nextGivenDate = new Date(checkDate);
+                        const timeDiff = new Date(baseTask.finishDate) - new Date(baseTask.givenDate);
+                        nextGivenDate.setTime(nextGivenDate.getTime() - timeDiff);
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) {
+                    break; // This shouldn't happen with valid input
+                }
+            } else {
+                nextFinishDate.setDate(nextFinishDate.getDate() + (interval * 7));
+                nextGivenDate.setDate(nextGivenDate.getDate() + (interval * 7));
+            }
+        } else if (frequencyType === FREQUENCY_TYPE.MONTHS) {
+            nextFinishDate.setMonth(nextFinishDate.getMonth() + interval);
+            nextGivenDate.setMonth(nextGivenDate.getMonth() + interval);
+        } else if (frequencyType === FREQUENCY_TYPE.YEARS) {
+            nextFinishDate.setFullYear(nextFinishDate.getFullYear() + interval);
+            nextGivenDate.setFullYear(nextGivenDate.getFullYear() + interval);
+        }
+
+        // Check if we should continue generating
+        let shouldContinue = true;
+
+        if (endType === "after" && occurrencesLeft !== undefined) {
+            occurrencesLeft--;
+            if (occurrencesLeft <= 0) {
+                shouldContinue = false;
+            }
+        } else if (endType === "on" && endDate) {
+            if (nextFinishDate > endDate) {
+                shouldContinue = false;
+            }
+        }
+
+        if (!shouldContinue) {
+            break;
+        }
+
+        tasks.push(createNextTask(nextFinishDate, nextGivenDate, occurrencesLeft));
+        currentFinishDate = nextFinishDate;
+        currentGivenDate = nextGivenDate;
+    }
+
+    return tasks;
 }
 
-async function generateNextTask(task) {
-    const nextDates = calculateNextDates(task);
-    if (!nextDates) {
-        return null;
-    }
-
-    const newTaskData = {
-        userId: task.userId,
-        subjectId: task.subjectId,
-        title: task.title,
-        description: task.description,
-        estimatedTime: task.estimatedTime,
-        finishDate: nextDates.newFinishDate,
-        givenDate: nextDates.newGivenDate,
-        frequencyType: task.frequencyType,
-        frequencyEndDate: task.frequencyEndDate,
-        frequencyOccurrencesLeft: task.frequencyOccurrencesLeft ? task.frequencyOccurrencesLeft - 1 : undefined,
-        frequencyInterval: task.frequencyInterval,
-        frequencyDaysOfWeek: task.frequencyDaysOfWeek,
-        frequencyEndType: task.frequencyEndType,
-        completed: false,
-        generatedFromTaskId: task._id
-    };
-
-    const newTask = new TaskModel(newTaskData);
-    return await newTask.save();
-}
-
-async function findAndDeleteGeneratedTask(task) {
-    try {
-        const generatedTask = await TaskModel.findOne({
-            generatedFromTaskId: task._id,
-            userId: task.userId,
-            completed: false
-        });
-
-        if (generatedTask) {
-            await TaskModel.deleteOne({ _id: generatedTask._id });
-        }
-    } catch (error) {
-        // If the task doesn't exist, that's fine - user may have already deleted it
-    }
-}
-
-function validateData(data) {
-    const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate', 'frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
+function validateData(data, checkRecurrence = false) {
+    const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate'];
+    const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
     const updateData = {};
     for (const field of allowedFields) {
         if (Object.prototype.hasOwnProperty.call(data, field)) {
             updateData[field] = data[field];
+        }
+    }
+
+    if (checkRecurrence) {
+        for (const field of recurrenceFields) {
+            if (Object.prototype.hasOwnProperty.call(data, field)) {
+                updateData[field] = data[field];
+            }
         }
     }
 
@@ -153,38 +178,31 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
     try {
-        const validatedData = validateData(req.body);
+        const validatedData = validateData(req.body, true);
 
         validatedData.userId = userId;
         validatedData.subjectId = req.body.subjectId || null;
 
-        const newTask = new TaskModel(validatedData);
-        const saved = await newTask.save();
-        res.status(201).json(saved);        
-    } catch (error) {
-        console.error("Error saving task:", error);
-        res.status(500).json({ error: "Error saving tasks" });
-    }
-});
+        // Create base task
+        const baseTask = validatedData;
 
-router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
-    const userId = req.userId;
-    const taskId = req.params.id;
+        // Generate all recurring tasks if applicable
+        const tasksToCreate = generateRecurringTasks(baseTask);
 
-    if (!mongoose.Types.ObjectId.isValid(taskId)) {
-        return res.status(400).json({ error: "Invalid task ID" });
-    }
+        const groupId = new mongoose.Types.ObjectId().toString();
 
-    try {
-        const task = await TaskModel.findOne({ _id: taskId, userId });
-        if (!task) {
-            return res.status(404).json({ error: "Task not found" });
+        // If multiple tasks are generated, assign them a common groupId
+        if (tasksToCreate.length > 1) {
+            tasksToCreate.forEach(task => {
+                task.groupId = groupId;
+            });
         }
 
-        await TaskModel.deleteOne({ _id: taskId, userId });
-        res.json({ message: "Task deleted successfully" });
+        // Save all tasks
+        const saved = await TaskModel.insertMany(tasksToCreate);
+        res.status(201).json(tasksToCreate.length === 1 ? saved[0] : saved);
     } catch (error) {
-        res.status(500).json({ error: "Error deleting task" });
+        res.status(500).json({ error: "Error saving tasks" });
     }
 });
 
@@ -215,6 +233,88 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
     }
 });
 
+router.put('/forward/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    const validation = validatetaskData(req.body, { isCreation: false });
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+    }
+
+    try {
+        const originaltask = await Calendartask.findOne({ _id: taskId, userId });
+        if (!originaltask) {
+            return res.status(404).json({ error: "task not found" });
+        }
+
+        const changedFields = getChangedFields(validation.data, originaltask);
+
+        if (Object.keys(changedFields).length === 0) {
+            return res.status(200).json({ message: "No changes detected", modifiedCount: 0 });
+        }
+
+        const updateQuery = originaltask.groupId
+            ? { groupId: originaltask.groupId, userId, start: { $gte: originaltask.start } }
+            : { _id: taskId, userId };
+
+        const result = await Calendartask.updateMany(updateQuery, { $set: changedFields });
+
+        res.json({
+            message: `${result.modifiedCount} task(s) updated successfully`,
+            modifiedCount: result.modifiedCount,
+        });
+    } catch (error) {
+        console.error("Error updating task:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    const validation = validatetaskData(req.body, { isCreation: false });
+    if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+    }
+
+    try {
+        const originaltask = await Calendartask.findOne({ _id: taskId, userId });
+        if (!originaltask) {
+            return res.status(404).json({ error: "task not found" });
+        }
+
+        const changedFields = getChangedFields(validation.data, originaltask);
+
+        if (Object.keys(changedFields).length === 0) {
+            return res.status(200).json({ message: "No changes detected", modifiedCount: 0 });
+        }
+
+        const updateQuery = originaltask.groupId
+            ? { groupId: originaltask.groupId, userId }
+            : { _id: taskId, userId };
+
+        const result = await Calendartask.updateMany(updateQuery, { $set: changedFields });
+
+        res.json({
+            message: `${result.modifiedCount} task(s) updated successfully`,
+            modifiedCount: result.modifiedCount,
+        });
+    } catch (error) {
+        console.error("Error updating task:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.put('/toggle/:id', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
     const taskId = req.params.id;
@@ -228,24 +328,84 @@ router.put('/toggle/:id', dbLimiter, authMiddleware, async function(req, res) {
         if (!task) {
             return res.status(404).json({ error: "Task not found" });
         }
-
-        const isMarkingAsCompleted = !task.completed;
-
-        // If marking as completed and task has recurrence, generate the next task
-        if (isMarkingAsCompleted && task.frequencyType && task.frequencyType !== 'none') {
-            await generateNextTask(task);
-        }
-        // If marking as uncompleted, find and delete the generated task
-        else if (!isMarkingAsCompleted) {
-            await findAndDeleteGeneratedTask(task);
-        }
-
         task.completed = !task.completed;
         const updated = await task.save();
         res.status(200).json(updated);
     } catch (error) {
         res.status(500).json({ error: "Error updating task" });
     }
+});
+
+router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    try {
+        const task = await TaskModel.findOne({ _id: taskId, userId });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found" });
+        }
+
+        await TaskModel.deleteOne({ _id: taskId, userId });
+        res.json({ message: "Task deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Error deleting task" });
+    }
+});
+
+router.delete('/forward/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    try {
+        const task = await TaskModel.findOne({ _id: taskId, userId });
+        if (!task) {
+            return res.status(404).json({ error: "task not found" });
+        }
+
+        const deleteQuery = task.groupId
+            ? { groupId: task.groupId, userId, finishDate: { $gte: task.finishDate } }
+            : { _id: taskId, userId };
+
+        const result = await TaskModel.deleteMany(deleteQuery);
+
+        res.json({
+            message: `${result.deletedCount} task(s) deleted successfully`,
+            deletedCount: result.deletedCount,
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Error deleting task" });
+    }
+});
+
+router.delete('/all/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const taskId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    try {
+        const deleted = await TaskModel.findOneAndDelete({ _id: taskId, userId });
+        if (!deleted) {
+            return res.status(404).json({ error: "task not found" });
+        }
+
+        await TaskModel.deleteMany({ groupId: deleted.groupId, userId });
+
+        res.status(200).json({ message: "tasks deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Error deleting task" });
+    }   
 });
 
 module.exports = router;

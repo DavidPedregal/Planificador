@@ -347,7 +347,7 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
                                                         onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}
                                                     />
                                                     <span className="aed-radio-label" onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}>
-                            {{ on: "El día", after: "Después de" }[type]}
+                            {{ on: "El día", after: "Después de ocurrencias" }[type]}
                           </span>
                                                     {type === "on" && recurrence.frequencyEndType === "on" && (
                                                         <input
@@ -368,7 +368,7 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
                                                                 onChange={e => setRecurrence(r => ({ ...r, frequencyOccurrencesLeft: Math.max(1, +e.target.value) }))}
                                                                 style={{ width: 64, flex: "none", textAlign: "center" }}
                                                             />
-                                                            <span className="aed-row-label">ocurrencias</span>
+                                                            <span className="aed-row-label">veces</span>
                                                         </div>
                                                     )}
                                                 </label>

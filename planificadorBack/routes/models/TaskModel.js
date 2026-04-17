@@ -29,34 +29,12 @@ const taskModel = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    frequencyType : {
-        type : String,
-        enum : Object.values(FREQUENCY_TYPE),
-    },
-    frequencyEndDate : {
-        type: Date,
-    },
-    frequencyOccurrencesLeft : {
-        type: Number,
-    },
-    frequencyInterval: {
-        type: Number,
-    },
-    frequencyDaysOfWeek: {
-        type: [Number],
-    },
-    frequencyEndType: {
-        type: String,
-        enum: ["never", "on", "after"],
-    },
     completed: {
         type: Boolean,
         default: false,
     },
-    generatedFromTaskId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Task",
-        default: null,
+    groupId: {
+        type: String,
     },
 });
 

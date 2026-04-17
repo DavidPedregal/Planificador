@@ -6,8 +6,8 @@ import { config } from "@/app/config/config";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddTaskDialog from "./add-task-dialog";
 import "./todoList.css";
-import ConfirmDialog from "../Sidebar/confirm-dialog";
 import EditTaskDialog from "./edit-task-dialog";
+import RecurrenceChoiceDialog from "../Event/recurrence-choice-dialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Task {
@@ -35,7 +35,7 @@ export default function TodoList() {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
 
     const handleToggleTask = async (id: number) => {
         try {
@@ -58,7 +58,7 @@ export default function TodoList() {
     };
 
     const handleDeleteTask = (id: number) => {
-        setConfirmDeleteOpen(true);
+        setRecurrenceChoiceOpen(true);
         setSelectedTaskId(id);
     };
 
@@ -72,6 +72,36 @@ export default function TodoList() {
                 },
             });
             setTasks(t => t.filter(x => x.id !== selectedTaskId));
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
+    }
+
+    const deleteTaskFromThis = async () => {
+        try {
+            let url = config.backendUrl + `/tasks/forward/${selectedTaskId}`;
+            await fetch(url, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            await fetchTasks();
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
+    }
+
+    const deleteTaskSeries = async () => {
+        try {
+            let url = config.backendUrl + `/tasks/all/${selectedTaskId}`;
+            await fetch(url, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            await fetchTasks();
         } catch (error) {
             console.error("Error deleting event:", error);
         }
@@ -173,23 +203,33 @@ export default function TodoList() {
                 <AddTaskDialog
                     open={addDialogOpen}
                     onClose={() => setAddDialogOpen(false)}
-                    onSave={(newTask) => {
-                        setTasks([...tasks, mapTask(newTask)]);
+                    onSave={(newTasks) => {
+                        const orderedTasks = [...tasks, ...newTasks.map(mapTask)].sort((a: Task, b: Task) => a.finishDate.getTime() - b.finishDate.getTime());
+                        setTasks(orderedTasks);
                         setAddDialogOpen(false);
                     }}
                 />
 
-                <ConfirmDialog
-                    open={confirmDeleteOpen}
-                    title="Eliminar tarea"
-                    message="¿Estás seguro de que quieres eliminar esta tarea?"
-                    isDangerous={true}
-                    onCancel={() => setConfirmDeleteOpen(false)}
-                    onConfirm={() => {
+                <RecurrenceChoiceDialog
+                    open={recurrenceChoiceOpen}
+                    action="delete"
+                    title="Eliminar tarea recurrente"
+                    message="¿Quieres eliminar solo esta tarea o todas las tareas de la serie?"
+                    onChooseSingle={() => {
                         deleteTask();
-                        setConfirmDeleteOpen(false);
+                        setRecurrenceChoiceOpen(false);
                     }}
-                 />
+                    onChooseFromThis={() => {
+                        deleteTaskFromThis();
+                        setRecurrenceChoiceOpen(false);
+                    }}
+                    onChooseAll={() => {
+                        deleteTaskSeries();
+                        setRecurrenceChoiceOpen(false);
+                    }}
+                    onCancel={() => setRecurrenceChoiceOpen(false)}
+                />
+
 
                 <EditTaskDialog
                     open={editDialogOpen}
