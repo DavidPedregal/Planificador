@@ -61,6 +61,15 @@ export interface RecurrenceRule {
     frequencyOccurrencesLeft?: number;
 }
 
+export interface TaskRecurrenceRule {
+    frequencyType: typeof FREQUENCY_TYPE[keyof typeof FREQUENCY_TYPE];
+    frequencyInterval: number;
+    frequencyDaysOfWeek?: number[]; // 0=Sun … 6=Sat
+    frequencyEndType: "never" | "on" | "after";
+    frequencyEndDate?: string;
+    frequencyOccurrencesLeft?: number;
+}
+
 export const WEEKDAYS = ["D", "L", "M", "X", "J", "V", "S"];
 export const WEEKDAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 

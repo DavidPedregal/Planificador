@@ -124,6 +124,36 @@
   padding-right: 34px;
 }
 
+.atd-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  cursor: help;
+  position: relative;
+}
+
+.atd-info-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated, #1e1e2a);
+  border: 1px solid var(--border, rgba(255,255,255,0.2));
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 10;
+  color: var(--text-primary, #e8e8f0);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.atd-info-icon svg {
+  color: var(--accent, #7c6ff7);
+}
+
 /* ── Recurrence Box ── */
 .atd-recurrence-box {
   display: flex; flex-direction: column; gap: 12px;

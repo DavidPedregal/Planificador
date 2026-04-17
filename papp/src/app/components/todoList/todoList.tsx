@@ -46,7 +46,7 @@ export default function TodoList() {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-            setTasks(t => t.map(x => x.id === id ? { ...x, completed: !x.completed } : x));
+            fetchTasks();
         } catch (error) {
             console.error("Error deleting event:", error);
         }

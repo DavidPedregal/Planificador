@@ -47,11 +47,16 @@ const taskModel = new mongoose.Schema({
     },
     frequencyEndType: {
         type: String,
-        enum: ["on", "after"],
+        enum: ["never", "on", "after"],
     },
     completed: {
         type: Boolean,
         default: false,
+    },
+    generatedFromTaskId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+        default: null,
     },
 });
 

@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./add-event-dialog.css";
 import EastIcon from '@mui/icons-material/East';
 import { config } from "@/app/config/config";
-import { CalendarEvent, EVENT_COLORS, WEEKDAYS, 
-    WEEKDAY_LABELS, formatDateTimeLocal, 
-    Calendar} from "../Calendar/calendarHelper";
+import { CalendarEvent, EVENT_COLORS, Calendar} from "../Calendar/calendarHelper";
 import RecurrenceChoiceDialog from "./recurrence-choice-dialog";
 
 
