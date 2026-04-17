@@ -78,4 +78,25 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res) {
     }
 });
 
+router.put('/toggleVisibility/:id', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const calendarId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(calendarId)) {
+        return res.status(400).json({ error: "Invalid calendar ID" });
+    }
+
+    try {
+        const calendar = await Calendar.findOne({ _id: calendarId, userId });
+        if (!calendar) {
+            return res.status(404).json({ error: "Calendar not found" });
+        }
+        calendar.visible = !calendar.visible;
+        await calendar.save();
+        res.status(200).json({ message : "Calendar visibility changed" });
+    } catch (error) {
+        res.status(500).json({ error: "Error updating calendar" });
+    }
+});
+
 module.exports = router;

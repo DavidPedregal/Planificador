@@ -40,10 +40,19 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
     }, [user]);
 
 
-    const toggleVisibility = (id: string) => {
-        const updated = calendars.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
-        setCalendars(updated);
-        onCalendarVisibilityChange?.(updated.filter(c => c.visible).map(c => c.id));
+    const toggleVisibility = async (id: string) => {
+        try {
+            await fetch(config.backendUrl + `/calendars/toggleVisibility/${id}`, {
+                method: "PUT",
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const updated = calendars.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
+            setCalendars(updated);
+            onCalendarVisibilityChange?.(updated.filter(c => c.visible).map(c => c.id));
+            onCalendarDeleted?.();
+        } catch (error) {
+            console.error("Error toggling calendar visibility:", error);
+        }
     };
 
     const handleDelete = (id: string) => {

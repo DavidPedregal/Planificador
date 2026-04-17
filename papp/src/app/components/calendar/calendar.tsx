@@ -38,6 +38,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
+    const [allEvents, setAllEvents] = useState<any[]>([]); // Store all events for recurrence handling
     const [events, setEvents] = useState<any[]>([]);
     const [calendars, setCalendars] = useState<CalendarInterface[]>([]);
 
@@ -101,6 +102,13 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
         }).catch(error => console.error("Error updating event:", error));
     };
 
+    const filterEventsByVisibility = (allEventsList: any[], calendarsList: CalendarInterface[]) => {
+        return allEventsList.filter(event => {
+            const calendar = calendarsList.find(cal => cal.id === event.calendarId);
+            return calendar?.visible ?? true; // Show event if calendar is visible (or if calendar not found, default to true)
+        });
+    };
+
     const fetchEvents = async (calendarsList: CalendarInterface[]) => {
         try {
             const res = await fetch(config.backendUrl + "/events", {
@@ -108,10 +116,15 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             });
             const data = await res.json();
             
-            setEvents(data.map((event: any) => {
+            const mappedEvents = data.map((event: any) => {
                 const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList);
                 return mapToFullCalendarEvent(event, color);
-            }));
+            });
+            
+            setAllEvents(mappedEvents);
+            // Filter events based on calendar visibility
+            const visibleEvents = filterEventsByVisibility(mappedEvents, calendarsList);
+            setEvents(visibleEvents);
         } catch (error) {
             console.error("Error fetching events:", error);
         }   
@@ -155,6 +168,12 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
         loadData();
     }, [refreshTrigger]);
 
+    // Update visible events when calendar visibility changes
+    useEffect(() => {
+        const visibleEvents = filterEventsByVisibility(allEvents, calendars);
+        setEvents(visibleEvents);
+    }, [calendars]);
+
     return (
     <>
     <div className="calendar-wrapper">
@@ -193,8 +212,12 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 const eventsArray = Array.isArray(newEvents) ? newEvents : [newEvents];
                 const newFullCalendarEvents = eventsArray.map((newEvent: any) => 
                     mapToFullCalendarEvent(newEvent, setEventColor(newEvent.useCalendarColor, newEvent.color, newEvent.calendarId))
-            );
-                setEvents([...events, ...newFullCalendarEvents]);
+                );
+                const updatedAllEvents = [...allEvents, ...newFullCalendarEvents];
+                setAllEvents(updatedAllEvents);
+                // Filter to show only events from visible calendars
+                const visibleEvents = filterEventsByVisibility(updatedAllEvents, calendars);
+                setEvents(visibleEvents);
             }}
         />
 
