@@ -47,7 +47,17 @@ const EditEventDialog: React.FC<Props> = ({open, event, onClose, onSave, onDelet
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             const data = await res.json();
-            setCalendars(data.map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color })));
+            const customCalendars = data.map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color }));
+            
+            const commonRes = await fetch(config.backendUrl + "/calendars/common", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const commonData = await commonRes.json();
+            const commonCalendars = commonData
+                .filter((cal: any) => cal.name !== "Planned")
+                .map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color }));
+            
+            setCalendars([...customCalendars, ...commonCalendars]);
         } catch (error) {
             console.error("Error fetching calendars:", error);
         }

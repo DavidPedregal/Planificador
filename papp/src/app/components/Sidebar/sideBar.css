@@ -60,6 +60,13 @@
   }
 
   /* ── Calendar list ── */
+  .sidebar-default-calendars{
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: none;
+  }
   .sidebar-calendars {
     flex: 1;
     overflow-y: auto;

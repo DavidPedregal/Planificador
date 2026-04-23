@@ -56,7 +56,11 @@ router.post('/login', authLimiter, async function(req, res) {
 function createDefaultCalendarForUser(userId) {
   const Calendar = require("./models/CalendarModel");
   const newCalendar = new Calendar({ userId, name: "Default", color: "#ff0000" });
+  const plannedCalendar = new Calendar({ userId, name: "Planned", color: "#505050", isSystem: true });
+  const plannableCalendar = new Calendar({ userId, name: "Plannable", color: "#bbbbbb", isSystem: true });
   newCalendar.save();
+  plannedCalendar.save();
+  plannableCalendar.save();
 }
 
 router.get('/verify', authMiddleware, (req, res) => {

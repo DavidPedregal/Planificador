@@ -21,9 +21,10 @@ interface SidebarProps {
 
 export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted }: SidebarProps) {
     const { user } = useApp();
-    const [calendars, setCalendars] = useState<Calendar[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
     const menuRef = useRef<HTMLDivElement>(null);
+    const [defaultCalendars, setDefaultCalendars] = useState<Calendar[]>([]);
+    const [customCalendars, setCustomCalendars] = useState<Calendar[]>([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
     const [addCalendarOpen, setAddCalendarOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [editCalendarOpen, setEditCalendarOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
     useEffect(() => {
         if (!user) return;
         fetchCalendars();
+        fetchDefaultCalendars();
         fetchSubjects();
     }, [user]);
 
@@ -46,8 +48,10 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 method: "PUT",
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
-            const updated = calendars.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
-            setCalendars(updated);
+            const updated = customCalendars.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
+            setCustomCalendars(updated);
+            const updatedDefault = defaultCalendars.map(c => c.id === id ? { ...c, visible: !c.visible } : c);
+            setDefaultCalendars(updatedDefault);
             onCalendarVisibilityChange?.(updated.filter(c => c.visible).map(c => c.id));
             onCalendarDeleted?.();
         } catch (error) {
@@ -67,7 +71,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
             method: "DELETE",
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        setCalendars(prev => prev.filter(c => c.id !== selectedCalendarId));
+        setCustomCalendars(prev => prev.filter(c => c.id !== selectedCalendarId));
         setDeleteConfirmOpen(false);
         setSelectedCalendarId(null);
         onCalendarDeleted?.();
@@ -83,18 +87,39 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
         .then(res => res.json())
-        .then(data => {setCalendars(data.map((cal: any) => (
+        .then(data => {setCustomCalendars(data.map((cal: any) => (
             { 
                 id: cal._id, 
                 name: cal.name, 
                 userId: cal.userId, 
                 color: cal.color, 
-                visible: cal.visible
+                visible: cal.visible,
+                isSystem: cal.isSystem ?? false,
             }
             )));
         })
         .catch(error => console.error("Error fetching calendars:", error));
     };
+
+    const fetchDefaultCalendars = async () => {
+        fetch(config.backendUrl + `/calendars/common`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
+        .then(res => res.json())
+        .then(data => {setDefaultCalendars(data.map((cal: any) => (
+            { 
+                id: cal._id, 
+                name: cal.name, 
+                userId: cal.userId, 
+                color: cal.color, 
+                visible: cal.visible,
+                isSystem: cal.isSystem ?? false,
+            }
+            )));
+        })
+        .catch(error => console.error("Error fetching calendars:", error));
+    };
+
 
     const fetchSubjects = async () => {
         try {
@@ -143,7 +168,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
 
                 {/* ── General ── */}
                 <span className="sidebar-label">General</span>
-                <button className="sidebar-nav-item active">
+                <button className="sidebar-nav-item">
                     <PersonOutlineIcon/>
                     Perfil
                 </button>
@@ -155,10 +180,27 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 <div className="sidebar-divider" />
 
                 {/* ── Calendarios ── */}
+                <span className="sidebar-label">Calendarios por defecto</span>
+                <div className="sidebar-default-calendars">
+                    {defaultCalendars.map(cal => (
+                        <div key={cal.id} className="sidebar-cal-item">
+                            <div
+                                className={`sidebar-cal-checkbox${cal.visible ? " checked" : ""}`}
+                                style={cal.visible ? { background: cal.color } : {}}
+                                onClick={() => toggleVisibility(cal.id)}
+                            >
+                                <svg className="sidebar-cal-checkbox-tick" viewBox="0 0 8 8" fill="none">
+                                    <path d="M1 4l2.5 2.5L7 1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <span className="sidebar-cal-name">{cal.name}</span>
+                        </div>
+                    ))}
+                </div>
                 <span className="sidebar-label">Mis calendarios</span>
 
                 <div className="sidebar-calendars">
-                    {calendars.map(cal => (
+                    {customCalendars.map(cal => (
                         <div key={cal.id} className="sidebar-cal-item">
                             <div
                                 className={`sidebar-cal-checkbox${cal.visible ? " checked" : ""}`}
@@ -174,10 +216,11 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                             <button className="sidebar-cal-menu-btn" onClick={() => handleEdit(cal.id)}>
                                 <EditIcon size={"1rem"}/>
                             </button>
-                            {calendars.length > 1 && (
-                                <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal.id)}>
-                                    <DeleteForeverIcon fontSize="small"/>
-                                </button>
+
+                            {customCalendars.length > 1 && (
+                            <button className="sidebar-cal-menu-btn danger" onClick={() => handleDelete(cal.id)}>
+                                <DeleteForeverIcon fontSize="small"/>
+                            </button>
                             )}
                         </div>
                     ))}
@@ -236,7 +279,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 
                 <EditCalendarDialog
                     open={editCalendarOpen}
-                    calendar={calendars.find(c => c.id === selectedCalendarId) || {
+                    calendar={defaultCalendars.concat(customCalendars).find(c => c.id === selectedCalendarId) || {
                         id: "",
                         name: "",
                         color: "",

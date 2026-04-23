@@ -9,10 +9,21 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res) {
     const userId = req.userId;
 
     try {
-        const calendars = await Calendar.find({ userId });
+        const calendars = await Calendar.find({ userId, isSystem: false });
         res.json(calendars);
     } catch (error) {
         res.status(500).json({ error: "Error obtaining calendars" });
+    }
+});
+
+router.get('/common', dbLimiter, authMiddleware, async function(req, res) {
+    const userId = req.userId;
+
+    try {
+        const commonCalendars = await Calendar.find({ userId, isSystem: true });
+        res.json(commonCalendars);
+    } catch (error) {
+        res.status(500).json({ error: "Error obtaining common calendars" });
     }
 });
 
@@ -41,6 +52,10 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res) {
     }
 
     try {
+        const defaults = await Calendar.find({ userId, isSystem: true });
+        if (defaults.some(cal => cal._id.toString() === calendarId)) {
+            return res.status(400).json({ error: "Cannot delete a default calendar" });
+        }
         const calendar = await Calendar.findOne({ _id: calendarId, userId });
         if (!calendar) {
             return res.status(404).json({ error: "Calendar not found" });

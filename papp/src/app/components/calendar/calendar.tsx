@@ -41,6 +41,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [allEvents, setAllEvents] = useState<any[]>([]); // Store all events for recurrence handling
     const [events, setEvents] = useState<any[]>([]);
     const [calendars, setCalendars] = useState<CalendarInterface[]>([]);
+    const [customCalendars, setCustomCalendars] = useState<CalendarInterface[]>([]);
 
     const addEvent = (start: Date, end: Date) => {
         setStartDate(start);
@@ -117,7 +118,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             const data = await res.json();
             
             const mappedEvents = data.map((event: any) => {
-                const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList);
+                const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList.concat(customCalendars));
                 return mapToFullCalendarEvent(event, color);
             });
             
@@ -153,7 +154,20 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 visible: cal.visible,
             }));
             setCalendars(mappedCalendars);
-            return mappedCalendars;
+
+            const commonRes = await fetch(config.backendUrl + "/calendars/common", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const commonData = await commonRes.json();
+            
+            const mappedCommonCalendars = commonData.map((cal: any) => ({
+                id: cal._id, // Use _id from backend as id
+                name: cal.name,
+                color: cal.color,
+                visible: cal.visible,
+            }));
+            setCustomCalendars(mappedCommonCalendars);
+            return mappedCalendars.concat(mappedCommonCalendars);
         } catch (error) {
             console.error("Error fetching calendars:", error);
             return [];

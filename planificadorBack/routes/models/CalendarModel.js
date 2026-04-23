@@ -16,6 +16,10 @@ const calendarModel = new mongoose.Schema({
     visible: {
         type: Boolean,
         default: true,
+    },
+    isSystem: {
+        type: Boolean,
+        default: false,
     }
 });
 
