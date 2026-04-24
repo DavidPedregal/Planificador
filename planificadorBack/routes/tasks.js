@@ -225,6 +225,7 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
 
         // Generate all recurring tasks if applicable
         const tasksToCreate = generateRecurringTasks(baseTask);
+        console.log("Tasks to create:", tasksToCreate); 
 
         const groupId = new mongoose.Types.ObjectId().toString();
 
@@ -239,6 +240,7 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res) {
         const saved = await TaskModel.insertMany(tasksToCreate);
         res.status(201).json(tasksToCreate.length === 1 ? saved[0] : saved);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Error saving tasks" });
     }
 });
