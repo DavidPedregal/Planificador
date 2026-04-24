@@ -2,6 +2,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from '@fullcalendar/list';
 import {useEffect, useState} from "react";
 import AddEventDialog from "../Event/add-event-dialog";
 import "./calendar.css";
@@ -192,14 +193,14 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     <>
     <div className="calendar-wrapper">
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
         initialView="timeGridWeek"
         slotMinTime="08:00:00"
         slotMaxTime="22:00:00"
         headerToolbar={{
           left: "prev next today",
           center: "title",
-          right: "dayGridMonth timeGridWeek timeGridDay",
+          right: "dayGridMonth timeGridWeek timeGridDay listWeek",
         }}
         events={events}
         dateClick={(info) => {

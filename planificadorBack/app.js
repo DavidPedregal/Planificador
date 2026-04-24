@@ -12,6 +12,7 @@ const calendarRouter = require("./routes/calendars");
 const eventRouter = require("./routes/events");
 const taskRouter = require("./routes/tasks");
 const subjectRouter = require("./routes/subjects");
+const planRouter = require("./routes/plan");
 
 connectDB().then();
 
@@ -38,6 +39,7 @@ app.use("/calendars", calendarRouter);
 app.use("/events", eventRouter);
 app.use("/tasks", taskRouter);
 app.use("/subjects", subjectRouter);
+app.use("/plan", planRouter);
 
 // 404
 app.use((req, res, next) => {
