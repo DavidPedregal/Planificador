@@ -3,23 +3,23 @@ const express = require('express');
 
 // ── Mocks ──────────────────────────────────────────────────────────────────────
 
-jest.mock('../../middlewares/authmiddleware', () =>
+jest.mock('../middlewares/authmiddleware', () =>
     (req, _res, next) => {
         req.userId = '507f1f77bcf86cd799439011';
         next();
     }
 );
 
-jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
+jest.mock('../middlewares/rateLimiterMiddleware', () => ({
     dbLimiter: (_req, _res, next) => next(),
 }));
 
-jest.mock('../models/SubjectModel');
-const SubjectModel = require('../models/SubjectModel');
+jest.mock('../routes/models/SubjectModel');
+const SubjectModel = require('../routes/models/SubjectModel');
 
 // ── App setup ──────────────────────────────────────────────────────────────────
 
-const subjectsRouter = require('../subjects'); // ajusta el nombre si es distinto
+const subjectsRouter = require('../routes/subjects'); // ajusta el nombre si es distinto
 
 const app = express();
 app.use(express.json());

@@ -3,22 +3,22 @@ const express = require('express');
 
 // ── Mocks ──────────────────────────────────────────────────────────────────────
 
-jest.mock('../../middlewares/authmiddleware', () =>
+jest.mock('../middlewares/authmiddleware', () =>
     (req, _res, next) => {
         req.userId = '507f1f77bcf86cd799439011';
         next();
     }
 );
 
-jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
+jest.mock('../middlewares/rateLimiterMiddleware', () => ({
     authLimiter: (_req, _res, next) => next(),
 }));
 
-jest.mock('../models/UserModel');
-const User = require('../models/UserModel');
+jest.mock('../routes/models/UserModel');
+const User = require('../routes/models/UserModel');
 
-jest.mock('../models/CalendarModel');
-const Calendar = require('../models/CalendarModel');
+jest.mock('../routes/models/CalendarModel');
+const Calendar = require('../routes/models/CalendarModel');
 
 jest.mock('jsonwebtoken');
 const jwt = require('jsonwebtoken');

@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require("mongoose");
-const SubjectModel = require("./models/SubjectModel");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');

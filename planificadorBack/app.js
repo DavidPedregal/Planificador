@@ -13,6 +13,7 @@ const eventRouter = require("./routes/events");
 const taskRouter = require("./routes/tasks");
 const subjectRouter = require("./routes/subjects");
 const planRouter = require("./routes/plan");
+const errorHandler = require("./middlewares/errorHandler");
 
 connectDB().then();
 
@@ -46,12 +47,6 @@ app.use((req, res, next) => {
   next(createError(404));
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  res.status(err.status || 500).json({
-    message: err.message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
-  });
-});
+app.use(errorHandler);
 
 module.exports = app;

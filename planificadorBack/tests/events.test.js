@@ -4,24 +4,24 @@ const mongoose = require('mongoose');
 
 // ── Mocks ──────────────────────────────────────────────────────────────────────
 
-jest.mock('../../middlewares/authmiddleware', () =>
+jest.mock('../middlewares/authmiddleware', () =>
     (req, _res, next) => {
         req.userId = '507f1f77bcf86cd799439011'; // ObjectId válido hardcodeado
         next();
     }
 );
 
-jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
+jest.mock('../middlewares/rateLimiterMiddleware', () => ({
     dbLimiter: (_req, _res, next) => next(),
 }));
 
-jest.mock('../models/CalendarEventModel');
-const CalendarEvent = require('../models/CalendarEventModel');
+jest.mock('../routes/models/CalendarEventModel');
+const CalendarEvent = require('../routes/models/CalendarEventModel');
 
 // ── App setup ──────────────────────────────────────────────────────────────────
 
-const eventsRouter = require('../events'); // ajusta la ruta si el archivo se llama distinto
-const { FREQUENCY_TYPE } = require('../models/enums/enums');
+const eventsRouter = require('../routes/events'); // ajusta la ruta si el archivo se llama distinto
+const { FREQUENCY_TYPE } = require('../routes/models/enums/enums');
 
 const app = express();
 app.use(express.json());

@@ -1,11 +1,11 @@
 var express = require('express');
 var router = express.Router();
-const User = require("./models/UserModel");
+import * as CalendarService from '../services/calendarService';
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authmiddleware");
 const { authLimiter } = require('../middlewares/rateLimiterMiddleware');
 
-router.post('/login', authLimiter, async function(req, res) {
+router.post('/login', authLimiter, async function(req, res, next) {
   const { token } = req.body;
 
   if (!token) return res.status(401).send('Authentication failed.');
@@ -20,20 +20,9 @@ router.post('/login', authLimiter, async function(req, res) {
 
     const payload = await googleRes.json();
 
-    let userId;
-    const user = await User.findOne({ email: payload.email });
-    userId = user ? user._id : null;
-    if (!user) {
-      const newUser = new User({
-        email: payload.email, 
-        fullName: payload.name, 
-        name: payload.given_name,
-        familyName: payload.family_name,
-        profilePicture: payload.picture});
-      const savedUser = await newUser.save();
-      userId = savedUser._id;
-      await createDefaultCalendarForUser(userId);
-    }
+    const user = await CalendarService.login(payload);
+    const userId = user._id;
+    
     const user_token = jwt.sign(
         { userId },
         process.env.JWT_SECRET,
@@ -49,22 +38,12 @@ router.post('/login', authLimiter, async function(req, res) {
         } 
       });
   } catch (error) {
-    return res.status(401).send(error.message || 'Authentication failed.');
+    next(error);
   }
 });
 
-function createDefaultCalendarForUser(userId) {
-  const Calendar = require("./models/CalendarModel");
-  const newCalendar = new Calendar({ userId, name: "Default", color: "#ff0000" });
-  const plannedCalendar = new Calendar({ userId, name: "Planned", color: "#505050", isSystem: true });
-  const plannableCalendar = new Calendar({ userId, name: "Plannable", color: "#bbbbbb", isSystem: true });
-  newCalendar.save();
-  plannedCalendar.save();
-  plannableCalendar.save();
-}
-
 router.get('/verify', authMiddleware, (req, res) => {
-    res.status(200).json({ ok: true });
+  res.status(200).json({ ok: true }); 
 });
 
 module.exports = router;

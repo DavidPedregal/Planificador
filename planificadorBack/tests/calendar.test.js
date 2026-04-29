@@ -3,23 +3,23 @@ const express = require('express');
 
 // ── Mocks ──────────────────────────────────────────────────────────────────────
 
-jest.mock('../../middlewares/authmiddleware', () =>
+jest.mock('../middlewares/authmiddleware', () =>
     (req, _res, next) => {
         req.userId = '507f1f77bcf86cd799439011';
         next();
     }
 );
 
-jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
+jest.mock('../middlewares/rateLimiterMiddleware', () => ({
     dbLimiter: (_req, _res, next) => next(),
 }));
 
-jest.mock('../models/CalendarModel');
-const Calendar = require('../models/CalendarModel');
+jest.mock('../routes/models/CalendarModel');
+const Calendar = require('../routes/models/CalendarModel');
 
 // ── App setup ──────────────────────────────────────────────────────────────────
 
-const calendarsRouter = require('../calendars'); // ajusta el nombre si es distinto
+const calendarsRouter = require('../routes/calendars'); // ajusta el nombre si es distinto
 
 const app = express();
 app.use(express.json());
