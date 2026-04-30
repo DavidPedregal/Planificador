@@ -1,18 +1,18 @@
-import * as SubjectRepo from '../repository/subjectRepository';
-import { ValidationError, NotFoundError } from '../errors/AppError';
+const SubjectRepo = require('../repository/subjectRepository');
+const { ValidationError, NotFoundError } = require('../errors/AppError');
 
-export const getSubjectsForUser = async (userId) => {
+const getSubjectsForUser = async (userId) => {
     return await SubjectRepo.findAllSubjectsForUser(userId);
 }
 
-export const createSubject = async (userId,subjectData) => {
+const createSubject = async (userId,subjectData) => {
     if (!subjectData.name || subjectData.name.trim() === '') {
         throw new ValidationError('Subject name is required');
     }
     return await SubjectRepo.createSubject({ ...subjectData, userId });
 };
 
-export const deleteSubject = async (userId, subjectId) => {
+const deleteSubject = async (userId, subjectId) => {
     const existing = await SubjectRepo.findSubjectForUser(userId, subjectId);
     if (!existing) {
         throw new NotFoundError('Subject not found');
@@ -20,7 +20,7 @@ export const deleteSubject = async (userId, subjectId) => {
     await SubjectRepo.deleteSubject(userId, subjectId);
 };
 
-export const updateSubject = async (userId, subjectId, updateData) => {
+const updateSubject = async (userId, subjectId, updateData) => {
     if (!updateData.name || updateData.name.trim() === '') {
         throw new ValidationError('Subject name is required');
     }
@@ -31,3 +31,10 @@ export const updateSubject = async (userId, subjectId, updateData) => {
     }
     return updated;
 };
+
+module.exports = {
+    getSubjectsForUser,
+    createSubject,
+    deleteSubject,
+    updateSubject
+}

@@ -9,7 +9,7 @@ const { FREQUENCY_TYPE } = require("../../repository/models/enums/enums");
  * @param {Object} options.existingEvent - The original event (for updates)
  * @returns {Object} { valid: boolean, error: string|null, data: Object }
  */
-export function validateEventData(data, options = {}) {
+function validateEventData(data, options = {}) {
     const { isCreation = false, existingEvent = null } = options;
     const allowedFields = ['title', 'start', 'end', 'calendarId', 'description', 'color', 
         'useCalendarColor', 'label'];
@@ -84,35 +84,33 @@ export function validateEventData(data, options = {}) {
  * @param {Object} originalEvent The original data to check changes from
  * @returns An object containing only the fields changed with their new values.
  */
-export function getChangedFields(newData, originalEvent) {
-    // Detectar únicamente los campos que han cambiado
+function getChangedFields(newData, originalEvent) {
     const allowedFields = ['title', 'calendarId', 'description', 'color', 'useCalendarColor', 'label'];
     const changedFields = {};
+
     for (const field of allowedFields) {
         if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;
-        const incoming = String(newData[field]);
-        const original = String(originalEvent[field]);
-        if (incoming !== original) {
+        if (String(newData[field]) !== String(originalEvent[field])) {
             changedFields[field] = newData[field];
         }
     }
 
-    const dateFields = new Set(['start', 'end']);
+    if (newData.start || newData.end) {
+        const startDate = newData.start ? new Date(newData.start) : new Date(originalEvent.start);
+        const endDate = newData.end ? new Date(newData.end) : new Date(originalEvent.end);
 
-    for (const field of allowedFields) {
-        if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;
-        
-        const incoming = dateFields.has(field)
-            ? new Date(newData[field]).toISOString()
-            : newData[field];
-        const original = dateFields.has(field)
-            ? new Date(originalEvent[field]).toISOString()
-            : originalEvent[field];
+        if (endDate <= startDate) {
+            return { error: 'End date must be after start date' };
+        }
 
-        if (incoming !== original) {
-            changedFields[field] = newData[field];
+        if (newData.start && originalEvent.start && new Date(newData.start).toISOString() !== new Date(originalEvent.start).toISOString()) {
+            changedFields.start = newData.start;
+        }
+        if (newData.end && originalEvent.end && new Date(newData.end).toISOString() !== new Date(originalEvent.end).toISOString()) {
+            changedFields.end = newData.end;
         }
     }
+
     return changedFields;
 }
 
@@ -121,7 +119,7 @@ export function getChangedFields(newData, originalEvent) {
  * @param {Object} baseEvent - The base event to generate recurrences from
  * @returns {Array} Array of event objects to be created
  */
-export function generateRecurringEvents(baseEvent) {
+function generateRecurringEvents(baseEvent) {
     const events = [baseEvent];
     
     // If no frequency type or it's "none", return just the base event
@@ -225,4 +223,10 @@ export function generateRecurringEvents(baseEvent) {
     }
 
     return events;
+}
+
+module.exports = {
+    generateRecurringEvents,
+    getChangedFields,
+    validateEventData
 }

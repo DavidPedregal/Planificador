@@ -1,21 +1,21 @@
 const Task = require("./models/TaskModel");
 const mongoose = require("mongoose");
-import { RepositoryError } from '../errors/AppError';
+const { RepositoryError } = require('../errors/AppError');
 
-export const getAllTasks = async (userId) => 
+const getAllTasks = async (userId) => 
     Task.find({ userId }).sort({ finishDate: 1 });
 
-export const getTaskById = (userId, taskId) => {
+const getTaskById = async (userId, taskId) => {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
         throw new RepositoryError('Invalid ID format');
     }
     return Task.findOne({ _id: taskId, userId });
 }
 
-export const createTasks = (tasks) =>
+const createTasks = (tasks) =>
     Task.insertMany(tasks);
 
-export const updateTask = async (userId, taskId, updateData) => {
+const updateTask = async (userId, taskId, updateData) => {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
         throw new RepositoryError('Invalid ID format');
     }
@@ -23,11 +23,11 @@ export const updateTask = async (userId, taskId, updateData) => {
     return Task.findOneAndUpdate(
         { _id: taskId, userId },
         { $set: updateData },
-        { new: true }
+        { returnDocument: 'after' }
     );
 };
 
-export const updateForwardTask = async (userId, taskId, updateData, originalFinishDate) => {
+const updateForwardTask = async (userId, taskId, groupId, updateData, originalFinishDate) => {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
         throw new RepositoryError('Invalid ID format');
     }
@@ -36,20 +36,20 @@ export const updateForwardTask = async (userId, taskId, updateData, originalFini
         ? { groupId: groupId, userId, finishDate: { $gte: originalFinishDate } }
         : { _id: taskId, userId };
 
-    const result = await TaskModel.updateMany(updateQuery, { $set: updateData });
+    const result = await Task.updateMany(updateQuery, { $set: updateData });
     return result;
 };
 
-export const updateAllTasksInGroup = async (userId, groupId, updateData) => {
+const updateAllTasksInGroup = async (userId, taskId, groupId, updateData) => {
     const updateQuery = groupId
         ? { groupId: groupId, userId }
         : { _id: taskId, userId };
 
-    const result = await TaskModel.updateMany(updateQuery, { $set: updateData });
+    const result = await Task.updateMany(updateQuery, { $set: updateData });
     return result;
 };
 
-export const toggleTaskCompletion = async (userId, taskId) => {
+const toggleTaskCompletion = async (userId, taskId) => {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
         throw new RepositoryError('Invalid ID format');
     }
@@ -63,7 +63,7 @@ export const toggleTaskCompletion = async (userId, taskId) => {
     return task.save();
 };
 
-export const deleteTask = async (userId, taskId) => {
+const deleteTask = async (userId, taskId) => {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
         throw new RepositoryError('Invalid ID format');
     }
@@ -71,17 +71,29 @@ export const deleteTask = async (userId, taskId) => {
     return Task.deleteOne({ _id: taskId, userId });
 };
 
-export const deleteForwardTasks = async (userId, groupId, finishDate) => {
+const deleteForwardTasks = async (userId, taskId, groupId, finishDate) => {
     const deleteQuery = groupId
         ? { groupId: groupId, userId, finishDate: { $gte: finishDate } }
         : { _id: taskId, userId };
 
-    const result = await TaskModel.deleteMany(deleteQuery);
+    const result = await Task.deleteMany(deleteQuery);
     return result;
 };
 
-export const deleteAllTasksInGroup = async (userId, groupId) => {
-    return await TaskModel.deleteMany({ groupId, userId });
+const deleteAllTasksInGroup = async (userId, groupId) => {
+    return await Task.deleteMany({ groupId, userId });
 };
 
+module.exports = {
+    getAllTasks,
+    getTaskById,
+    createTasks,
+    updateTask,
+    updateForwardTask,
+    updateAllTasksInGroup,
+    deleteTask,
+    deleteForwardTasks,
+    deleteAllTasksInGroup,
+    toggleTaskCompletion
+}
 

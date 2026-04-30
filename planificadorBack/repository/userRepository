@@ -1,9 +1,0 @@
-const User = require("./models/UserModel");
-const mongoose = require("mongoose");
-import { RepositoryError } from '../errors/AppError';
-
-export const findByEmail = (email) =>
-    User.findOne({ email });
-
-export const create = (userData) =>
-    new User(userData).save();

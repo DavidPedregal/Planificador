@@ -25,4 +25,4 @@ class RepositoryError extends AppError {
   }
 }
 
-module.exports = { AppError, ValidationError, NotFoundError };
+module.exports = { AppError, ValidationError, RepositoryError, NotFoundError };

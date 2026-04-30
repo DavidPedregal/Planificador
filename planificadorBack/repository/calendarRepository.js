@@ -1,31 +1,31 @@
 const Calendar = require("./models/CalendarModel");
 const mongoose = require("mongoose");
-import { RepositoryError } from '../errors/AppError';
+const { RepositoryError } = require('../errors/AppError');
 
-export const findCalendarForUser = (userId, calendarId) => {
+const findCalendarForUser = async (userId, calendarId) => {
     if (!mongoose.Types.ObjectId.isValid(calendarId)) {
         throw new RepositoryError('Invalid ID format');
     }
     return Calendar.findOne({ _id: calendarId, userId });
 }
 
-export const findCustomCalendarsForUser = (userId) => 
+const findCustomCalendarsForUser = (userId) => 
     Calendar.find({ userId, isSystem: false });
     
-export const findSystemCalendarsForUser = (userId) =>
+const findSystemCalendarsForUser = (userId) =>
     Calendar.find({ userId, isSystem: true });
 
-export const createCalendar = (calendarData) => 
+const createCalendar = (calendarData) => 
     new Calendar(calendarData).save();
 
-export const deleteCalendar = async (userId, calendarId) => {
+const deleteCalendar = async (userId, calendarId) => {
     if (!mongoose.Types.ObjectId.isValid(calendarId)) {
         throw new RepositoryError('Invalid ID format');
     }
     return Calendar.deleteOne({ _id: calendarId, userId });
 };
 
-export const updateCalendar = async (userId, calendarId, updateData) => {
+const updateCalendar = async (userId, calendarId, updateData) => {
     if (!mongoose.Types.ObjectId.isValid(calendarId)) {
         throw new RepositoryError('Invalid ID format');
     }
@@ -33,6 +33,15 @@ export const updateCalendar = async (userId, calendarId, updateData) => {
     return Calendar.findOneAndUpdate(
         { _id: calendarId, userId },
         { $set: updateData },
-        { new: true }
+        { returnDocument: 'after' }
     );
+};
+
+module.exports = {
+    findCalendarForUser,
+    findCustomCalendarsForUser,
+    findSystemCalendarsForUser,
+    createCalendar,
+    deleteCalendar,
+    updateCalendar
 };

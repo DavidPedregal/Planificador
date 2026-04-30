@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-import * as CalendarService from '../services/calendarService';
+const CalendarService = require('../services/calendarService');
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 

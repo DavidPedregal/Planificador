@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-import * as CalendarService from '../services/calendarService';
+const UserService = require('../services/userService');
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authmiddleware");
 const { authLimiter } = require('../middlewares/rateLimiterMiddleware');
@@ -20,7 +20,7 @@ router.post('/login', authLimiter, async function(req, res, next) {
 
     const payload = await googleRes.json();
 
-    const user = await CalendarService.login(payload);
+    const user = await UserService.login(payload);
     const userId = user._id;
     
     const user_token = jwt.sign(

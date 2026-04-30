@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-import * as EventService from '../services/eventService';
+const EventService = require('../services/eventService');
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
-        const events = await EventService.getEventsByUserId(req.userId);
+        const events = await EventService.getAllEvents(req.userId);
         res.json(events);
     } catch (error) {
         next(error);

@@ -1,12 +1,12 @@
-import * as TaskRepo from '../repository/taskRepository';
-import { ValidationError, NotFoundError } from '../errors/AppError';
-import { generateRecurringTasks, validateData, getChangedFields } from './helper/taskHelper';
+const TaskRepo = require('../repository/taskRepository');
+const { ValidationError, NotFoundError } = require('../errors/AppError');
+const { generateRecurringTasks, validateData, getChangedFields } = require('./helper/taskHelper');
 const { randomUUID } = require('crypto');
 
-export const getAllTasks = async (userId) => 
+const getAllTasks = async (userId) => 
     TaskRepo.getAllTasks(userId);
 
-export const getTaskById = async (userId, taskId) => {
+const getTaskById = async (userId, taskId) => {
     const task = await TaskRepo.getTaskById(userId, taskId);
     if (!task) {
         throw new NotFoundError("Task not found");
@@ -14,8 +14,8 @@ export const getTaskById = async (userId, taskId) => {
     return task;
 };
 
-export const createTasks = async (userId, taskData) => {
-    const validation = validateData(taskData);
+const createTasks = async (userId, taskData) => {
+    const validation = validateData(taskData, true);
     if (!validation.valid) {
         throw new ValidationError(validation.error);
     }
@@ -35,7 +35,7 @@ export const createTasks = async (userId, taskData) => {
     return await TaskRepo.createTasks(tasksToCreate);
 };
 
-export const updateTask = async (userId, taskId, updateData) => {
+const updateTask = async (userId, taskId, updateData) => {
     const existingTask = await TaskRepo.getTaskById(userId, taskId);
     if (!existingTask) {
         throw new NotFoundError("Task not found");
@@ -46,7 +46,7 @@ export const updateTask = async (userId, taskId, updateData) => {
         throw new ValidationError(validation.error);
     }
 
-    const changedFields = getChangedFields(existingTask, validation.data);
+    const changedFields = getChangedFields(validation.data, existingTask);
     if (Object.keys(changedFields).length === 0) {
         return existingTask; // No changes, return original task
     }
@@ -54,7 +54,7 @@ export const updateTask = async (userId, taskId, updateData) => {
     return await TaskRepo.updateTask(userId, taskId, changedFields);
 };
 
-export const updateforwardTask = async (userId, taskId, updateData) => {
+const updateForwardTask = async (userId, taskId, updateData) => {
     const validation = validateData(updateData);
     if (!validation.valid) {
         throw new ValidationError(validation.error);
@@ -65,16 +65,16 @@ export const updateforwardTask = async (userId, taskId, updateData) => {
         throw new NotFoundError("Task not found");
     }
 
-    const changedFields = getChangedFields(existingTask, validation.data);
+    const changedFields = getChangedFields(validation.data, existingTask);
     if (Object.keys(changedFields).length === 0) {
         return { message: "No changes detected", modifiedCount: 0 };
     }
 
-    const modifiedCount = await TaskRepo.updateForwardTask(userId, taskId, changedFields, existingTask.finishDate);
-    return { message: "Task(s) forwarded successfully", modifiedCount };
+    const result = await TaskRepo.updateForwardTask(userId, taskId, existingTask.groupId, changedFields, existingTask.finishDate);
+    return { message: "Task(s) updated successfully", modifiedCount: result.modifiedCount };
 };
 
-export const updateAllTasksInGroup = async (userId, taskId, updateData) => {
+const updateAllTasksInGroup = async (userId, taskId, updateData) => {
     const validation = validateData(updateData, true);
     if (!validation.valid) {
         throw new ValidationError(validation.error);
@@ -85,16 +85,16 @@ export const updateAllTasksInGroup = async (userId, taskId, updateData) => {
         throw new NotFoundError("Task not found");
     }
 
-    const changedFields = getChangedFields(existingTask, validation.data);
+    const changedFields = getChangedFields(validation.data, existingTask);
     if (Object.keys(changedFields).length === 0) {
         return { message: "No changes detected", modifiedCount: 0 };
     }
 
-    const modifiedCount = await TaskRepo.updateAllTasksInGroup(userId, existingTask.groupId, changedFields);
-    return { message: "Task(s) updated successfully", modifiedCount };
+    const result = await TaskRepo.updateAllTasksInGroup(userId, taskId, existingTask.groupId, changedFields);
+    return { message: "Task(s) updated successfully", modifiedCount: result.modifiedCount };
 };
 
-export const toggleTaskCompletion = async (userId, taskId) => {
+const toggleTaskCompletion = async (userId, taskId) => {
     const existingTask = await TaskRepo.getTaskById(userId, taskId);
     if (!existingTask) {
         throw new NotFoundError("Task not found");
@@ -105,7 +105,7 @@ export const toggleTaskCompletion = async (userId, taskId) => {
     return updatedTask;
 };
 
-export const deleteTask = async (userId, taskId) => {
+const deleteTask = async (userId, taskId) => {
     const existingTask = await TaskRepo.getTaskById(userId, taskId);
     if (!existingTask) {
         throw new NotFoundError("Task not found");
@@ -113,22 +113,35 @@ export const deleteTask = async (userId, taskId) => {
     await TaskRepo.deleteTask(userId, taskId);
 };
 
-export const deleteForwardTasks = async (userId, taskId) => {
+const deleteForwardTasks = async (userId, taskId) => {
     const existingTask = await TaskRepo.getTaskById(userId, taskId);
     if (!existingTask) {
         throw new NotFoundError("Task not found");
     }
 
-    const modifiedCount = await TaskRepo.deleteForwardTasks(userId, existingTask.groupId, existingTask.finishDate);
-    return { message: "Task(s) deleted successfully", modifiedCount };
+    const result = await TaskRepo.deleteForwardTasks(userId, taskId, existingTask.groupId, existingTask.finishDate);
+    return { message: "Task(s) deleted successfully", modifiedCount: result.deletedCount };
 };
 
-export const deleteAllTasksInGroup = async (userId, taskId) => {
+const deleteAllTasksInGroup = async (userId, taskId) => {
     const existingTask = await TaskRepo.getTaskById(userId, taskId);
     if (!existingTask) {
         throw new NotFoundError("Task not found");
     }
 
-    const modifiedCount = await TaskRepo.deleteAllTasksInGroup(userId, existingTask.groupId);
-    return { message: "Task(s) deleted successfully", modifiedCount };
+    const result = await TaskRepo.deleteAllTasksInGroup(userId, existingTask.groupId);
+    return { message: "Task(s) deleted successfully", modifiedCount: result.deletedCount };
 };
+
+module.exports = {
+    getAllTasks,
+    getTaskById,
+    createTasks,
+    updateTask,
+    updateForwardTask,
+    updateAllTasksInGroup,
+    toggleTaskCompletion,
+    deleteTask,
+    deleteForwardTasks,
+    deleteAllTasksInGroup
+}

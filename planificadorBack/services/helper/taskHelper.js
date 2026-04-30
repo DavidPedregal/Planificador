@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
  * @param {Object} baseTask - The base task to generate recurrences from
  * @returns {Array} Array of task objects to be created
  */
-export function generateRecurringTasks(baseTask) {
+function generateRecurringTasks(baseTask) {
     const tasks = [baseTask];
     
     // If no frequency type or it's "none", return just the base task
@@ -119,7 +119,7 @@ export function generateRecurringTasks(baseTask) {
  * @param {boolean} checkRecurrence 
  * @returns object with properties: valid (boolean), error (string|null), data (object)
  */
-export function validateData(data, checkRecurrence = false) {
+function validateData(data, checkRecurrence = false) {
     const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate', 'subjectId', 'plannable'];
     const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
     const updateData = {};
@@ -159,10 +159,10 @@ export function validateData(data, checkRecurrence = false) {
  * @param {Object} originalEvent 
  * @returns Object with only the changed fields and their new values
  */
-export function getChangedFields(newData, originalEvent) {
+function getChangedFields(newData, originalEvent) {
     // Detectar únicamente los campos que han cambiado
     if (!newData.subjectId){
-        newData.subjectId = null;
+        newData.subjectId = null; 
     }
     const allowedFields = ['title', 'description', 'estimatedTime', 'subjectId', 'plannable'];
     const changedFields = {};
@@ -187,4 +187,10 @@ export function getChangedFields(newData, originalEvent) {
         }
     }
     return changedFields;
+}
+
+module.exports = {
+    validateData,
+    generateRecurringTasks,
+    getChangedFields
 }

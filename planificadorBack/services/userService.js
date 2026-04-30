@@ -1,8 +1,12 @@
-import * as UserRepo from '../repository/userRepository';
-import * as CalendarRepo from '../repository/calendarRepository';
-import { ValidationError, NotFoundError } from '../errors/AppError';
+const UserRepo = require('../repository/userRepository');
+const CalendarRepo = require('../repository/calendarRepository');
+const { ValidationError, NotFoundError } = require('../errors/AppError');
 
-export const login = async (userData) => {
+module.exports = {
+    login
+};
+
+async function login(userData) {
     if (!userData.email) throw new ValidationError('Email is required.');
 
     const user = await UserRepo.findByEmail(userData.email);
@@ -22,7 +26,7 @@ export const login = async (userData) => {
 };
 
 async function createDefaultCalendarsForUser(userId) {
-    await CalendarRepo.createCalendar({ userId, name: "Default", color: "#ff0000" });
+    await CalendarRepo.createCalendar({ userId, name: "Default", color: "#ff0000", isSystem: false });
     await CalendarRepo.createCalendar({ userId, name: "Planned", color: "#505050", isSystem: true });
     await CalendarRepo.createCalendar({ userId, name: "Plannable", color: "#bbbbbb", isSystem: true });
 };

@@ -13,9 +13,9 @@ const eventRouter = require("./routes/events");
 const taskRouter = require("./routes/tasks");
 const subjectRouter = require("./routes/subjects");
 const planRouter = require("./routes/plan");
-const errorHandler = require("./middlewares/errorHandler");
+const { errorHandler } = require("./middlewares/errorHandler");
 
-connectDB().then();
+connectDB();
 
 const app = express();
 

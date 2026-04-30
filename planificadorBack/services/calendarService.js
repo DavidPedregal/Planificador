@@ -1,18 +1,18 @@
-import * as CalendarRepo from '../repository/calendarRepository';
-import * as EventRepo from '../repository/eventRepository';
-import { ValidationError, NotFoundError } from '../errors/AppError';
+const CalendarRepo = require('../repository/calendarRepository');
+const EventRepo = require('../repository/eventRepository');
+const { ValidationError, NotFoundError } = require('../errors/AppError');
 
-export const getCustomCalendarsForUser = async (userId) => {
+const getCustomCalendarsForUser = async (userId) => {
     const customCalendars = await CalendarRepo.findCustomCalendarsForUser(userId);
     return customCalendars;
 };
 
-export const getSystemCalendarsForUser = async (userId) => {
+const getSystemCalendarsForUser = async (userId) => {
     const systemCalendars = await CalendarRepo.findSystemCalendarsForUser(userId);
     return systemCalendars;
 }
 
-export const createCalendarForUser = async (userId, calendarData) => {
+const createCalendarForUser = async (userId, calendarData) => {
     if (!calendarData.name || calendarData.name.length === 0 || !calendarData.color) {
         throw new ValidationError("Name and color are required");
     }
@@ -26,15 +26,11 @@ export const createCalendarForUser = async (userId, calendarData) => {
         isSystem: false,
         userId
     }
-    const newCalendar = CalendarRepo.createCalendar(filteredData);
+    const newCalendar = await CalendarRepo.createCalendar(filteredData);
     return newCalendar;
 };
 
-export const deleteCalendarForUser = async (userId, calendarId) => {
-    if (!mongoose.Types.ObjectId.isValid(calendarId)) {
-        throw new ValidationError("Invalid calendar ID");
-    }
-
+const deleteCalendarForUser = async (userId, calendarId) => {
     const calendar = await CalendarRepo.findCalendarForUser(userId, calendarId);
     if (!calendar) {
         throw new NotFoundError("Calendar not found");
@@ -44,11 +40,11 @@ export const deleteCalendarForUser = async (userId, calendarId) => {
         throw new ValidationError("Cannot delete a default calendar");
     }
 
-    await CalendarRepo.deleteCalendar(calendar._id);
+    await CalendarRepo.deleteCalendar(userId, calendarId);
     await EventRepo.deleteEventsByCalendarId(calendar._id);
 };
 
-export const updateCalendarForUser = async (userId, calendarId, updateData) => {
+const updateCalendarForUser = async (userId, calendarId, updateData) => {
     const existingCalendar = await CalendarRepo.findCalendarForUser(userId, calendarId);
     if (!existingCalendar) {
         throw new NotFoundError("Calendar not found");
@@ -71,7 +67,7 @@ export const updateCalendarForUser = async (userId, calendarId, updateData) => {
     return updatedCalendar;
 };
 
-export const toggleCalendarVisibilityForUser = async (userId, calendarId) => {
+const toggleCalendarVisibilityForUser = async (userId, calendarId) => {
     const calendar = await CalendarRepo.findCalendarForUser(userId, calendarId);
     if (!calendar) {
         throw new NotFoundError("Calendar not found");
@@ -80,3 +76,12 @@ export const toggleCalendarVisibilityForUser = async (userId, calendarId) => {
     const updatedCalendar = await CalendarRepo.updateCalendar(calendarId, { visible: !calendar.visible });
     return updatedCalendar;
 }
+
+module.exports = {
+    getCustomCalendarsForUser,
+    getSystemCalendarsForUser,
+    createCalendarForUser,
+    deleteCalendarForUser,
+    updateCalendarForUser,
+    toggleCalendarVisibilityForUser
+};

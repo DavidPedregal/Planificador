@@ -1,28 +1,28 @@
 const Subject = require("./models/SubjectModel");
 const mongoose = require("mongoose");
-import { RepositoryError } from '../errors/AppError';
+const { RepositoryError } = require('../errors/AppError');
 
-export const findSubjectForUser = (userId, subjectId) => {
+const findSubjectForUser = async (userId, subjectId) => {
     if (!mongoose.Types.ObjectId.isValid(subjectId)) {
         throw new RepositoryError('Invalid ID format');
     }
     return Subject.findOne({ _id: subjectId, userId });
 }
 
-export const findAllSubjectsForUser = (userId) => 
+const findAllSubjectsForUser = (userId) => 
     Subject.find({ userId });
     
-export const createSubject = (subjectData) => 
+const createSubject = (subjectData) => 
     new Subject(subjectData).save();
 
-export const deleteSubject = async (userId, subjectId) => {
+const deleteSubject = async (userId, subjectId) => {
     if (!mongoose.Types.ObjectId.isValid(subjectId)) {
         throw new RepositoryError('Invalid ID format');
     }
     return Subject.deleteOne({ _id: subjectId, userId });
 };
 
-export const updateSubject = async (userId, subjectId, updateData) => {
+const updateSubject = async (userId, subjectId, updateData) => {
     if (!mongoose.Types.ObjectId.isValid(subjectId)) {
         throw new RepositoryError('Invalid ID format');
     }
@@ -30,6 +30,14 @@ export const updateSubject = async (userId, subjectId, updateData) => {
     return Subject.findOneAndUpdate(
         { _id: subjectId, userId },
         { $set: updateData },
-        { new: true }
+        { returnDocument: 'after' }
     );
 };
+
+module.exports = {
+    findSubjectForUser,
+    findAllSubjectsForUser,
+    createSubject,
+    deleteSubject,
+    updateSubject
+}
