@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const {FREQUENCY_TYPE} = require("./enums/enums");
 
 const calendarEventModel = new mongoose.Schema({
     userId: {
