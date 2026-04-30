@@ -260,13 +260,6 @@ function TaskItem({ task, onToggle, onEdit, onDelete }: {
 }) {
     return (
         <div className={`todo-item${task.completed ? " completed" : ""}`}>
-            <button
-                className={`todo-check${task.completed ? " done" : ""}`}
-                onClick={() => onToggle(task.id)}
-                aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-            >
-                {task.completed && <Check size={12} />}
-            </button>
 
             <div className="todo-content">
                 <span className="todo-text">{task.title}</span>
