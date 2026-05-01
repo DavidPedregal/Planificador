@@ -120,7 +120,7 @@ function generateRecurringTasks(baseTask) {
  * @returns object with properties: valid (boolean), error (string|null), data (object)
  */
 function validateData(data, checkRecurrence = false) {
-    const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate', 'subjectId', 'plannable'];
+    const allowedFields = ['title', 'description', 'estimatedTime', 'finishDate', 'givenDate', 'subjectId', 'plannable', 'includeReviews'];
     const recurrenceFields = ['frequencyType', 'frequencyEndDate', 'frequencyOccurrencesLeft', 'frequencyInterval', 'frequencyDaysOfWeek', 'frequencyEndType'];
     const updateData = {};
     for (const field of allowedFields) {

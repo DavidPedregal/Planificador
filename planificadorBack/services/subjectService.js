@@ -25,7 +25,7 @@ const updateSubject = async (userId, subjectId, updateData) => {
         throw new ValidationError('Subject name is required');
     }
 
-    const updated = await SubjectRepo.updateSubject(userId, subjectId, updateData);
+    const updated = await SubjectRepo.updateSubject(userId, subjectId, {name: updateData.name});
     if (!updated) {
         throw new NotFoundError('Subject not found');
     }

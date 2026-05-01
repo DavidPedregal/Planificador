@@ -64,6 +64,10 @@ describe('taskRepository', () => {
             const { givenDate, ...withoutGivenDate } = mockTaskData;
             await expect(TaskRepo.createTasks([withoutGivenDate])).rejects.toThrow();
         });
+        it('should default includeReviews to false', async () => {
+            const [created] = await TaskRepo.createTasks([mockTaskData]);
+            expect(created.includeReviews).toBe(false);
+        });
     });
 
     describe('getAllTasks', () => {

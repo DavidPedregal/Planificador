@@ -38,6 +38,10 @@ const taskModel = new mongoose.Schema({
     },
     plannable: {
         type: Boolean,
+    },
+    includeReviews: {
+        type: Boolean,
+        default: false,
     }
 });
 
