@@ -14,6 +14,9 @@ const getTaskById = async (userId, taskId) => {
     return task;
 };
 
+const getTasksToPlan = async (userId) => 
+    TaskRepo.getTasksToPlan(userId);
+
 const createTasks = async (userId, taskData) => {
     const validation = validateData(taskData, true);
     if (!validation.valid) {
@@ -136,6 +139,7 @@ const deleteAllTasksInGroup = async (userId, taskId) => {
 module.exports = {
     getAllTasks,
     getTaskById,
+    getTasksToPlan,
     createTasks,
     updateTask,
     updateForwardTask,

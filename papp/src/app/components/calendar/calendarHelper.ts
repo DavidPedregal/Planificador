@@ -37,7 +37,6 @@ export interface CalendarEvent {
     useCalendarColor: boolean;
     color: string;
     calendarId: string;
-    recurrenceRule: RecurrenceRule;
 }
 
 export interface Calendar { 
@@ -87,15 +86,7 @@ export const mapToFullCalendarEvent = (event: any, color: string) => {
         end: event.end,
         color: color,
         calendarId: event.calendarId,
-        useCalendarColor: event.useCalendarColor,
-        recurrenceRule: {
-            frequencyType: event.frequencyType,
-            frequencyInterval: event.frequencyInterval,
-            frequencyDaysOfWeek: event.frequencyDaysOfWeek,
-            frequencyEndType: event.frequencyEndType,
-            frequencyEndDate: event.frequencyEndDate,
-            frequencyOccurrencesLeft: event.frequencyOccurrencesLeft,
-        }
+        useCalendarColor: event.useCalendarColor
     };
 
     return base;

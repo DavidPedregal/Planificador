@@ -24,6 +24,9 @@ const getEventById = async (userId, eventId) => {
     return CalendarEvent.findOne({ _id: eventId, userId });
 };
 
+const getPlannableEventsForUser = async (userId, calendarId) =>
+    CalendarEvent.find({userId: userId, calendarId: calendarId});
+
 const createEvent = async (events) => 
     CalendarEvent.insertMany(events);
 
@@ -82,6 +85,7 @@ module.exports = {
     deleteEventsByCalendarId,
     getEventsByUserId,
     getEventById,
+    getPlannableEventsForUser,
     createEvent,
     updateEvent,
     updateForwardEvent,

@@ -1,4 +1,5 @@
 const EventRepo = require('../repository/eventRepository');
+const CalendarRepo = require('../repository/calendarRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
 const { generateRecurringEvents, getChangedFields, validateEventData } = require('./helper/eventHelper');
 const { randomUUID } = require('crypto');
@@ -13,6 +14,15 @@ const getEventById = async (userId, eventId) => {
     }
     return event;
 };
+
+const getPlannableEventsForUser = async (userId) => {
+    const systemCalendars = await CalendarRepo.findSystemCalendarsForUser(userId);
+    const plannableCalendar = systemCalendars.find(cal => cal.name === "Plannable");
+    if (!plannableCalendar) {
+        throw new NotFoundError('Plannable calendar not found');
+    }
+    return EventRepo.getPlannableEventsForUser(userId, plannableCalendar._id);
+}
 
 const createEvent = async (userId, eventData) => {
     const validation = validateEventData(eventData, { isCreation: true });
@@ -123,6 +133,7 @@ const deleteAllEventsInGroup = async (userId, eventId) => {
 module.exports = {
     getAllEvents,
     getEventById,
+    getPlannableEventsForUser,
     createEvent,
     updateEvent,
     updateforwardEvent,

@@ -23,14 +23,6 @@ const EMPTY_EVENT: CalendarEvent = {
     calendarId: "",
     useCalendarColor: true,
     label: "",
-    recurrenceRule: {
-        frequencyType: "none",
-        frequencyInterval: 1,
-        frequencyDaysOfWeek: [],
-        frequencyEndType: "on",
-        frequencyEndDate: "",
-        frequencyOccurrencesLeft: 1,
-    },
 };
 
 export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
@@ -60,14 +52,6 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             calendarId: info.event.extendedProps.calendarId,
             useCalendarColor: info.event.extendedProps.useCalendarColor,
             label: info.event.extendedProps.label || "",
-            recurrenceRule: {
-                frequencyType: info.event.extendedProps.recurrenceRule?.frequencyType || FREQUENCY_TYPE.NONE,
-                frequencyInterval: info.event.extendedProps.recurrenceRule?.frequencyInterval || 1,
-                frequencyDaysOfWeek: info.event.extendedProps.recurrenceRule?.frequencyDaysOfWeek || [],
-                frequencyEndType: info.event.extendedProps.recurrenceRule?.frequencyEndType || "never",
-                frequencyEndDate: info.event.extendedProps.recurrenceRule?.frequencyEndDate || "",
-                frequencyOccurrencesLeft: info.event.extendedProps.recurrenceRule?.frequencyOccurrencesLeft || 1,
-            }
         });
         setEditDialogOpen(true);
     };

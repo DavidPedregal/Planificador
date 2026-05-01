@@ -12,6 +12,9 @@ const getTaskById = async (userId, taskId) => {
     return Task.findOne({ _id: taskId, userId });
 }
 
+const getTasksToPlan = async (userId) =>
+    Task.find({userId: userId, finishDate: { $gte: Date.now() }, plannable: true, completed: false });
+
 const createTasks = (tasks) =>
     Task.insertMany(tasks);
 
@@ -87,6 +90,7 @@ const deleteAllTasksInGroup = async (userId, groupId) => {
 module.exports = {
     getAllTasks,
     getTaskById,
+    getTasksToPlan,
     createTasks,
     updateTask,
     updateForwardTask,
