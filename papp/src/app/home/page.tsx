@@ -70,10 +70,7 @@ export default function Home() {
                         <button className="mobile-drawer-close" onClick={closeDrawer}>✕</button>
                     </div>
                     <div className="mobile-drawer-body">
-                        {/* Aquí irá tu componente de sidebar cuando lo tengas */}
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
-                            Tu sidebar de configuración aparecerá aquí.
-                        </p>
+                        <Sidebar onCalendarDeleted={() => setRefreshEvents(prev => prev + 1)} />
                     </div>
                 </div>
             )}

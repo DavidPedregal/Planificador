@@ -11,7 +11,7 @@ interface Props {
     start: Date;
     end: Date;
     onClose: () => void;
-    onSave: (newEvent: any) => void;
+    onSave: () => void;
 }
 
 const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd, onClose, onSave,}) => {
@@ -144,7 +144,7 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
             });
 
             const createdEvents = await response.json();
-            onSave(createdEvents);
+            onSave();
             onClose();
         } catch (error) {
             console.error("Error guardando evento:", error);

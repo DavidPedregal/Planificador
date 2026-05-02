@@ -6,6 +6,7 @@ const TaskService = require('../services/taskService.js');
 const router = express.Router();
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
+const { mapPreviousPlan, mapSlots, mapTasks } = require('./helper/planHelper.js');
 
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try{
@@ -22,17 +23,22 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
         const plannableSlots = await EventService.getPlannableEventsForUser(req.userId);
         const tasks = await TaskService.getTasksToPlan(req.userId);
 
+        const mappedPreviousPlan = mapPreviousPlan(previousPlan);
+        const mappedPlannableSlots = mapSlots(plannableSlots);
+        const mappedTasks = mapTasks(tasks);
+
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tasks: tasks, plannableSlots: plannableSlots, previousPlan: previousPlan })
+            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: mappedPreviousPlan })
         });
         if (!response.ok) {
             throw new Error('Planner service failed');
         }
         const planData = await response.json();
-        await PlanService.addPlan(req.userId, planData.scheduled);
-        res.status(201).json({ message: 'Plan created successfully', response });
+        console.log(planData);
+        // await PlanService.addPlan(req.userId, planData.scheduled);
+        res.status(201).json({ message: 'Plan created successfully', planData });
     } catch (error){
         next(error);
     }

@@ -26,6 +26,7 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [plannable, setPlannable] = useState(true);
+    const [includeReviews, setIncludeReviews] = useState(false);
     const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
 
     const fetchSubjects = async () => {
@@ -95,7 +96,8 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
             finishDate,
             givenDate,
             subjectId,
-            plannable
+            plannable,
+            includeReviews
         };
 
         try {
@@ -167,15 +169,39 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
 
                         {/* Tiempo estimado */}
                         <div className="atd-field">
-                            <label className="atd-label">Tiempo estimado (minutos)</label>
-                            <input
-                                className="atd-input"
-                                type="number"
-                                min={1}
-                                max={1440}
-                                value={estimatedTime}
-                                onChange={e => setEstimatedTime(Math.max(1, +e.target.value))}
-                            />
+                            <label className="atd-label">Tiempo estimado</label>
+                            <div className="aed-date-strip">
+                                <div className="aed-date-field">
+                                    <input
+                                        className="aed-date-input"
+                                        type="number"
+                                        min={0}
+                                        max={99}
+                                        value={String(Math.floor(estimatedTime / 60)).padStart(2, '0')}
+                                        onChange={e => {
+                                            const hours = Math.min(99, Math.max(0, +e.target.value));
+                                            const minutes = estimatedTime % 60;
+                                            setEstimatedTime(hours * 60 + minutes);
+                                        }}
+                                    />
+                                    <span className="aed-date-icon">h</span>
+                                </div>
+                                <div className="aed-date-field">
+                                    <input
+                                        className="aed-date-input"
+                                        type="number"
+                                        min={0}
+                                        max={59}
+                                        value={String(estimatedTime % 60).padStart(2, '0')}
+                                        onChange={e => {
+                                            const minutes = Math.min(59, Math.max(0, +e.target.value));
+                                            const hours = Math.floor(estimatedTime / 60);
+                                            setEstimatedTime(hours * 60 + minutes);
+                                        }}
+                                    />
+                                    <span className="aed-date-icon">min</span>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Fecha de entrega */}
@@ -230,6 +256,19 @@ const EditTaskDialog: React.FC<Props> = ({open, taskId, onClose, onSave}) => {
                                     style={{ marginRight: '8px' }}
                                 />
                                 Incluir en planificación
+                            </label>
+                        </div>
+
+                        {/* Reviews */}
+                        <div className="atd-field">
+                            <label className="atd-label">
+                                <input
+                                    type="checkbox"
+                                    checked={includeReviews}
+                                    onChange={e => setIncludeReviews(e.target.checked)}
+                                    style={{ marginRight: '8px' }}
+                                />
+                                Añadir repasos
                             </label>
                         </div>
                     </div>

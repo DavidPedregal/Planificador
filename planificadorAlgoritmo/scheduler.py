@@ -1,25 +1,3 @@
-from ortools.sat.python import cp_model
-from models import PlanRequest
-from datetime import datetime
-
-# 
-model = cp_model.CpModel()
-
-def compute_time_left(tasks, previous_plan):
-    tiempo_planificado = {}
-    for block in previous_plan:
-        taskId = block.taskId
-        tiempo_planificado[taskId] = tiempo_planificado.get(taskId, 0) + block.scheduledTime
-
-    resultado = []
-    for task in tasks:
-        restante = task.estimatedTime - tiempo_planificado.get(task.taskId, 0)
-        if restante > 0:
-            resultado.append({ **task.model_dump(), "estimatedTime": restante })
-    
-    return resultado
-
-# scheduler.py
 from datetime import datetime, timedelta
 from ortools.sat.python import cp_model
 from models import PlanRequest, PlanResponse, ScheduledBlock, Warning

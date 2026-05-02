@@ -12,7 +12,8 @@ import AddSubjectDialog from "./add-subject-dialog";
 import EditSubjectDialog from "./edit-subject-dialog";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { EditIcon, SettingsIcon, } from "lucide-react";
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import AutoFixNormalIcon from '@mui/icons-material/AutoFixNormal';
+import ConstructionIcon from '@mui/icons-material/Construction';
 
 interface SidebarProps {
     onCalendarVisibilityChange?: (visibleIds: string[]) => void;
@@ -33,6 +34,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
     const [editSubjectOpen, setEditSubjectOpen] = useState(false);
     const [deleteSubjectConfirmOpen, setDeleteSubjectConfirmOpen] = useState(false);
     const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+    const [openTools, setOpenTools] = useState(false);
 
     useEffect(() => {
         if (!user) return;
@@ -162,6 +164,17 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
         setSelectedSubjectId(id);
     };
 
+    const sendPlanRequest = async () => {
+        try {
+            await fetch(config.backendUrl + `/plan`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+        } catch (error) {
+            console.error("Error deleting subject:", error);
+        }
+    };
+
     return (
         <>
             <div className="sidebar">
@@ -169,12 +182,16 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 {/* ── General ── */}
                 <span className="sidebar-label">General</span>
                 <button className="sidebar-nav-item">
-                    <PersonOutlineIcon/>
-                    Perfil
-                </button>
-                <button className="sidebar-nav-item">
                     <SettingsIcon size={"1.25rem"}/>
                     Ajustes
+                </button>
+                <button className="sidebar-nav-item" onClick={sendPlanRequest}>
+                    <AutoFixNormalIcon/>
+                    Planificar
+                </button>
+                <button className="sidebar-nav-item" onClick={() => setOpenTools(true)}>
+                    <ConstructionIcon/>
+                    Herramientas
                 </button>
 
                 <div className="sidebar-divider" />

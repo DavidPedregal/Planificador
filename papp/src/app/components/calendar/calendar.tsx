@@ -206,17 +206,8 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             start={startDate}
             end={endDate}
             onClose={() => setAddDialogOpen(false)}
-            onSave={(newEvents) => {
-                // Ensure newEvents is always an array (backend may return single object or array)
-                const eventsArray = Array.isArray(newEvents) ? newEvents : [newEvents];
-                const newFullCalendarEvents = eventsArray.map((newEvent: any) => 
-                    mapToFullCalendarEvent(newEvent, setEventColor(newEvent.useCalendarColor, newEvent.color, newEvent.calendarId))
-                );
-                const updatedAllEvents = [...allEvents, ...newFullCalendarEvents];
-                setAllEvents(updatedAllEvents);
-                // Filter to show only events from visible calendars
-                const visibleEvents = filterEventsByVisibility(updatedAllEvents, calendars);
-                setEvents(visibleEvents);
+            onSave={() => {
+                fetchEvents(calendars);
             }}
         />
 

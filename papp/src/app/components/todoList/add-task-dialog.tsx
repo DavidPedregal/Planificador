@@ -26,6 +26,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
     const [subjectId, setSubjectId] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [plannable, setPlannable] = useState(true);
+    const [includeReviews, setIncludeReviews] = useState(false);
     const [recurrence, setRecurrence] = useState<RecurrenceRule>({
         frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
         frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
@@ -42,6 +43,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
             setFinishDate(today);
             setGivenDate(today);
             setPlannable(true);
+            setIncludeReviews(false);
             setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
         }
     }, [open]);
@@ -92,6 +94,7 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
             givenDate,
             subjectId,
             plannable,
+            includeReviews,
             frequencyType: recurrence.frequencyType,
             frequencyInterval: recurrence.frequencyInterval,
             frequencyDaysOfWeek: recurrence.frequencyDaysOfWeek,
@@ -169,16 +172,41 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
 
                         {/* Tiempo estimado */}
                         <div className="atd-field">
-                            <label className="atd-label">Tiempo estimado (minutos)</label>
-                            <input
-                                className="atd-input"
-                                type="number"
-                                min={1}
-                                max={1440}
-                                value={estimatedTime}
-                                onChange={e => setEstimatedTime(Math.max(1, +e.target.value))}
-                            />
+                            <label className="atd-label">Tiempo estimado</label>
+                            <div className="aed-date-strip">
+                                <div className="aed-date-field">
+                                    <input
+                                        className="aed-date-input"
+                                        type="number"
+                                        min={0}
+                                        max={99}
+                                        value={String(Math.floor(estimatedTime / 60)).padStart(2, '0')}
+                                        onChange={e => {
+                                            const hours = Math.min(99, Math.max(0, +e.target.value));
+                                            const minutes = estimatedTime % 60;
+                                            setEstimatedTime(hours * 60 + minutes);
+                                        }}
+                                    />
+                                    <span className="aed-date-icon">h</span>
+                                </div>
+                                <div className="aed-date-field">
+                                    <input
+                                        className="aed-date-input"
+                                        type="number"
+                                        min={0}
+                                        max={59}
+                                        value={String(estimatedTime % 60).padStart(2, '0')}
+                                        onChange={e => {
+                                            const minutes = Math.min(59, Math.max(0, +e.target.value));
+                                            const hours = Math.floor(estimatedTime / 60);
+                                            setEstimatedTime(hours * 60 + minutes);
+                                        }}
+                                    />
+                                    <span className="aed-date-icon">min</span>
+                                </div>
+                            </div>
                         </div>
+                        
 
                         {/* Fecha de entrega */}
                         <div className="atd-field">
@@ -232,6 +260,19 @@ const AddTaskDialog: React.FC<Props> = ({open, onClose, onSave}) => {
                                     style={{ marginRight: '8px' }}
                                 />
                                 Incluir en planificación
+                            </label>
+                        </div>
+
+                        {/* Reviews */}
+                        <div className="atd-field">
+                            <label className="atd-label">
+                                <input
+                                    type="checkbox"
+                                    checked={includeReviews}
+                                    onChange={e => setIncludeReviews(e.target.checked)}
+                                    style={{ marginRight: '8px' }}
+                                />
+                                Añadir repasos
                             </label>
                         </div>
 
