@@ -114,6 +114,28 @@ describe('eventRepository', () => {
         });
     });
 
+    describe('getPlannableEventsForUser', () => {
+        it('should return events for a specific calendar', async () => {
+            await EventRepo.createEvent([mockEventData]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(1);
+        });
+
+        it('should not return events from other calendars', async () => {
+            const otherCalendarId = new mongoose.Types.ObjectId();
+            await EventRepo.createEvent([{ ...mockEventData, calendarId: otherCalendarId.toString() }]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(0);
+        });
+
+        it('should not return events from other users', async () => {
+            const otherUserId = new mongoose.Types.ObjectId();
+            await EventRepo.createEvent([{ ...mockEventData, userId: otherUserId }]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(0);
+        });
+    });
+
     describe('updateEvent', () => {
         it('should update an event', async () => {
             const [created] = await EventRepo.createEvent([mockEventData]);

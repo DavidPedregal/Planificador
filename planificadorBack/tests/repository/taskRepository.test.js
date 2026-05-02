@@ -114,6 +114,57 @@ describe('taskRepository', () => {
         });
     });
 
+    describe('getTasksToPlan', () => {
+        it('should return plannable incomplete tasks with future finishDate', async () => {
+            const plannableTask = {
+                ...mockTaskData,
+                plannable: true,
+                completed: false,
+                finishDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días en el futuro
+            };
+            await TaskRepo.createTasks([plannableTask]);
+
+            const tasks = await TaskRepo.getTasksToPlan(mockUserId);
+            expect(tasks).toHaveLength(1);
+        });
+
+        it('should not return completed tasks', async () => {
+            await TaskRepo.createTasks([{
+                ...mockTaskData,
+                plannable: true,
+                completed: true,
+                finishDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            }]);
+
+            const tasks = await TaskRepo.getTasksToPlan(mockUserId);
+            expect(tasks).toHaveLength(0);
+        });
+
+        it('should not return non-plannable tasks', async () => {
+            await TaskRepo.createTasks([{
+                ...mockTaskData,
+                plannable: false,
+                completed: false,
+                finishDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            }]);
+
+            const tasks = await TaskRepo.getTasksToPlan(mockUserId);
+            expect(tasks).toHaveLength(0);
+        });
+
+        it('should not return tasks with past finishDate', async () => {
+            await TaskRepo.createTasks([{
+                ...mockTaskData,
+                plannable: true,
+                completed: false,
+                finishDate: new Date(Date.now() - 24 * 60 * 60 * 1000) // ayer
+            }]);
+
+            const tasks = await TaskRepo.getTasksToPlan(mockUserId);
+            expect(tasks).toHaveLength(0);
+        });
+    });
+
     describe('updateTask', () => {
         it('should update a task', async () => {
             const [created] = await TaskRepo.createTasks([mockTaskData]);

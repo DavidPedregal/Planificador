@@ -56,6 +56,25 @@ describe('taskService', () => {
         });
     });
 
+    describe('getTasksToPlan', () => {
+        it('should return plannable incomplete tasks', async () => {
+            TaskRepo.getTasksToPlan.mockResolvedValue([mockTask]);
+
+            const result = await TaskService.getTasksToPlan(mockUserId);
+
+            expect(result).toEqual([mockTask]);
+            expect(TaskRepo.getTasksToPlan).toHaveBeenCalledWith(mockUserId);
+        });
+
+        it('should return empty array if no tasks to plan', async () => {
+            TaskRepo.getTasksToPlan.mockResolvedValue([]);
+
+            const result = await TaskService.getTasksToPlan(mockUserId);
+
+            expect(result).toHaveLength(0);
+        });
+    });
+    
     describe('createTasks', () => {
         it('should create a single non-recurring task', async () => {
             TaskRepo.createTasks.mockResolvedValue([mockTask]);

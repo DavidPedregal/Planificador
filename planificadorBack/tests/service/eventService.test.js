@@ -1,9 +1,11 @@
 // tests/service/eventService.test.js
 const EventRepo = require('../../repository/eventRepository');
+const CalendarRepo = require('../../repository/calendarRepository');
 const EventService = require('../../services/eventService');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
 
 jest.mock('../../repository/eventRepository');
+jest.mock('../../repository/calendarRepository');
 
 afterEach(() => {
     jest.clearAllMocks();
@@ -13,6 +15,14 @@ const mockUserId = '507f1f77bcf86cd799439011';
 const mockEventId = '507f1f77bcf86cd799439012';
 const mockCalendarId = '507f1f77bcf86cd799439013';
 const mockGroupId = 'some-uuid-group-id';
+
+
+const mockPlannableCalendar = {
+    _id: mockCalendarId,
+    name: 'Plannable',
+    isSystem: true,
+    userId: mockUserId
+};
 
 const mockEvent = {
     _id: mockEventId,
@@ -55,6 +65,39 @@ describe('eventService', () => {
         it('should throw NotFoundError if event does not exist', async () => {
             EventRepo.getEventById.mockResolvedValue(null);
             await expect(EventService.getEventById(mockUserId, mockEventId)).rejects.toThrow(NotFoundError);
+        });
+    });
+
+    describe('getPlannableEventsForUser', () => {
+        it('should return plannable events for user', async () => {
+            CalendarRepo.findSystemCalendarsForUser.mockResolvedValue([mockPlannableCalendar]);
+            EventRepo.getPlannableEventsForUser.mockResolvedValue([mockEvent]);
+
+            const result = await EventService.getPlannableEventsForUser(mockUserId);
+
+            expect(result).toEqual([mockEvent]);
+            expect(EventRepo.getPlannableEventsForUser).toHaveBeenCalledWith(
+                mockUserId,
+                mockCalendarId
+            );
+        });
+
+        it('should throw NotFoundError if Plannable calendar does not exist', async () => {
+            CalendarRepo.findSystemCalendarsForUser.mockResolvedValue([]);
+
+            await expect(
+                EventService.getPlannableEventsForUser(mockUserId)
+            ).rejects.toThrow(NotFoundError);
+        });
+
+        it('should not use a non-Plannable system calendar', async () => {
+            CalendarRepo.findSystemCalendarsForUser.mockResolvedValue([
+                { _id: mockCalendarId, name: 'Planned', isSystem: true }
+            ]);
+
+            await expect(
+                EventService.getPlannableEventsForUser(mockUserId)
+            ).rejects.toThrow(NotFoundError);
         });
     });
 
