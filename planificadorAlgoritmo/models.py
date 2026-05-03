@@ -17,6 +17,7 @@ class PlannedBlock(BaseModel):
     start: str
     end: str
     scheduledTime: int  # minutos
+    status: str = 'pending'  # pending, completed, uncompleted
 
 class PlanRequest(BaseModel):
     tasks: list[Task]

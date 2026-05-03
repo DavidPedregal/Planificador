@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 const PlanService = require('../services/planService.js');
 const EventService = require('../services/eventService.js');
 const TaskService = require('../services/taskService.js');
+const CalendarService = require('../services/calendarService.js');
 const router = express.Router();
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
-const { mapPreviousPlan, mapSlots, mapTasks } = require('./helper/planHelper.js');
+const { mapPreviousPlan, mapSlots, mapTasks, mapPlanData } = require('./helper/planHelper.js');
 
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try{
@@ -35,10 +36,15 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
         if (!response.ok) {
             throw new Error('Planner service failed');
         }
-        const planData = await response.json();
-        console.log(planData);
-        // await PlanService.addPlan(req.userId, planData.scheduled);
-        res.status(201).json({ message: 'Plan created successfully', planData });
+        const planData = await response.json(); 
+
+        const systemCalendars = await CalendarService.getSystemCalendarsForUser(req.userId);
+        const plannedCalendar = systemCalendars.find(cal => cal.name === "Planned");
+
+        const mappedPlanData = mapPlanData(planData.scheduled, plannedCalendar._id, req.userId);
+        await PlanService.addPlan(mappedPlanData);
+
+        res.status(201).json({ message: 'Plan created successfully', warnings: planData.warnings });
     } catch (error){
         next(error);
     }
@@ -50,14 +56,26 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
         const plannableSlots = await EventService.getPlannableEventsForUser(req.userId);
         const tasks = await TaskService.getTasksToPlan(req.userId);
 
+        const mappedPlannableSlots = mapSlots(plannableSlots);
+        const mappedTasks = mapTasks(tasks);
+
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tasks: tasks, plannableSlots: plannableSlots, previousPlan: {} })
+            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: {} })
         });
+        if (!response.ok) {
+            throw new Error('Planner service failed');
+        }
         const planData = await response.json();
-        await PlanService.addPlan(req.userId, planData.scheduled);
-        res.status(201).json({ message: 'Plan created successfully', response });
+
+        const systemCalendars = await CalendarService.getSystemCalendarsForUser(req.userId);
+        const plannedCalendar = systemCalendars.find(cal => cal.name === "Planned");
+
+        const mappedPlanData = mapPlanData(planData.scheduled, plannedCalendar._id, req.userId);
+        await PlanService.addPlan(mappedPlanData);
+
+        res.status(201).json({ message: 'Plan created successfully', warnings: planData.warnings });
     } catch (error){
         next(error);
     }
@@ -91,26 +109,3 @@ router.delete('/', dbLimiter, authMiddleware, async function(req, res, next) {
 });
 
 module.exports = router;
-
-/*
-POST /plan          → planifica encima de lo existente (respeta lo anterior)
-POST /plan/reset    → borra todo y planifica desde cero
-DELETE /plan        → borra toda la planificación
-PATCH /plan/:id     → marca como completed/uncompleted, guarda userTime
-DELETE /plan/:id    → borra un evento de planificación concreto
-GET /plan           → devuelve la planificación actual (para mostrar en calendario)
-*/
-
-/*
-El POST:
-1. Obtener eventos planificables (calendarId = "Plannable")
-2. Obtener planificación existente (status = pending)
-3. Obtener tareas pendientes
-    Tareas elegibles para planificación:
-    - completed = false
-    - plannable = true
-    - finishDate >= hoy (inclusive si hay huecos disponibles hoy)
-4. Llamar al microservicio Python con todo eso
-5. Guardar los bloques que devuelve Python en BD
-6. Devolver la planificación al frontend
-*/

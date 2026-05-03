@@ -5,9 +5,8 @@ const getPlanForUser = async (userId) => {
     return await PlanRepo.findPlanForUser(userId);
 }
 
-const addPlan = async (userId, planEvents) => {
-    const eventsWithUser = planEvents.map(event => ({ ...event, userId }));
-    return await PlanRepo.addPlan(eventsWithUser);
+const addPlan = async (planEvents) => {
+    return await PlanRepo.addPlan(planEvents);
 };
 
 const deletePlan = async (userId) =>

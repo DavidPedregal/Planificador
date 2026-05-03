@@ -191,3 +191,11 @@ class TestSchedule:
         result = schedule(request)
         total = sum(b.scheduledTime for b in result.scheduled if b.taskId == "t1")
         assert total >= 120
+
+    def test_bloque_uncompleted_no_descuenta_tiempo(self):
+        tasks = [make_task("t1", "Mates", 120, "2026-05-10T23:59:00Z", "2026-05-01T00:00:00Z")]
+        previous = [make_block("t1", "2026-05-05T09:00:00Z", "2026-05-05T10:00:00Z", 60)]
+        # Sobreescribimos el status
+        previous[0] = PlannedBlock(taskId="t1", start="2026-05-05T09:00:00Z", end="2026-05-05T10:00:00Z", scheduledTime=60, status="uncompleted")
+        result = calcular_tiempo_restante(tasks, previous)
+        assert result[0]["estimatedTime"] == 120  # no se descontó nada

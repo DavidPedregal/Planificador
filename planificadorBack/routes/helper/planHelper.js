@@ -21,6 +21,20 @@ function mapPreviousPlan(previousPlan) {
         taskId: block.taskId.toString(),
         start: block.start.toISOString(),
         end: block.end.toISOString(),
+        scheduledTime: block.scheduledTime,
+        status: block.status
+    }));
+}
+
+function mapPlanData(planData, calendarId, userId) {
+    return planData.map(block => ({
+        userId: userId,
+        title: block.title,
+        calendarId: calendarId,
+        taskId: block.taskId,
+        start: new Date(block.start),
+        end: new Date(block.end),
+        status: 'pending',
         scheduledTime: block.scheduledTime
     }));
 }
@@ -28,6 +42,6 @@ function mapPreviousPlan(previousPlan) {
 module.exports = {
     mapSlots,
     mapTasks,
-    mapPreviousPlan
-
+    mapPreviousPlan,
+    mapPlanData
 }

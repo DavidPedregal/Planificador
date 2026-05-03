@@ -29,10 +29,14 @@ def schedule(request: PlanRequest) -> PlanResponse:
     return PlanResponse(scheduled=scheduled, warnings=warnings)
 
 
+# scheduler.py
 def calcular_tiempo_restante(tasks, previous_plan):
     tiempo_planificado = {}
     for block in previous_plan:
-        tiempo_planificado[block.taskId] = tiempo_planificado.get(block.taskId, 0) + block.scheduledTime
+        # Solo descontar si el bloque fue completado o está pendiente
+        # Si fue uncompleted, el usuario no lo hizo y hay que replanificarlo
+        if block.status in ('pending', 'completed'):
+            tiempo_planificado[block.taskId] = tiempo_planificado.get(block.taskId, 0) + block.scheduledTime
 
     resultado = []
     for task in tasks:

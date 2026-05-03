@@ -47,7 +47,7 @@ describe('planService', () => {
             PlanRepo.addPlan.mockResolvedValue([mockPlanEvent]);
             const planEvents = [{ title: 'Matemáticas', scheduledTime: 120 }];
 
-            await PlanService.addPlan(mockUserId, planEvents);
+            await PlanService.addPlan([mockPlanEvent]);
 
             expect(PlanRepo.addPlan).toHaveBeenCalledWith(
                 expect.arrayContaining([
@@ -63,11 +63,10 @@ describe('planService', () => {
                 { title: 'Historia', scheduledTime: 60 }
             ];
 
-            await PlanService.addPlan(mockUserId, planEvents);
+            await PlanService.addPlan(planEvents);
 
             const callArg = PlanRepo.addPlan.mock.calls[0][0];
             expect(callArg).toHaveLength(2);
-            callArg.forEach(e => expect(e.userId).toBe(mockUserId));
         });
     });
 

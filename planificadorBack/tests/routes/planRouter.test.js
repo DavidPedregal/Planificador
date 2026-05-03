@@ -4,6 +4,7 @@ const app = require('../../app');
 const PlanService = require('../../services/planService');
 const EventService = require('../../services/eventService');
 const TaskService = require('../../services/taskService');
+const CalendarService = require('../../services/calendarService');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
@@ -12,6 +13,7 @@ jest.mock('../../config/db', () => jest.fn());
 jest.mock('../../services/planService');
 jest.mock('../../services/eventService');
 jest.mock('../../services/taskService');
+jest.mock('../../services/calendarService');
 jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
     authLimiter: (req, res, next) => next(),
     dbLimiter: (req, res, next) => next()
@@ -91,6 +93,9 @@ describe('planRouter', () => {
             PlanService.getPlanForUser.mockResolvedValue([]);
             EventService.getPlannableEventsForUser.mockResolvedValue([]);
             TaskService.getTasksToPlan.mockResolvedValue([]);
+            CalendarService.getSystemCalendarsForUser.mockResolvedValue([
+                { _id: '507f1f77bcf86cd799439099', name: 'Planned', isSystem: true }
+            ]);
             global.fetch.mockResolvedValue({
                 ok: true,
                 json: async () => mockPythonResponse
@@ -138,6 +143,9 @@ describe('planRouter', () => {
             PlanService.deletePlan.mockResolvedValue({});
             EventService.getPlannableEventsForUser.mockResolvedValue([]);
             TaskService.getTasksToPlan.mockResolvedValue([]);
+            CalendarService.getSystemCalendarsForUser.mockResolvedValue([
+                { _id: '507f1f77bcf86cd799439099', name: 'Planned', isSystem: true }
+            ]);
             global.fetch.mockResolvedValue({
                 ok: true,
                 json: async () => mockPythonResponse
