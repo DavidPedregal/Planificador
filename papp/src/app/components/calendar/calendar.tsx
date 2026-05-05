@@ -8,7 +8,8 @@ import AddEventDialog from "../Event/add-event-dialog";
 import "./calendar.css";
 import { config } from "@/app/config/config";
 import EditEventDialog from "../Event/edit-event-dialog";
-import { Calendar as CalendarInterface, CalendarEvent, FREQUENCY_TYPE, mapToFullCalendarEvent } from "./calendarHelper";
+import { Calendar as CalendarInterface, CalendarEvent, mapToFullCalendarEvent } from "./calendarHelper";
+import EditPlanEventDialog from "../PlannedEvent/edit-plan-event-dialog";
 
 interface CalendarProps {
     refreshTrigger?: number;
@@ -23,18 +24,23 @@ const EMPTY_EVENT: CalendarEvent = {
     calendarId: "",
     useCalendarColor: true,
     label: "",
+    isPlannedEvent: false,
 };
 
 export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editPlanEventDialogOpen, setEditPlanEventDialogOpen] = useState(false);
+
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+    const [selectedPlanEventId, setSelectedPlanEventId] = useState<string | null>(null);
+
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
+
     const [allEvents, setAllEvents] = useState<any[]>([]); // Store all events for recurrence handling
     const [events, setEvents] = useState<any[]>([]);
     const [calendars, setCalendars] = useState<CalendarInterface[]>([]);
-    const [customCalendars, setCustomCalendars] = useState<CalendarInterface[]>([]);
 
     const addEvent = (start: Date, end: Date) => {
         setStartDate(start);
@@ -43,17 +49,25 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     };
 
     const handleEventClick = (info: any) => {
-        setSelectedEvent({
-            id: info.event.id,
-            title: info.event.title,
-            start: info.event.start,
-            end: info.event.end,
-            color: info.event.backgroundColor,
-            calendarId: info.event.extendedProps.calendarId,
-            useCalendarColor: info.event.extendedProps.useCalendarColor,
-            label: info.event.extendedProps.label || "",
-        });
-        setEditDialogOpen(true);
+        if (info.event.extendedProps.isPlannedEvent) {
+            console.log("hola");
+            setSelectedPlanEventId(info.event.id);
+            setEditPlanEventDialogOpen(true);
+
+        } else {
+            setSelectedEvent({
+                id: info.event.id,
+                title: info.event.title,
+                start: info.event.start,
+                end: info.event.end,
+                color: info.event.backgroundColor,
+                calendarId: info.event.extendedProps.calendarId,
+                useCalendarColor: info.event.extendedProps.useCalendarColor,
+                label: info.event.extendedProps.label || "",
+                isPlannedEvent: info.event.extendedProps.isPlannedEvent || false,
+            });
+            setEditDialogOpen(true);
+        }
     };
 
     const handleEventDrop = (info: any) => {
@@ -103,13 +117,25 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             const data = await res.json();
             
             const mappedEvents = data.map((event: any) => {
-                const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList.concat(customCalendars));
+                const color = setEventColor(event.useCalendarColor, event.color, event.calendarId, calendarsList);
                 return mapToFullCalendarEvent(event, color);
             });
+
+            const plannedEventsRes = await fetch(config.backendUrl + "/plan", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            const plannedEventData = await plannedEventsRes.json();
             
-            setAllEvents(mappedEvents);
+            const mappedPlannedEvents = plannedEventData.map((event: any) => {
+                const color = setEventColor(true, "", event.calendarId, calendarsList); // Planned events always use calendar color
+                return mapToFullCalendarEvent(event, color, true, event.status);
+            });
+
+            const allMappedEvents = mappedEvents.concat(mappedPlannedEvents);
+            setAllEvents(allMappedEvents);
+
             // Filter events based on calendar visibility
-            const visibleEvents = filterEventsByVisibility(mappedEvents, calendarsList);
+            const visibleEvents = filterEventsByVisibility(allMappedEvents, calendarsList);
             setEvents(visibleEvents);
         } catch (error) {
             console.error("Error fetching events:", error);
@@ -151,7 +177,6 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 color: cal.color,
                 visible: cal.visible,
             }));
-            setCustomCalendars(mappedCommonCalendars);
             return mappedCalendars.concat(mappedCommonCalendars);
         } catch (error) {
             console.error("Error fetching calendars:", error);
@@ -175,32 +200,61 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
 
     return (
     <>
-    <div className="calendar-wrapper">
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView="timeGridWeek"
-        slotMinTime="08:00:00"
-        slotMaxTime="22:00:00"
-        headerToolbar={{
-          left: "prev next today",
-          center: "title",
-          right: "dayGridMonth timeGridWeek timeGridDay listWeek",
-        }}
-        events={events}
-        dateClick={(info) => {
-            addEvent(info.date, new Date(info.date.getTime() + 60 * 60 * 1000));
-        }}
-        selectable={true}
-        select={(info) => {
-          addEvent(info.start, info.end);
-        }}
-        editable={true}
-        eventResizableFromStart={true}
-        eventClick={handleEventClick}
-        eventDrop={handleEventDrop}
-        eventResize={handleEventResize}
-      />
-    </div>
+        <div className="calendar-wrapper">
+            <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                initialView="timeGridWeek"
+                slotMinTime="08:00:00"
+                slotMaxTime="22:00:00"
+                headerToolbar={{
+                    left: "prev next today",
+                    center: "title",
+                    right: "dayGridMonth timeGridWeek timeGridDay listWeek",
+                }}
+                events={events}
+                dateClick={(info) => {
+                    addEvent(info.date, new Date(info.date.getTime() + 60 * 60 * 1000));
+                }}
+                selectable={true}
+                select={(info) => {
+                    addEvent(info.start, info.end);
+                }}
+                editable={true}
+                eventResizableFromStart={true}
+                eventClick={handleEventClick}
+                eventDrop={handleEventDrop}
+                eventResize={handleEventResize}
+                eventContent={(arg) => {
+                    const status = arg.event.extendedProps.status;
+                    const bg = arg.event.backgroundColor;
+
+                    const gradients: Record<string, string> = {
+                        completed:  `linear-gradient(180deg, ${bg} 50%, #22c55e)`,
+                        uncompleted: `linear-gradient(180deg, ${bg} 50%, #ef4444)`,
+                        pending:    "none",
+                    };
+
+                    const gradient = gradients[status] ?? "none";
+
+                    return (
+                        <div style={{
+                            background: gradient !== "none" ? gradient : bg,
+                            width: "100%",
+                            height: "100%",
+                            padding: "2px 4px",
+                            borderRadius: "3px",
+                            overflow: "hidden",
+                            display: "flex",
+                            alignItems: "flex-start",
+                        }}>
+                            <span style={{ fontSize: "0.75rem", fontWeight: 500, color: "#fff" }}>
+                                {arg.event.title}
+                            </span>
+                        </div>
+                    );
+                }}
+            />
+        </div>
         <AddEventDialog
             open={addDialogOpen}
             start={startDate}
@@ -223,7 +277,29 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             }}
         />
 
-
-  </>
+        <EditPlanEventDialog
+            open={editPlanEventDialogOpen}
+            planEventId={selectedPlanEventId || ""}
+            onClose={() => setEditPlanEventDialogOpen(false)}
+            onSave={(status) => {
+                allEvents.forEach(event => {
+                    if (event.id === selectedPlanEventId) {
+                        event.status = status; // Update status in allEvents
+                    }
+                });
+                const visibleEvents = filterEventsByVisibility(allEvents, calendars);
+                setEvents(visibleEvents);
+            }}
+            onDelete={() => {
+                allEvents.forEach((event, index) => {
+                    if (event.id === selectedPlanEventId) {
+                        allEvents.splice(index, 1); // Remove from allEvents
+                    }
+                });
+                const visibleEvents = filterEventsByVisibility(allEvents, calendars);
+                setEvents(visibleEvents);
+            }}
+        />
+    </>
 );
 }

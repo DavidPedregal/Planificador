@@ -1,19 +1,12 @@
-// tests/routes/planRouter.test.js
 const request = require('supertest');
 const app = require('../../app');
 const PlanService = require('../../services/planService');
-const EventService = require('../../services/eventService');
-const TaskService = require('../../services/taskService');
-const CalendarService = require('../../services/calendarService');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
 
 jest.mock('../../config/db', () => jest.fn());
 jest.mock('../../services/planService');
-jest.mock('../../services/eventService');
-jest.mock('../../services/taskService');
-jest.mock('../../services/calendarService');
 jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
     authLimiter: (req, res, next) => next(),
     dbLimiter: (req, res, next) => next()
@@ -56,12 +49,19 @@ const mockPlanEvent = {
 };
 
 const mockPythonResponse = {
-    scheduled: [mockPlanEvent]
+    scheduled: [mockPlanEvent],
+    warnings: []
+};
+
+const mockMappedData = {
+    mappedPreviousPlan: [],
+    mappedPlannableSlots: [],
+    mappedTasks: []
 };
 
 describe('planRouter', () => {
     describe('GET /plan', () => {
-        it('should return 200 with the plan', async () => {
+        it('should return 201 with the plan', async () => {
             PlanService.getPlanForUser.mockResolvedValue([mockPlanEvent]);
 
             const res = await request(app)
@@ -90,17 +90,12 @@ describe('planRouter', () => {
 
     describe('POST /plan', () => {
         beforeEach(() => {
-            PlanService.getPlanForUser.mockResolvedValue([]);
-            EventService.getPlannableEventsForUser.mockResolvedValue([]);
-            TaskService.getTasksToPlan.mockResolvedValue([]);
-            CalendarService.getSystemCalendarsForUser.mockResolvedValue([
-                { _id: '507f1f77bcf86cd799439099', name: 'Planned', isSystem: true }
-            ]);
+            PlanService.getDataToPlan.mockResolvedValue(mockMappedData);
+            PlanService.addPlan.mockResolvedValue([mockPlanEvent]);
             global.fetch.mockResolvedValue({
                 ok: true,
                 json: async () => mockPythonResponse
             });
-            PlanService.addPlan.mockResolvedValue([mockPlanEvent]);
         });
 
         it('should return 201 when plan is created', async () => {
@@ -111,7 +106,15 @@ describe('planRouter', () => {
             expect(res.status).toBe(201);
         });
 
-        it('should call the Python planner with tasks and events', async () => {
+        it('should call getDataToPlan with userId', async () => {
+            await request(app)
+                .post('/plan')
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(PlanService.getDataToPlan).toHaveBeenCalledWith(mockUserId);
+        });
+
+        it('should call the Python planner', async () => {
             await request(app)
                 .post('/plan')
                 .set('Authorization', `Bearer ${validToken}`);
@@ -122,9 +125,20 @@ describe('planRouter', () => {
             );
         });
 
-        it('should return 401 without token', async () => {
-            const res = await request(app).post('/plan');
-            expect(res.status).toBe(401);
+        it('should return warnings from Python in response', async () => {
+            global.fetch.mockResolvedValue({
+                ok: true,
+                json: async () => ({
+                    scheduled: [],
+                    warnings: [{ taskId: 'x', title: 'X', message: 'No cabe' }]
+                })
+            });
+
+            const res = await request(app)
+                .post('/plan')
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.body.warnings).toHaveLength(1);
         });
 
         it('should return 500 if Python service fails', async () => {
@@ -136,21 +150,22 @@ describe('planRouter', () => {
 
             expect(res.status).toBe(500);
         });
+
+        it('should return 401 without token', async () => {
+            const res = await request(app).post('/plan');
+            expect(res.status).toBe(401);
+        });
     });
 
     describe('POST /plan/reset', () => {
         beforeEach(() => {
             PlanService.deletePlan.mockResolvedValue({});
-            EventService.getPlannableEventsForUser.mockResolvedValue([]);
-            TaskService.getTasksToPlan.mockResolvedValue([]);
-            CalendarService.getSystemCalendarsForUser.mockResolvedValue([
-                { _id: '507f1f77bcf86cd799439099', name: 'Planned', isSystem: true }
-            ]);
+            PlanService.getDataToPlan.mockResolvedValue(mockMappedData);
+            PlanService.addPlan.mockResolvedValue([mockPlanEvent]);
             global.fetch.mockResolvedValue({
                 ok: true,
                 json: async () => mockPythonResponse
             });
-            PlanService.addPlan.mockResolvedValue([mockPlanEvent]);
         });
 
         it('should return 201 when plan is reset', async () => {
@@ -175,12 +190,12 @@ describe('planRouter', () => {
         });
     });
 
-    describe('PATCH /plan/:id', () => {
+    describe('put /plan/:id', () => {
         it('should return 200 when plan event is updated', async () => {
             PlanService.updatePlanEvent.mockResolvedValue({ ...mockPlanEvent, status: 'completed' });
 
             const res = await request(app)
-                .patch(`/plan/${mockPlanEventId}`)
+                .put(`/plan/${mockPlanEventId}`)
                 .set('Authorization', `Bearer ${validToken}`)
                 .send({ status: 'completed', userTime: 90 });
 
@@ -194,7 +209,7 @@ describe('planRouter', () => {
             );
 
             const res = await request(app)
-                .patch(`/plan/${mockPlanEventId}`)
+                .put(`/plan/${mockPlanEventId}`)
                 .set('Authorization', `Bearer ${validToken}`)
                 .send({});
 
@@ -207,7 +222,7 @@ describe('planRouter', () => {
             );
 
             const res = await request(app)
-                .patch(`/plan/${mockPlanEventId}`)
+                .put(`/plan/${mockPlanEventId}`)
                 .set('Authorization', `Bearer ${validToken}`)
                 .send({ status: 'completed', userTime: 90 });
 
@@ -215,7 +230,7 @@ describe('planRouter', () => {
         });
 
         it('should return 401 without token', async () => {
-            const res = await request(app).patch(`/plan/${mockPlanEventId}`).send({});
+            const res = await request(app).put(`/plan/${mockPlanEventId}`).send({});
             expect(res.status).toBe(401);
         });
     });

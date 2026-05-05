@@ -1,7 +1,7 @@
 const EventRepo = require('../repository/eventRepository');
 const CalendarRepo = require('../repository/calendarRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
-const { generateRecurringEvents, getChangedFields, validateEventData } = require('./helper/eventHelper');
+const { generateRecurringEvents, getChangedFields, validateEventData } = require('./business/eventHelper');
 const { randomUUID } = require('crypto');
 
 const getAllEvents = async (userId) => 
@@ -130,6 +130,14 @@ const deleteAllEventsInGroup = async (userId, eventId) => {
     return { message: "Event(s) deleted successfully", modifiedCount: result.deletedCount };
 };
 
+const deleteEventsByLabel = async (userId, label) => {
+    if (!label || typeof label !== 'string') {
+        throw new ValidationError("Invalid label");
+    }
+    const result = await EventRepo.deleteEventsByLabel(userId, label);
+    return { message: "Event(s) deleted successfully", modifiedCount: result.deletedCount };
+};
+
 module.exports = {
     getAllEvents,
     getEventById,
@@ -140,5 +148,6 @@ module.exports = {
     updateAllEventsInGroup,
     deleteEvent,
     deleteForwardEvents,
-    deleteAllEventsInGroup
+    deleteAllEventsInGroup,
+    deleteEventsByLabel
 }

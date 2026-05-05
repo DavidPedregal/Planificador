@@ -336,4 +336,27 @@ describe('eventService', () => {
             await expect(EventService.deleteAllEventsInGroup(mockUserId, mockEventId)).rejects.toThrow(NotFoundError);
         });
     });
+
+    describe('deleteEventsByLabel', () => {
+        it('should delete events by label and return modifiedCount', async () => {
+            EventRepo.deleteEventsByLabel.mockResolvedValue({ deletedCount: 2 });
+
+            const result = await EventService.deleteEventsByLabel(mockUserId, 'examen');
+
+            expect(result.modifiedCount).toBe(2);
+            expect(EventRepo.deleteEventsByLabel).toHaveBeenCalledWith(mockUserId, 'examen');
+        });
+
+        it('should throw ValidationError if label is empty', async () => {
+            await expect(
+                EventService.deleteEventsByLabel(mockUserId, '')
+            ).rejects.toThrow(ValidationError);
+        });
+
+        it('should throw ValidationError if label is not a string', async () => {
+            await expect(
+                EventService.deleteEventsByLabel(mockUserId, null)
+            ).rejects.toThrow(ValidationError);
+        });
+    });
 });

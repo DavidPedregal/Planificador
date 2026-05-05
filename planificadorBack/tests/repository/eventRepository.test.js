@@ -286,4 +286,35 @@ describe('eventRepository', () => {
             expect(events[0].groupId).toBeUndefined();
         });
     });
+
+    describe('deleteEventsByLabel', () => {
+        it('should delete all events with a given label', async () => {
+            await EventRepo.createEvent([
+                { ...mockEventData, label: 'examen' },
+                { ...mockEventData, label: 'examen' },
+                { ...mockEventData, label: 'tarea' }
+            ]);
+
+            await EventRepo.deleteEventsByLabel(mockUserId, 'examen');
+
+            const events = await EventRepo.getEventsByUserId(mockUserId);
+            expect(events).toHaveLength(1);
+            expect(events[0].label).toBe('tarea');
+        });
+
+        it('should not delete events from other users', async () => {
+            const otherUserId = new mongoose.Types.ObjectId();
+            await EventRepo.createEvent([{ ...mockEventData, userId: otherUserId, label: 'examen' }]);
+
+            await EventRepo.deleteEventsByLabel(mockUserId, 'examen');
+
+            const events = await EventRepo.getEventsByUserId(otherUserId);
+            expect(events).toHaveLength(1);
+        });
+
+        it('should return deletedCount 0 if no events match', async () => {
+            const result = await EventRepo.deleteEventsByLabel(mockUserId, 'noexiste');
+            expect(result.deletedCount).toBe(0);
+        });
+    });
 });

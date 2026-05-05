@@ -134,7 +134,7 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
             frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
         };
         try {
-            const response = await fetch(config.backendUrl + "/events", {
+            await fetch(config.backendUrl + "/events", {
                 method: "POST",
                  headers: {
                     "Content-Type": "application/json",
@@ -143,7 +143,6 @@ const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd
                 body: JSON.stringify(newEvent),
             });
 
-            const createdEvents = await response.json();
             onSave();
             onClose();
         } catch (error) {

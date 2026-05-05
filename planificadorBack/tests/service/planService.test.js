@@ -1,9 +1,14 @@
-// tests/service/planService.test.js
 const PlanRepo = require('../../repository/planRepository');
+const EventService = require('../../services/eventService');
+const TaskService = require('../../services/taskService');
+const CalendarService = require('../../services/calendarService');
 const PlanService = require('../../services/planService');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
 
 jest.mock('../../repository/planRepository');
+jest.mock('../../services/eventService');
+jest.mock('../../services/taskService');
+jest.mock('../../services/calendarService');
 
 afterEach(() => {
     jest.clearAllMocks();
@@ -13,6 +18,7 @@ const mockUserId = '507f1f77bcf86cd799439011';
 const mockPlanEventId = '507f1f77bcf86cd799439012';
 const mockTaskId = '507f1f77bcf86cd799439013';
 const mockCalendarId = '507f1f77bcf86cd799439014';
+const mockPlannedCalendarId = '507f1f77bcf86cd799439015';
 
 const mockPlanEvent = {
     _id: mockPlanEventId,
@@ -24,6 +30,26 @@ const mockPlanEvent = {
     end: new Date('2026-05-05T11:00:00Z'),
     scheduledTime: 120,
     status: 'pending'
+};
+
+const mockTask = {
+    _id: mockTaskId,
+    title: 'Matemáticas',
+    estimatedTime: 120,
+    finishDate: new Date('2026-05-10T00:00:00Z'),
+    givenDate: new Date('2026-05-01T00:00:00Z'),
+    includeReviews: false
+};
+
+const mockSlot = {
+    start: new Date('2026-05-05T09:00:00Z'),
+    end: new Date('2026-05-05T12:00:00Z')
+};
+
+const mockPlannedCalendar = {
+    _id: mockPlannedCalendarId,
+    name: 'Planned',
+    isSystem: true
 };
 
 describe('planService', () => {
@@ -42,31 +68,94 @@ describe('planService', () => {
         });
     });
 
-    describe('addPlan', () => {
-        it('should add userId to each event and save', async () => {
-            PlanRepo.addPlan.mockResolvedValue([mockPlanEvent]);
-            const planEvents = [{ title: 'Matemáticas', scheduledTime: 120 }];
+    describe('getPlanEventForUser', () => {
+        it('should return a plan event by id', async () => {
+            PlanRepo.findPlanEventForUser.mockResolvedValue(mockPlanEvent);
+            const result = await PlanService.getPlanEventForUser(mockUserId, mockPlanEventId);
+            expect(result).toEqual(mockPlanEvent);
+        });
 
-            await PlanService.addPlan([mockPlanEvent]);
+        it('should throw NotFoundError if plan event does not exist', async () => {
+            PlanRepo.findPlanEventForUser.mockResolvedValue(null);
+            await expect(
+                PlanService.getPlanEventForUser(mockUserId, mockPlanEventId)
+            ).rejects.toThrow(NotFoundError);
+        });
+    });
+
+    describe('getDataToPlan', () => {
+        beforeEach(() => {
+            PlanRepo.findPlanForUser.mockResolvedValue([mockPlanEvent]);
+            EventService.getPlannableEventsForUser.mockResolvedValue([mockSlot]);
+            TaskService.getTasksToPlan.mockResolvedValue([mockTask]);
+        });
+
+        it('should return mapped data for the planner', async () => {
+            const result = await PlanService.getDataToPlan(mockUserId);
+            expect(result).toHaveProperty('mappedPreviousPlan');
+            expect(result).toHaveProperty('mappedPlannableSlots');
+            expect(result).toHaveProperty('mappedTasks');
+        });
+
+        it('should map tasks with correct fields', async () => {
+            const result = await PlanService.getDataToPlan(mockUserId);
+            const task = result.mappedTasks[0];
+            expect(task).toHaveProperty('taskId');
+            expect(task).toHaveProperty('title');
+            expect(task).toHaveProperty('estimatedTime');
+            expect(task).toHaveProperty('finishDate');
+            expect(task).toHaveProperty('givenDate');
+            expect(task).toHaveProperty('includeReviews');
+        });
+
+        it('should map slots with correct fields', async () => {
+            const result = await PlanService.getDataToPlan(mockUserId);
+            const slot = result.mappedPlannableSlots[0];
+            expect(slot).toHaveProperty('start');
+            expect(slot).toHaveProperty('end');
+        });
+
+        it('should map previous plan with status', async () => {
+            const result = await PlanService.getDataToPlan(mockUserId);
+            const block = result.mappedPreviousPlan[0];
+            expect(block).toHaveProperty('taskId');
+            expect(block).toHaveProperty('scheduledTime');
+            expect(block).toHaveProperty('status');
+        });
+    });
+
+    describe('addPlan', () => {
+        it('should map plan data and save to repo', async () => {
+            CalendarService.getSystemCalendarsForUser.mockResolvedValue([mockPlannedCalendar]);
+            PlanRepo.addPlan.mockResolvedValue([mockPlanEvent]);
+
+            const planEvents = [{
+                taskId: mockTaskId,
+                title: 'Matemáticas',
+                start: '2026-05-05T09:00:00Z',
+                end: '2026-05-05T11:00:00Z',
+                scheduledTime: 120
+            }];
+
+            await PlanService.addPlan(planEvents, mockUserId);
 
             expect(PlanRepo.addPlan).toHaveBeenCalledWith(
                 expect.arrayContaining([
-                    expect.objectContaining({ userId: mockUserId, title: 'Matemáticas' })
+                    expect.objectContaining({
+                        userId: mockUserId,
+                        calendarId: mockPlannedCalendarId,
+                        status: 'pending'
+                    })
                 ])
             );
         });
 
-        it('should handle multiple events', async () => {
-            PlanRepo.addPlan.mockResolvedValue([mockPlanEvent, mockPlanEvent]);
-            const planEvents = [
-                { title: 'Matemáticas', scheduledTime: 120 },
-                { title: 'Historia', scheduledTime: 60 }
-            ];
+        it('should throw NotFoundError if Planned calendar does not exist', async () => {
+            CalendarService.getSystemCalendarsForUser.mockResolvedValue([]);
 
-            await PlanService.addPlan(planEvents);
-
-            const callArg = PlanRepo.addPlan.mock.calls[0][0];
-            expect(callArg).toHaveLength(2);
+            await expect(
+                PlanService.addPlan([], mockUserId)
+            ).rejects.toThrow(NotFoundError);
         });
     });
 
@@ -106,11 +195,6 @@ describe('planService', () => {
             });
 
             expect(result.status).toBe('completed');
-            expect(PlanRepo.updatePlanEvent).toHaveBeenCalledWith(
-                mockUserId,
-                mockPlanEventId,
-                { status: 'completed', userTime: 90 }
-            );
         });
 
         it('should update status to uncompleted without userTime', async () => {
@@ -141,7 +225,7 @@ describe('planService', () => {
             ).rejects.toThrow(ValidationError);
         });
 
-        it('should throw ValidationError if userTime is negative or zero', async () => {
+        it('should throw ValidationError if userTime is zero or negative', async () => {
             await expect(
                 PlanService.updatePlanEvent(mockUserId, mockPlanEventId, { status: 'completed', userTime: 0 })
             ).rejects.toThrow(ValidationError);

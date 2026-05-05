@@ -1,6 +1,6 @@
 const TaskRepo = require('../repository/taskRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
-const { generateRecurringTasks, validateData, getChangedFields } = require('./helper/taskHelper');
+const { generateRecurringTasks, validateData, getChangedFields } = require('./business/taskHelper');
 const { randomUUID } = require('crypto');
 
 const getAllTasks = async (userId) => 

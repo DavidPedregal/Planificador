@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from ortools.sat.python import cp_model
 from models import PlanRequest, PlanResponse, ScheduledBlock, Warning
 
-BLOCK_SIZE = 30  # minutos por bloque
+BLOCK_SIZE = 15  # minutos por bloque
 
 
 def schedule(request: PlanRequest) -> PlanResponse:
@@ -13,7 +13,7 @@ def schedule(request: PlanRequest) -> PlanResponse:
     # 1. Calcular tiempo restante por tarea
     tasks_with_remaining = calcular_tiempo_restante(tasks, previous_plan)
 
-    # 2. Generar bloques disponibles de 30 minutos
+    # 2. Generar bloques disponibles de 15 minutos
     available_blocks = generar_bloques_disponibles(plannable_slots, previous_plan)
 
     if not available_blocks or not tasks_with_remaining:
@@ -173,12 +173,12 @@ def resolver(tasks, available_blocks):
     x = {}
     for i in range(n_tasks):
         for j in range(n_blocks):
-            x[i, j] = model.NewBoolVar(f"x_{i}_{j}")
+            x[i, j] = model.NewBoolVar(f"x_{i}_{j}") # type: ignore
 
     # Variable que indica si la tarea i está completamente planificada
     completada = {}
     for i in range(n_tasks):
-        completada[i] = model.NewBoolVar(f"completada_{i}")
+        completada[i] = model.NewBoolVar(f"completada_{i}") # type: ignore
 
     bloques_necesarios = []
     for i, task in enumerate(tasks):
@@ -187,21 +187,21 @@ def resolver(tasks, available_blocks):
 
     # Restricción: cada bloque se asigna a una sola tarea como máximo
     for j in range(n_blocks):
-        model.Add(sum(x[i, j] for i in range(n_tasks)) <= 1)
+        model.Add(sum(x[i, j] for i in range(n_tasks)) <= 1) # type: ignore
 
     # Restricción: bloques asignados >= necesarios SI la tarea está completada
     for i, task in enumerate(tasks):
         needed = bloques_necesarios[i]
         total_asignados = sum(x[i, j] for j in range(n_blocks))
-        model.Add(total_asignados >= needed).OnlyEnforceIf(completada[i])
-        model.Add(total_asignados < needed).OnlyEnforceIf(completada[i].Not())
+        model.Add(total_asignados >= needed).OnlyEnforceIf(completada[i]) # type: ignore
+        model.Add(total_asignados < needed).OnlyEnforceIf(completada[i].Not()) # type: ignore
 
     # Restricción: bloques después de finishDate no se pueden asignar
     for i, task in enumerate(tasks):
         finish = datetime.fromisoformat(task["finishDate"].replace("Z", "+00:00"))
         for j, block_time in enumerate(available_blocks):
             if block_time + timedelta(minutes=BLOCK_SIZE) > finish:
-                model.Add(x[i, j] == 0)
+                model.Add(x[i, j] == 0) # type: ignore
 
     # Objetivo: maximizar tareas completadas, luego minimizar distancia a givenDate
     given_dates = []
@@ -219,7 +219,7 @@ def resolver(tasks, available_blocks):
 
     # Prioridad 1: maximizar tareas completadas (peso alto)
     # Prioridad 2: minimizar distancia a givenDate (peso bajo)
-    model.Minimize(
+    model.Minimize( # type: ignore
         sum(-10000 * completada[i] for i in range(n_tasks)) +
         sum(costs)
     )

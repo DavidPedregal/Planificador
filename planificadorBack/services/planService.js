@@ -1,12 +1,44 @@
 const PlanRepo = require('../repository/planRepository');
+const EventService = require('../services/eventService.js');
+const TaskService = require('../services/taskService.js');
+const CalendarService = require('../services/calendarService.js');
+const { mapPreviousPlan, mapSlots, mapTasks, mapPlanData } = require('./business/planHelper.js');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
 
 const getPlanForUser = async (userId) => {
     return await PlanRepo.findPlanForUser(userId);
 }
 
-const addPlan = async (planEvents) => {
-    return await PlanRepo.addPlan(planEvents);
+const getPlanEventForUser = async (userId, planEventId) => {
+    const planEvent = await PlanRepo.findPlanEventForUser(userId, planEventId);
+    if (!planEvent) {
+        throw new NotFoundError('Plan event not found');
+    }
+    return planEvent;
+};
+
+const getDataToPlan = async (userId) => {
+    const previousPlan = await getPlanForUser(userId);
+    const plannableSlots = await EventService.getPlannableEventsForUser(userId);
+    const tasks = await TaskService.getTasksToPlan(userId);
+
+    const mappedPreviousPlan = mapPreviousPlan(previousPlan);
+    const mappedPlannableSlots = mapSlots(plannableSlots);
+    const mappedTasks = mapTasks(tasks);
+
+    return { mappedPreviousPlan, mappedPlannableSlots, mappedTasks };
+};
+
+const addPlan = async (planEvents, userId) => {
+    const systemCalendars = await CalendarService.getSystemCalendarsForUser(userId);
+    const plannedCalendar = systemCalendars.find(cal => cal.name === "Planned");
+
+    if (!plannedCalendar) {
+        throw new NotFoundError('Planned calendar not found for user');
+    }
+    
+    const mappedPlanData = mapPlanData(planEvents, plannedCalendar._id, userId);
+    return await PlanRepo.addPlan(mappedPlanData);
 };
 
 const deletePlan = async (userId) =>
@@ -49,6 +81,8 @@ const updatePlanEvent = async (userId, planEventId, updateData) => {
 
 module.exports = {
     getPlanForUser,
+    getPlanEventForUser,
+    getDataToPlan,
     addPlan,
     deletePlan,
     deletePlanEvent,

@@ -37,6 +37,8 @@ export interface CalendarEvent {
     useCalendarColor: boolean;
     color: string;
     calendarId: string;
+    isPlannedEvent: boolean;
+    status?: string; // "pending", "completed", "uncompleted"
 }
 
 export interface Calendar { 
@@ -77,7 +79,7 @@ export function formatDateTimeLocal(d: Date | string): string {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export const mapToFullCalendarEvent = (event: any, color: string) => {
+export const mapToFullCalendarEvent = (event: any, color: string, isPlannedEvent: boolean = false, status?: string) => {
     const base : CalendarEvent = {
         id: event._id,
         title: event.title,
@@ -86,7 +88,9 @@ export const mapToFullCalendarEvent = (event: any, color: string) => {
         end: event.end,
         color: color,
         calendarId: event.calendarId,
-        useCalendarColor: event.useCalendarColor
+        useCalendarColor: event.useCalendarColor,
+        isPlannedEvent: isPlannedEvent,
+        status: status,
     };
 
     return base;

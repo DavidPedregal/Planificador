@@ -293,4 +293,34 @@ describe('eventRouter', () => {
             expect(res.status).toBe(401);
         });
     });
+
+    describe('DELETE /events/label/:label', () => {
+        it('should return 200 with the result', async () => {
+            EventService.deleteEventsByLabel.mockResolvedValue({ message: 'Event(s) deleted successfully', modifiedCount: 2 });
+
+            const res = await request(app)
+                .delete('/events/label/examen')
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(200);
+            expect(res.body.modifiedCount).toBe(2);
+        });
+
+        it('should return 400 if service throws ValidationError', async () => {
+            EventService.deleteEventsByLabel.mockRejectedValue(
+                new ValidationError('Invalid label')
+            );
+
+            const res = await request(app)
+                .delete('/events/label/examen')
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 401 without token', async () => {
+            const res = await request(app).delete('/events/label/examen');
+            expect(res.status).toBe(401);
+        });
+    });
 });

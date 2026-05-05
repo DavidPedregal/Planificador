@@ -49,6 +49,15 @@ router.put('/all/:id', dbLimiter, authMiddleware, async function(req, res, next)
     }
 });
 
+router.delete('/label/:label', dbLimiter, authMiddleware, async function(req, res, next) {
+    try {
+        const result = await EventService.deleteEventsByLabel(req.userId, req.params.label);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const result = await EventService.deleteEvent(req.userId, req.params.id);
