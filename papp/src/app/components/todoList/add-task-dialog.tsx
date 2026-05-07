@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./add-task-dialog.css";
 import { config } from "@/app/config/config";
 import { FREQUENCY_TYPE, RecurrenceRule, WEEKDAYS, 
-    WEEKDAY_LABELS, FREQ_OPTIONS} from "../Calendar/calendarHelper";
+    WEEKDAY_LABELS, FREQ_OPTIONS} from "../calendar/calendarHelper";
 import InfoIcon from '@mui/icons-material/Info';
 import Tooltip from "@mui/material/Tooltip";
 

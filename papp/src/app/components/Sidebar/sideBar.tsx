@@ -7,7 +7,7 @@ import AddCalendarDialog from "./add-calendar-dialog";
 import ConfirmDialog from "./confirm-dialog";
 import { config } from "@/app/config/config";
 import EditCalendarDialog from "./edit-calendar-dialog";
-import { Calendar, Subject } from "../Calendar/calendarHelper";
+import { Calendar, Subject } from "../calendar/calendarHelper";
 import AddSubjectDialog from "./add-subject-dialog";
 import EditSubjectDialog from "./edit-subject-dialog";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';

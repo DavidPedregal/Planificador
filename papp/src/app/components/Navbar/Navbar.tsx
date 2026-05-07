@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import Login from "@/app/components/Login/login";
+import Login from "@/app/components/login/login";
 import "./Navbar.css";
 
 export default function Navbar() {

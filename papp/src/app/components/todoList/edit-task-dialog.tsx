@@ -3,7 +3,7 @@ import "./add-task-dialog.css";
 import { config } from "@/app/config/config";
 import InfoIcon from '@mui/icons-material/Info';
 import Tooltip from "@mui/material/Tooltip";
-import RecurrenceChoiceDialog from "@/app/components/Event/recurrence-choice-dialog";
+import RecurrenceChoiceDialog from "@/app/components/event/recurrence-choice-dialog";
 
 interface Subject {
     id: string;

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Calendar from "@/app/components/Calendar/calendar";
-import TodoList from "@/app/components/TodoList/todoList";
+import Calendar from "@/app/components/calendar/calendar";
+import TodoList from "@/app/components/todoList/todoList";
 import "./home.css";
-import Sidebar from "../components/Sidebar/sideBar";
+import Sidebar from "../components/sidebar/sideBar";
 
 
 export default function Home() {

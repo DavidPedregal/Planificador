@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./add-event-dialog.css";
-import { config } from "@/app/config/config";
-import EastIcon from '@mui/icons-material/East';
-import { FREQUENCY_TYPE, RecurrenceRule, EVENT_COLORS, WEEKDAYS, 
-    WEEKDAY_LABELS, FREQ_OPTIONS, formatDateTimeLocal, 
-    Calendar} from "../Calendar/calendarHelper";
+import { useCalendarList } from "./hooks/useCalendarList";
+import { useEventForm } from "./hooks/useEventForm";
+import { EventDateStrip } from "./components/EventDateStrip";
+import { EventColorPicker } from "./components/EventColorPicker";
+import { EventRecurrenceForm } from "./components/EventRecurrenceForm";
+import { useApp } from "@/context/AppContext";
 
 interface Props {
     open: boolean;
@@ -14,396 +15,134 @@ interface Props {
     onSave: () => void;
 }
 
-const AddEventDialog: React.FC<Props> = ({open, start: propsStart, end: propsEnd, onClose, onSave,}) => {
-    const [eventTitle, setEventTitle] = useState("");
-    const [label, setLabel] = useState("");
-    const [calendars, setCalendars] = useState<Calendar[]>([]);
-    const [calendarId, setCalendarId] = useState("");
-    const [color, setColor] = useState(EVENT_COLORS[0].value);
-    const [useCustomColor, setUseCustomColor] = useState(false);
-    const [start, setStart] = useState<Date>(propsStart);
-    const [end, setEnd] = useState<Date>(propsEnd);
-    const [recurrence, setRecurrence] = useState<RecurrenceRule>({
-        frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [],
-        frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1,
-    });
-
-    // Reset when dialog opens
-    useEffect(() => {
-        if (open) {
-            fetchCalendars();
-            setEventTitle("");
-            setLabel("");
-            setStart(propsStart);
-            setEnd(propsEnd);
-            setUseCustomColor(false);
-            setColor(EVENT_COLORS[0].value);
-            
-            setRecurrence({ frequencyType: FREQUENCY_TYPE.NONE, frequencyInterval: 1, frequencyDaysOfWeek: [], frequencyEndType: "on", frequencyEndDate: "", frequencyOccurrencesLeft: 1 });
-        }
-    }, [open, propsStart, propsEnd]);
-
-    useEffect(() => {
-        if (calendars.length > 0) {
-            setCalendarId(calendars[0].id);
-        }
-    }, [calendars]);
-
-    const fetchCalendars = async () => {
-        try {
-            const res = await fetch(config.backendUrl + "/calendars", {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-            });
-            const data = await res.json();
-            const customCalendars = data.map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color }));
-            
-            const commonRes = await fetch(config.backendUrl + "/calendars/common", {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-            });
-            const commonData = await commonRes.json();
-            const commonCalendars = commonData
-                .filter((cal: any) => cal.name !== "Planned")
-                .map((cal: any) => ({ id: cal._id, name: cal.name, userId: cal.userId, color: cal.color }));
-            
-            setCalendars([...customCalendars, ...commonCalendars]);
-        } catch (error) {
-            console.error("Error fetching calendars:", error);
-        }
-    };
+const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEnd, onClose, onSave }) => {
+    const { pushAlert } = useApp();
+    const { calendars } = useCalendarList(open, pushAlert);
+    const {
+        eventTitle, setEventTitle,
+        label, setLabel,
+        calendarId, setCalendarId,
+        color, setColor,
+        useCustomColor, setUseCustomColor,
+        start, setStart,
+        end, setEnd,
+        recurrence, setRecurrence,
+        toggleWeekday,
+        handleSave,
+    } = useEventForm({ open, propsStart, propsEnd, calendars, pushAlert });
 
     if (!open || !start || !end) return null;
 
-    const getDateString = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const getTimeString = (date: Date): string => {
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
-    };
-
-    const createDateFromParts = (dateStr: string, timeStr: string): Date => {
-        if (!dateStr || !timeStr) return new Date();
-        return new Date(`${dateStr}T${timeStr}`);
-    };
-
-    const toggleWeekday = (day: number) => {
-        setRecurrence(r => {
-            // Ensure frequencyDaysOfWeek is always an array
-            const currentDays = Array.isArray(r.frequencyDaysOfWeek) ? r.frequencyDaysOfWeek : [];
-            const newDays = currentDays.includes(day)
-                ? currentDays.filter(d => d !== day)
-                : [...currentDays, day];
-            
-            return {
-                ...r,
-                frequencyDaysOfWeek: newDays,
-            };
-        });
-    };
-
-    const handleSave = async () => {
-        if (!eventTitle.trim()) return;
-
-        const getEventColor = () => {
-            if (useCustomColor) {
-                return color;
-            }
-            // Use calendar's color or default
-            const selectedCalendar = calendars.find(cal => cal.id === calendarId);
-            return selectedCalendar?.color || EVENT_COLORS[0].value;
-        };
-
-        const newEvent = {
-            title: eventTitle,
-            label: label || undefined,
-            color: getEventColor(),
-            calendarId,
-            start: start,
-            end: end,
-            useCalendarColor: !useCustomColor,
-            frequencyType: recurrence.frequencyType,
-            frequencyInterval: recurrence.frequencyInterval,
-            frequencyDaysOfWeek: recurrence.frequencyDaysOfWeek,
-            frequencyEndType: recurrence.frequencyEndType,
-            frequencyEndDate: recurrence.frequencyEndDate,
-            frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
-        };
-        try {
-            await fetch(config.backendUrl + "/events", {
-                method: "POST",
-                 headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify(newEvent),
-            });
-
+    const onClickSave = async () => {
+        const ok = await handleSave();
+        if (ok) {
             onSave();
             onClose();
-        } catch (error) {
-            console.error("Error guardando evento:", error);
         }
     };
 
-    const showWeekdays = recurrence.frequencyType === FREQUENCY_TYPE.WEEKS;
-    const showEndOptions = recurrence.frequencyType !== FREQUENCY_TYPE.NONE;
-
     return (
-        <>
-            <div
-                className="aed-overlay"
-                onClick={(e) => e.target === e.currentTarget && onClose()}
-                role="dialog" aria-modal="true" aria-label="Crear evento"
-            >
-                <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
+        <div
+            className="aed-overlay"
+            onClick={(e) => e.target === e.currentTarget && onClose()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Crear evento"
+        >
+            <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
 
-                    {/* Header */}
-                    <div className="aed-header">
-                        <div className="aed-header-left">
-                            <div className="aed-header-dot" />
-                            <span className="aed-title">Nuevo evento</span>
-                        </div>
-                        <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
+                {/* Header */}
+                <div className="aed-header">
+                    <div className="aed-header-left">
+                        <div className="aed-header-dot" />
+                        <span className="aed-title">Nuevo evento</span>
                     </div>
-
-                    {/* Date strip */}
-                    <div className="aed-date-strip">
-                        <div className="aed-date-field">
-                            <span className="aed-date-icon">⏱</span>
-                            <input
-                                className="aed-date-input"
-                                type="date"
-                                value={getDateString(start)}
-                                onChange={e => {
-                                    const newStart = createDateFromParts(e.target.value, getTimeString(start));
-                                    setStart(newStart);
-                                    if (end <= newStart) {
-                                        setEnd(new Date(newStart.getTime() + 60 * 60 * 1000));
-                                    }
-                                }}
-                            />
-                        </div>
-                        <span className="aed-date-arrow"><EastIcon /></span>
-                        <div className="aed-date-field">
-                            <input
-                                className="aed-date-input"
-                                type="date"
-                                value={getDateString(end)}
-                                min={getDateString(start)}
-                                onChange={e => setEnd(createDateFromParts(e.target.value, getTimeString(end)))}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Time strip */}
-                    <div className="aed-date-strip">
-                        <div className="aed-date-field">
-                            <input
-                                className="aed-date-input"
-                                type="time"
-                                value={getTimeString(start)}
-                                onChange={e => {
-                                    const newStart = createDateFromParts(getDateString(start), e.target.value);
-                                    setStart(newStart);
-                                    if (end <= newStart) {
-                                        setEnd(new Date(newStart.getTime() + 60 * 60 * 1000));
-                                    }
-                                }}
-                            />
-                        </div>
-                        <span className="aed-date-arrow"><EastIcon /></span>
-                        <div className="aed-date-field">
-                            <input
-                                className="aed-date-input"
-                                type="time"
-                                value={getTimeString(end)}
-                                onChange={e => setEnd(createDateFromParts(getDateString(end), e.target.value))}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Body */}
-                    <div className="aed-body">
-
-                        {/* Título */}
-                        <div className="aed-field">
-                            <label className="aed-label">Título</label>
-                            <input
-                                className="aed-input"
-                                type="text"
-                                placeholder="Añadir título…"
-                                value={eventTitle}
-                                onChange={e => setEventTitle(e.target.value)}
-                                autoFocus
-                                onKeyDown={e => e.key === "Enter" && handleSave()}
-                            />
-                        </div>
-
-                        {/* Calendario */}
-                        <div className="aed-field">
-                            <label className="aed-label">Calendario</label>
-                            <select
-                                className="aed-input aed-select"
-                                value={calendarId}
-                                onChange={e => setCalendarId(e.target.value)}
-                            >
-                                {calendars.map(cal => (
-                                    <option key={cal.id} value={cal.id}>{cal.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Etiqueta */}
-                        <div className="aed-field">
-                            <label className="aed-label">Etiqueta</label>
-                            <input
-                                className="aed-input"
-                                type="text"
-                                placeholder="Añadir etiqueta (opcional)…"
-                                value={label}
-                                onChange={e => setLabel(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Color */}
-                        <div className="aed-field">
-                            <label className="aed-label">
-                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={useCustomColor}
-                                        onChange={e => setUseCustomColor(e.target.checked)}
-                                    />
-                                    <span>Usar color personalizado</span>
-                                </div>
-                            </label>
-                            {useCustomColor && (
-                                <div className="aed-colors">
-                                    {EVENT_COLORS.map(c => (
-                                        <button
-                                            key={c.value}
-                                            className={`aed-color-btn${color === c.value ? " active" : ""}`}
-                                            style={{ background: c.value }}
-                                            title={c.label}
-                                            onClick={() => setColor(c.value)}
-                                            aria-label={c.label}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Periodicidad */}
-                        <div className="aed-field">
-                            <label className="aed-label">Periodicidad</label>
-                            <div className="aed-recurrence-box">
-                                <select
-                                    className="aed-input aed-select"
-                                    style={{ margin: 0 }}
-                                    value={recurrence.frequencyType}
-                                    onChange={e => setRecurrence(r => ({ ...r, frequencyType: e.target.value as RecurrenceRule["frequencyType"] }))}
-                                >
-                                    {FREQ_OPTIONS.map(o => (
-                                        <option key={o.value} value={o.value}>{o.label}</option>
-                                    ))}
-                                </select>
-
-                                {recurrence.frequencyType !== FREQUENCY_TYPE.NONE && (
-                                    <div className="aed-row">
-                                        <span className="aed-row-label">Cada</span>
-                                        <input
-                                            className="aed-input"
-                                            type="number" min={1} max={99}
-                                            value={recurrence.frequencyInterval}
-                                            onChange={e => setRecurrence(r => ({ ...r, frequencyInterval: Math.max(1, +e.target.value) }))}
-                                            style={{ width: 64, flex: "none", textAlign: "center" }}
-                                        />
-                                        <span className="aed-row-label">
-                      {{ daily: "día(s)", weekly: "semana(s)", monthly: "mes(es)", yearly: "año(s)" }[recurrence.frequencyType]}
-                    </span>
-                                    </div>
-                                )}
-
-                                {showWeekdays && (
-                                    <div className="aed-field">
-                                        <span className="aed-label">Días de la semana</span>
-                                        <div className="aed-weekdays">
-                                            {WEEKDAYS.map((d, i) => (
-                                                <button
-                                                    key={`weekday-${i}`}
-                                                    className={`aed-wd-btn${recurrence.frequencyDaysOfWeek?.includes(i) ? " active" : ""}`}
-                                                    onClick={() => toggleWeekday(i)}
-                                                    title={WEEKDAY_LABELS[i]}
-                                                >{d}</button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {showEndOptions && (
-                                    <div className="aed-field">
-                                        <span className="aed-label">Finaliza</span>
-                                        <div className="aed-end-options">
-                                            {(["on", "after"] as const).map(type => (
-                                                <label key={type} className="aed-radio-row">
-                                                    <div
-                                                        className={`aed-radio${recurrence.frequencyEndType === type ? " checked" : ""}`}
-                                                        onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}
-                                                    />
-                                                    <span className="aed-radio-label" onClick={() => setRecurrence(r => ({ ...r, frequencyEndType: type }))}>
-                            {{ on: "El día", after: "Después de ocurrencias" }[type]}
-                          </span>
-                                                    {type === "on" && recurrence.frequencyEndType === "on" && (
-                                                        <input
-                                                            className="aed-input"
-                                                            type="date"
-                                                            value={recurrence.frequencyEndDate}
-                                                            min={formatDateTimeLocal(start).slice(0, 10)}
-                                                            onChange={e => setRecurrence(r => ({ ...r, frequencyEndDate: e.target.value }))}
-                                                            style={{ marginLeft: 8, flex: 1 }}
-                                                        />
-                                                    )}
-                                                    {type === "after" && recurrence.frequencyEndType === "after" && (
-                                                        <div className="aed-row" style={{ marginLeft: 8, flex: 1 }}>
-                                                            <input
-                                                                className="aed-input"
-                                                                type="number" min={1} max={999}
-                                                                value={recurrence.frequencyOccurrencesLeft}
-                                                                onChange={e => setRecurrence(r => ({ ...r, frequencyOccurrencesLeft: Math.max(1, +e.target.value) }))}
-                                                                style={{ width: 64, flex: "none", textAlign: "center" }}
-                                                            />
-                                                            <span className="aed-row-label">veces</span>
-                                                        </div>
-                                                    )}
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="aed-footer">
-                        <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
-                        <button
-                            className="aed-btn aed-btn-save"
-                            onClick={handleSave}
-                            disabled={!eventTitle.trim()}
-                            style={!eventTitle.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
-                        >
-                            Guardar evento
-                        </button>
-                    </div>
+                    <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
                 </div>
+
+                {/* Fechas y horas */}
+                <EventDateStrip mode="date" start={start} end={end} onStartChange={setStart} onEndChange={setEnd} />
+                <EventDateStrip mode="time" start={start} end={end} onStartChange={setStart} onEndChange={setEnd} />
+
+                {/* Body */}
+                <div className="aed-body">
+
+                    {/* Título */}
+                    <div className="aed-field">
+                        <label className="aed-label">Título</label>
+                        <input
+                            className="aed-input"
+                            type="text"
+                            placeholder="Añadir título…"
+                            value={eventTitle}
+                            onChange={(e) => setEventTitle(e.target.value)}
+                            autoFocus
+                            onKeyDown={(e) => e.key === "Enter" && onClickSave()}
+                        />
+                    </div>
+
+                    {/* Calendario */}
+                    <div className="aed-field">
+                        <label className="aed-label">Calendario</label>
+                        <select
+                            className="aed-input aed-select"
+                            value={calendarId}
+                            onChange={(e) => setCalendarId(e.target.value)}
+                            aria-label="Seleccionar calendario"
+                        >
+                            {calendars.map((cal) => (
+                                <option key={cal.id} value={cal.id}>{cal.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Etiqueta */}
+                    <div className="aed-field">
+                        <label className="aed-label">Etiqueta</label>
+                        <input
+                            className="aed-input"
+                            type="text"
+                            placeholder="Añadir etiqueta (opcional)…"
+                            value={label}
+                            onChange={(e) => setLabel(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Color */}
+                    <EventColorPicker
+                        useCustomColor={useCustomColor}
+                        color={color}
+                        onToggleCustomColor={setUseCustomColor}
+                        onColorChange={setColor}
+                    />
+
+                    {/* Periodicidad */}
+                    <EventRecurrenceForm
+                        recurrence={recurrence}
+                        start={start}
+                        onChange={setRecurrence}
+                        onToggleWeekday={toggleWeekday}
+                    />
+
+                </div>
+
+                {/* Footer */}
+                <div className="aed-footer">
+                    <button className="aed-btn aed-btn-cancel" onClick={onClose}>
+                        Cancelar
+                    </button>
+                    <button
+                        className="aed-btn aed-btn-save"
+                        onClick={onClickSave}
+                        disabled={!eventTitle.trim()}
+                        style={!eventTitle.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                    >
+                        Guardar evento
+                    </button>
+                </div>
+
             </div>
-        </>
+        </div>
     );
 };
 

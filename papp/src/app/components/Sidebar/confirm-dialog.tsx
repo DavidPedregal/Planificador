@@ -1,5 +1,5 @@
 import React from "react";
-import "../Event/add-event-dialog.css";
+import "../event/add-event-dialog.css";
 
 interface ConfirmDialogProps {
     open: boolean;

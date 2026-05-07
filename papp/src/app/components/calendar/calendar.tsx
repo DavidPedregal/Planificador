@@ -4,12 +4,12 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from '@fullcalendar/list';
 import {useEffect, useState} from "react";
-import AddEventDialog from "../Event/add-event-dialog";
+import AddEventDialog from "../event/add-event-dialog";
 import "./calendar.css";
 import { config } from "@/app/config/config";
-import EditEventDialog from "../Event/edit-event-dialog";
+import EditEventDialog from "../event/edit-event-dialog";
 import { Calendar as CalendarInterface, CalendarEvent, mapToFullCalendarEvent } from "./calendarHelper";
-import EditPlanEventDialog from "../PlannedEvent/edit-plan-event-dialog";
+import EditPlanEventDialog from "../plannedEvent/edit-plan-event-dialog";
 
 interface CalendarProps {
     refreshTrigger?: number;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "../Event/add-event-dialog.css";
+import "../event/add-event-dialog.css";
 import { config } from "@/app/config/config";
-import { Subject } from "../Calendar/calendarHelper";
+import { Subject } from "../calendar/calendarHelper";
 
 interface Props {
     open: boolean;

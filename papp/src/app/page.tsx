@@ -3,7 +3,7 @@ import "./page.css"
 import { useRouter } from "next/navigation";
 
 import { useState, useEffect } from "react";
-import Login from "@/app/components/Login/login";
+import Login from "@/app/components/login/login";
 import { config } from "./config/config";
 
 export default function Landing() {

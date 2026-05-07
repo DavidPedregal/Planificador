@@ -7,7 +7,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddTaskDialog from "./add-task-dialog";
 import "./todoList.css";
 import EditTaskDialog from "./edit-task-dialog";
-import RecurrenceChoiceDialog from "../Event/recurrence-choice-dialog";
+import RecurrenceChoiceDialog from "../event/recurrence-choice-dialog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Task {
