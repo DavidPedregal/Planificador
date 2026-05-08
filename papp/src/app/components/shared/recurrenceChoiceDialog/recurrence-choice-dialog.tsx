@@ -1,5 +1,5 @@
 import React from "react";
-import "./recurrence-choice-dialog.css"; // Reuse the confirm dialog styles
+import "./recurrence-choice-dialog.css";
 
 interface Props {
     open: boolean;
@@ -12,7 +12,16 @@ interface Props {
     onCancel: () => void;
 }
 
-const RecurrenceChoiceDialog: React.FC<Props> = ({ open, action, title, message, onChooseSingle, onChooseFromThis, onChooseAll, onCancel }) => {
+const RecurrenceChoiceDialog: React.FC<Props> = ({
+    open,
+    action,
+    title,
+    message,
+    onChooseSingle,
+    onChooseFromThis,
+    onChooseAll,
+    onCancel,
+}) => {
     if (!open) return null;
 
     const buttonLabel = action === "delete" ? "Eliminar" : "Actualizar";
@@ -25,14 +34,19 @@ const RecurrenceChoiceDialog: React.FC<Props> = ({ open, action, title, message,
             aria-modal="true"
             aria-label={title}
         >
-            <div className="rcd-dialog" style={{ "--rcd-color": action === "delete" ? "#ef4444" : "#7c6ff7" } as React.CSSProperties}>
+            <div
+                className="rcd-dialog"
+                style={{ "--rcd-color": action === "delete" ? "#ef4444" : "#7c6ff7" } as React.CSSProperties}
+            >
                 {/* Header */}
                 <div className="rcd-header">
                     <div className="rcd-header-left">
                         <div className="rcd-header-dot" />
                         <span className="rcd-title">{title}</span>
                     </div>
-                    <button className="rcd-close" onClick={onCancel} aria-label="Cerrar">✕</button>
+                    <button className="rcd-close" onClick={onCancel} aria-label="Cerrar">
+                        ✕
+                    </button>
                 </div>
 
                 {/* Body */}

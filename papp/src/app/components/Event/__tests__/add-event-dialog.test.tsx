@@ -1,11 +1,11 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AddEventDialog from "./add-event-dialog";
+import AddEventDialog from "../add-event-dialog";
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-jest.mock("./hooks/useCalendarList", () => ({
+jest.mock("../hooks/useCalendarList", () => ({
     useCalendarList: () => ({
         calendars: [
             { id: "cal1", name: "Personal", userId: "user1", color: "#ff0000" },

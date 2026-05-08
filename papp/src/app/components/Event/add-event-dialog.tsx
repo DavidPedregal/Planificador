@@ -4,7 +4,7 @@ import { useCalendarList } from "./hooks/useCalendarList";
 import { useEventForm } from "./hooks/useEventForm";
 import { EventDateStrip } from "./components/EventDateStrip";
 import { EventColorPicker } from "./components/EventColorPicker";
-import { EventRecurrenceForm } from "./components/EventRecurrenceForm";
+import { RecurrenceForm } from "@/app/components/shared/recurrenceForm/recurrenceForm";
 import { useApp } from "@/context/AppContext";
 
 interface Props {
@@ -117,7 +117,7 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
                     />
 
                     {/* Periodicidad */}
-                    <EventRecurrenceForm
+                    <RecurrenceForm
                         recurrence={recurrence}
                         start={start}
                         onChange={setRecurrence}

@@ -113,7 +113,7 @@ describe('taskRouter', () => {
                 .send(mockTask);
 
             expect(res.status).toBe(201);
-            expect(res.body).toEqual([mockTask]);
+            expect(res.body.data).toEqual([mockTask]);
         });
 
         it('should return 400 if service throws ValidationError', async () => {
@@ -144,7 +144,7 @@ describe('taskRouter', () => {
                 .send({ title: 'Updated' });
 
             expect(res.status).toBe(200);
-            expect(res.body.title).toBe('Updated');
+            expect(res.body.data.title).toBe('Updated');
         });
 
         it('should return 404 if task does not exist', async () => {
@@ -174,7 +174,7 @@ describe('taskRouter', () => {
                 .send({ title: 'Updated' });
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(2);
+            expect(res.body.data.modifiedCount).toBe(2);
         });
 
         it('should return 404 if task does not exist', async () => {
@@ -204,7 +204,7 @@ describe('taskRouter', () => {
                 .send({ title: 'Updated' });
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(3);
+            expect(res.body.data.modifiedCount).toBe(3);
         });
 
         it('should return 404 if task does not exist', async () => {
@@ -234,7 +234,7 @@ describe('taskRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.completed).toBe(true);
+            expect(res.body.data.completed).toBe(true);
         });
 
         it('should return 404 if task does not exist', async () => {
@@ -262,6 +262,7 @@ describe('taskRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
+            expect(res.body.data).toBeUndefined(); // Since no data is returned on successful deletion
         });
 
         it('should return 404 if task does not exist', async () => {
@@ -289,7 +290,7 @@ describe('taskRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(2);
+            expect(res.body.data.modifiedCount).toBe(2);
         });
 
         it('should return 404 if task does not exist', async () => {
@@ -317,7 +318,7 @@ describe('taskRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(3);
+            expect(res.body.data.modifiedCount).toBe(3);
         });
 
         it('should return 404 if task does not exist', async () => {

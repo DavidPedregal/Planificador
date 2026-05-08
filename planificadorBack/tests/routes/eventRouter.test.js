@@ -76,6 +76,42 @@ describe('eventRouter', () => {
             expect(res.status).toBe(500);
         });
     });
+    
+    describe('GET /events/:id', () => {
+        it('should return 200 with the event', async () => {
+            EventService.getEventById.mockResolvedValue(mockEvent);
+
+            const res = await request(app)
+                .get(`/events/${mockEventId}`)
+                .set('Authorization', `Bearer ${validToken}`);
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual(mockEvent);
+        });
+
+        it('should return 404 if event does not exist', async () => {
+            EventService.getEventById.mockRejectedValue(new NotFoundError('Event not found'));
+
+            const res = await request(app)
+                .get(`/events/notExistingId`)
+                .set('Authorization', `Bearer ${validToken}`);
+            expect(res.status).toBe(404);
+        });
+
+        it('should return 401 without token', async () => {
+            const res = await request(app).get(`/events/${mockEventId}`);
+            expect(res.status).toBe(401);
+        });
+
+        it('should return 500 if service throws unexpected error', async () => {
+            EventService.getEventById.mockRejectedValue(new Error('Unexpected'));
+
+            const res = await request(app)
+                .get(`/events/${mockEventId}`)
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(500);
+        });
+    });
 
     describe('POST /events', () => {
         it('should return 201 with the created events', async () => {
@@ -87,7 +123,7 @@ describe('eventRouter', () => {
                 .send(mockEvent);
 
             expect(res.status).toBe(201);
-            expect(res.body).toEqual([mockEvent]);
+            expect(res.body.data).toEqual([mockEvent]);
         });
 
         it('should return 400 if service throws ValidationError', async () => {
@@ -120,7 +156,7 @@ describe('eventRouter', () => {
                 .send({ title: 'Updated' });
 
             expect(res.status).toBe(200);
-            expect(res.body.title).toBe('Updated');
+            expect(res.body.data.title).toBe('Updated');
         });
 
         it('should return 404 if event does not exist', async () => {
@@ -161,7 +197,7 @@ describe('eventRouter', () => {
                 .send({ title: 'Updated' });
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(2);
+            expect(res.body.data.modifiedCount).toBe(2);
         });
 
         it('should return 404 if event does not exist', async () => {
@@ -191,7 +227,7 @@ describe('eventRouter', () => {
                 .send({ title: 'Updated' });
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(3);
+            expect(res.body.data.modifiedCount).toBe(3);
         });
 
         it('should return 404 if event does not exist', async () => {
@@ -247,7 +283,7 @@ describe('eventRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(2);
+            expect(res.body.data.modifiedCount).toBe(2);
         });
 
         it('should return 404 if event does not exist', async () => {
@@ -275,7 +311,7 @@ describe('eventRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(3);
+            expect(res.body.data.modifiedCount).toBe(3);
         });
 
         it('should return 404 if event does not exist', async () => {
@@ -303,7 +339,7 @@ describe('eventRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.modifiedCount).toBe(2);
+            expect(res.body.data.modifiedCount).toBe(2);
         });
 
         it('should return 400 if service throws ValidationError', async () => {

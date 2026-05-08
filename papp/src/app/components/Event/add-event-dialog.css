@@ -144,51 +144,6 @@
     font-size: 12px; color: #fff; font-weight: 700;
 }
 
-/* ── Recurrence ── */
-.aed-recurrence-box {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px; padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 12px;
-}
-.aed-weekdays { display: flex; gap: 6px; }
-.aed-wd-btn {
-    width: 32px; height: 32px; border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.04);
-    color: #8888aa; font-size: 0.72rem; font-weight: 600;
-    cursor: pointer; transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
-}
-.aed-wd-btn:hover { border-color: #7c6ff7; color: #c4bcf9; }
-.aed-wd-btn.active {
-    background: rgba(124,111,247,0.2);
-    border-color: #7c6ff7; color: #c4bcf9;
-}
-
-.aed-row { display: flex; gap: 10px; align-items: center; }
-.aed-row .aed-input { flex: 1; }
-.aed-row-label { font-size: 0.8rem; color: #55556a; white-space: nowrap; }
-
-.aed-end-options { display: flex; flex-direction: column; gap: 8px; }
-.aed-radio-row {
-    display: flex; align-items: center; gap: 10px; cursor: pointer;
-}
-.aed-radio {
-    width: 16px; height: 16px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: border-color 0.15s;
-}
-.aed-radio.checked { border-color: #7c6ff7; }
-.aed-radio.checked::after {
-    content: ''; width: 7px; height: 7px; border-radius: 50%;
-    background: #7c6ff7;
-}
-.aed-radio-label { font-size: 0.82rem; color: #8888aa; }
-.aed-radio-row:hover .aed-radio-label { color: #c4bcf9; }
-.aed-radio-row:hover .aed-radio { border-color: #7c6ff7; }
-
 /* ── Footer ── */
 .aed-footer {
     padding: 14px 24px 20px;

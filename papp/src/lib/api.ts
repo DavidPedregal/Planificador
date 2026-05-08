@@ -5,7 +5,7 @@ export async function apiFetch(
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    return { data, ok: res.ok, message: data.message ?? '' };
+    return { data: data.data, ok: res.ok, message: data.message ?? '' };
   } catch {
     return { data: null, ok: false, message: 'Error de conexión con el servidor' };
   }

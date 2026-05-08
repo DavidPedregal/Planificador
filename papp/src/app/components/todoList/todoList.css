@@ -126,6 +126,10 @@
   color: var(--text-muted, #55556a);
 }
 .todo-section-label svg { opacity: 0.6; }
+.todo-section-overdue {
+  color: #f76f6f;
+}
+.todo-section-overdue svg { opacity: 1; }
 
 /* ── Task item ── */
 .todo-item {

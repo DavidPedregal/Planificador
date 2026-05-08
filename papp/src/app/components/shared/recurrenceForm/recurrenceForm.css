@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+/* ── RecurrenceForm shared ── */
+.rf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rf-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #55556a;
+}
+
+.rf-box {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rf-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #e2e2ee;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.rf-input::placeholder { color: #33334a; }
+.rf-input:focus {
+    border-color: #7c6ff7;
+    box-shadow: 0 0 0 3px rgba(124,111,247,0.15);
+}
+
+.rf-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2355556a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+}
+.rf-select option { background: #1e1e2a; color: #e2e2ee; }
+
+.rf-weekdays {
+    display: flex;
+    gap: 6px;
+}
+
+.rf-wd-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #8888aa;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+}
+.rf-wd-btn:hover { border-color: #7c6ff7; color: #c4bcf9; }
+.rf-wd-btn.active {
+    background: rgba(124,111,247,0.2);
+    border-color: #7c6ff7;
+    color: #c4bcf9;
+}
+
+.rf-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.rf-row .rf-input { flex: 1; }
+.rf-row-label {
+    font-size: 0.8rem;
+    color: #55556a;
+    white-space: nowrap;
+}
+
+.rf-end-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rf-radio-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.rf-radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+}
+.rf-radio.checked { border-color: #7c6ff7; }
+.rf-radio.checked::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #7c6ff7;
+}
+
+.rf-radio-label {
+    font-size: 0.82rem;
+    color: #8888aa;
+}
+.rf-radio-row:hover .rf-radio-label { color: #c4bcf9; }
+.rf-radio-row:hover .rf-radio { border-color: #7c6ff7; }

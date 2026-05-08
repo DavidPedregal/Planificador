@@ -83,7 +83,7 @@ export function useEventForm({ open, propsStart, propsEnd, calendars, pushAlert 
             frequencyOccurrencesLeft: recurrence.frequencyOccurrencesLeft,
         };
         
-        const { ok, data, message } = await apiFetch(`${config.backendUrl}/events`, { 
+        const { ok, message } = await apiFetch(`${config.backendUrl}/events`, { 
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

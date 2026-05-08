@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { useCalendarList } from "./useCalendarList";
-import { Calendar } from "../../calendar/calendarHelper";
+import { useCalendarList } from "../useCalendarList";
+import { Calendar } from "../../../calendar/calendarHelper";
 
 const pushAlert = jest.fn();
 
