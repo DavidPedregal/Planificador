@@ -69,7 +69,7 @@ describe('planRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual([mockPlanEvent]);
+            expect(res.body.data).toEqual([mockPlanEvent]);
         });
 
         it('should return 401 without token', async () => {

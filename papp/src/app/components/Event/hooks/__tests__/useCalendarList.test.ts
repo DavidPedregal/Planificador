@@ -21,12 +21,12 @@ beforeEach(() => {
         if (url.includes("/calendars/common")) {
             return Promise.resolve({
                 ok: true,
-                json: () => Promise.resolve(mockCommonCalendars),
+                json: () => Promise.resolve({ data: mockCommonCalendars, message: "Ok" }),
             });
         }
         return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve(mockCustomCalendars),
+            json: () => Promise.resolve({ data: mockCustomCalendars, message: "Ok" }),
         });
     }) as jest.Mock;
 });

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { config } from "@/app/config/config";
 import { apiFetch } from "@/lib/api";
-import { FREQUENCY_TYPE, RecurrenceRule } from "@/app/components/calendar/calendarHelper";
+import { FREQUENCY_TYPE, RecurrenceRule } from "@/app/components/shared/lib/recurrence";
 import { AlertSeverity } from "@/context/AppContext";
 
 export interface TaskFormState {

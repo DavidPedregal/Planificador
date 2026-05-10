@@ -5,8 +5,8 @@ import {
     WEEKDAYS,
     WEEKDAY_LABELS,
     FREQ_OPTIONS,
-    formatDateTimeLocal,
-} from "@/app/components/calendar/calendarHelper";
+} from "@/app/components/shared/lib/recurrence";
+import { formatDateTimeLocal } from "@/app/components/shared/lib/eventTypes";
 
 interface Props {
     recurrence: RecurrenceRule;

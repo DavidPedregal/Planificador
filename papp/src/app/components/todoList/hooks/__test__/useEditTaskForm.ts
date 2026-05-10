@@ -25,13 +25,13 @@ beforeEach(() => {
 
 afterEach(() => jest.restoreAllMocks());
 
-function makeHook(taskId: number | null = 1) {
+function makeHook(taskId: string = "42") {
     return renderHook(() => useEditTaskForm({ open: true, taskId, pushAlert }));
 }
 
 describe("useEditTaskForm - carga de datos", () => {
     it("hace GET a /tasks/:id al abrir", async () => {
-        makeHook(42);
+        makeHook("42");
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith(
                 expect.stringContaining("/tasks/42"),
@@ -71,7 +71,7 @@ describe("useEditTaskForm - carga de datos", () => {
     });
 
     it("no hace fetch si taskId es null", () => {
-        makeHook(null);
+        makeHook("");
         expect(global.fetch).not.toHaveBeenCalled();
     });
 });
@@ -101,7 +101,7 @@ describe("useEditTaskForm - flujo de guardar", () => {
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: "Actualizada" }) }) as jest.Mock;
 
         const onSuccess = jest.fn();
-        const { result } = makeHook(1);
+        const { result } = makeHook("1");
         await waitFor(() => expect(result.current.title).toBe("Estudiar tema 3"));
 
         act(() => { result.current.handleSaveClicked(); });
@@ -119,7 +119,7 @@ describe("useEditTaskForm - flujo de guardar", () => {
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockTaskData) })
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: "OK" }) }) as jest.Mock;
 
-        const { result } = makeHook(1);
+        const { result } = makeHook("1");
         await waitFor(() => expect(result.current.title).toBe("Estudiar tema 3"));
 
         act(() => { result.current.handleSaveClicked(); });
@@ -136,7 +136,7 @@ describe("useEditTaskForm - flujo de guardar", () => {
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockTaskData) })
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: "OK" }) }) as jest.Mock;
 
-        const { result } = makeHook(1);
+        const { result } = makeHook("1");
         await waitFor(() => expect(result.current.title).toBe("Estudiar tema 3"));
 
         act(() => { result.current.handleSaveClicked(); });
@@ -154,7 +154,7 @@ describe("useEditTaskForm - flujo de guardar", () => {
             .mockResolvedValueOnce({ ok: false, json: () => Promise.resolve({ message: "Error" }) }) as jest.Mock;
 
         const onSuccess = jest.fn();
-        const { result } = makeHook(1);
+        const { result } = makeHook("1");
         await waitFor(() => expect(result.current.title).toBe("Estudiar tema 3"));
 
         act(() => { result.current.handleSaveClicked(); });
@@ -168,7 +168,7 @@ describe("useEditTaskForm - flujo de guardar", () => {
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockTaskData) })
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: "OK" }) }) as jest.Mock;
 
-        const { result } = makeHook(1);
+        const { result } = makeHook("1");
         await waitFor(() => expect(result.current.title).toBe("Estudiar tema 3"));
 
         act(() => { result.current.handleSaveClicked(); });

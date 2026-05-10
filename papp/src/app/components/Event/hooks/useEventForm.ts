@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { config } from "@/app/config/config";
-import {
-    FREQUENCY_TYPE,
-    RecurrenceRule,
-    EVENT_COLORS,
-    Calendar,
-} from "@/app/components/calendar/calendarHelper";
+import { COLORS, Calendar } from "@/app/components/shared/lib/eventTypes";
+import { RecurrenceRule, FREQUENCY_TYPE } from "@/app/components/shared/lib/recurrence";
 import { apiFetch } from "@/lib/api";
 import { AlertSeverity } from "@/context/AppContext";
 
@@ -22,7 +18,7 @@ export function useEventForm({ open, propsStart, propsEnd, calendars, pushAlert 
     const [eventTitle, setEventTitle] = useState("");
     const [label, setLabel] = useState("");
     const [calendarId, setCalendarId] = useState("");
-    const [color, setColor] = useState(EVENT_COLORS[0].value);
+    const [color, setColor] = useState(COLORS[0].value);
     const [useCustomColor, setUseCustomColor] = useState(false);
     const [start, setStart] = useState<Date>(propsStart);
     const [end, setEnd] = useState<Date>(propsEnd);
@@ -43,7 +39,7 @@ export function useEventForm({ open, propsStart, propsEnd, calendars, pushAlert 
             setStart(propsStart);
             setEnd(propsEnd);
             setUseCustomColor(false);
-            setColor(EVENT_COLORS[0].value);
+            setColor(COLORS[0].value);
             setRecurrence(defaultRecurrence());
         }
     }, [open, propsStart, propsEnd]);
@@ -61,7 +57,7 @@ export function useEventForm({ open, propsStart, propsEnd, calendars, pushAlert 
     const resolveColor = (): string => {
         if (useCustomColor) return color;
         const selectedCalendar = calendars.find((cal) => cal.id === calendarId);
-        return selectedCalendar?.color ?? EVENT_COLORS[0].value;
+        return selectedCalendar?.color ?? COLORS[0].value;
     };
 
     const handleSave = async (): Promise<boolean> => {

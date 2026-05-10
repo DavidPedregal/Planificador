@@ -8,7 +8,7 @@ const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try{
         const plan = await PlanService.getPlanForUser(req.userId);
-        res.status(200).json(plan);
+        res.status(200).json({ data: plan });
     } catch (error) {
         next(error);
     }

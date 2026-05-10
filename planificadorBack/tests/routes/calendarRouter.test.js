@@ -55,7 +55,7 @@ describe('calendarRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual([mockCalendar]);
+            expect(res.body.data).toEqual([mockCalendar]);
         });
 
         it('should return 401 without token', async () => {
@@ -83,7 +83,7 @@ describe('calendarRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual([mockCalendar]);
+            expect(res.body.data).toEqual([mockCalendar]);
         });
 
         it('should return 401 without token', async () => {
@@ -102,7 +102,7 @@ describe('calendarRouter', () => {
                 .send({ name: 'Test Calendar', color: '#ff0000' });
 
             expect(res.status).toBe(201);
-            expect(res.body).toEqual(mockCalendar);
+            expect(res.body.data).toEqual(mockCalendar);
         });
 
         it('should return 400 if service throws ValidationError', async () => {
@@ -177,7 +177,7 @@ describe('calendarRouter', () => {
                 .send({ name: 'Updated', color: '#ff0000' });
 
             expect(res.status).toBe(200);
-            expect(res.body.name).toBe('Updated');
+            expect(res.body.data.name).toBe('Updated');
         });
 
         it('should return 404 if calendar does not exist', async () => {
@@ -224,6 +224,7 @@ describe('calendarRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
+            expect(res.body.data.visible).toBe(false);
             expect(res.body.message).toBe('Calendar visibility changed');
         });
 

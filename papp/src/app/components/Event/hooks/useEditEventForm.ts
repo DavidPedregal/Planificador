@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { config } from "@/app/config/config";
 import { apiFetch } from "@/lib/api";
-import { CalendarEvent, EVENT_COLORS, Calendar } from "@/app/components/calendar/calendarHelper";
+import { COLORS, Calendar } from "@/app/components/shared/lib/eventTypes";
 import { AlertSeverity } from "@/context/AppContext";
 
 export type RecurrenceMode = "single" | "fromThis" | "all";
@@ -9,42 +9,58 @@ export type PendingAction = "update" | "delete";
 
 interface UseEditEventFormParams {
     open: boolean;
-    event: CalendarEvent;
+    eventId: string;
     calendars: Calendar[];
     pushAlert: (message: string, severity: AlertSeverity) => void;
 }
 
-export function useEditEventForm({ open, event, calendars, pushAlert }: UseEditEventFormParams) {
-    const [eventTitle, setEventTitle] = useState(event.title);
-    const [label, setLabel] = useState(event.label || "");
-    const [calendarId, setCalendarId] = useState(event.calendarId);
-    const [color, setColor] = useState(event.color);
-    const [useCustomColor, setUseCustomColor] = useState(!event.useCalendarColor);
-    const [start, setStart] = useState<Date>(toDate(event.start));
-    const [end, setEnd] = useState<Date>(toDate(event.end));
+export function useEditEventForm({ open, eventId, calendars, pushAlert }: UseEditEventFormParams) {
+    const [eventTitle, setEventTitle] = useState("");
+    const [label, setLabel] = useState("");
+    const [calendarId, setCalendarId] = useState("");
+    const [color, setColor] = useState("");
+    const [useCustomColor, setUseCustomColor] = useState(false);
+    const [start, setStart] = useState<Date>(new Date());
+    const [end, setEnd] = useState<Date>(new Date());
 
     // Flujo de confirmación de recurrencia
     const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
     const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
     const [pendingEventData, setPendingEventData] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
 
     // Reset al abrir
     useEffect(() => {
-        if (open) {
-            setEventTitle(event.title);
-            setLabel(event.label || "");
-            setCalendarId(event.calendarId);
-            setStart(toDate(event.start));
-            setEnd(toDate(event.end));
-            setColor(event.color);
-            setUseCustomColor(!event.useCalendarColor);
+        if (open && eventId) {
+            fetchEvent(eventId);
+        } else if (!open) {
+            setEventTitle("");
+            setLabel("");
+            setLoading(false);
         }
-    }, [open, event]);
+    }, [open, eventId]);
+
+    const fetchEvent = async (id: string) => {
+        setLoading(true);
+        const { ok, data, message } = await apiFetch(`${config.backendUrl}/events/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setLoading(false);
+        if (!ok) { pushAlert(message, "error"); return; }
+
+        setEventTitle(data.title);
+        setLabel(data.label || "");
+        setCalendarId(data.calendarId);
+        setStart(new Date(data.start));
+        setEnd(new Date(data.end));
+        setColor(data.color);
+        setUseCustomColor(!data.useCalendarColor);
+    };
 
     const resolveColor = (): string => {
         if (useCustomColor) return color;
         const selectedCalendar = calendars.find((cal) => cal.id === calendarId);
-        return selectedCalendar?.color ?? EVENT_COLORS[0].value;
+        return selectedCalendar?.color ?? COLORS[0].value;
     };
 
     // ── Guardar ──────────────────────────────────────────────────────────────
@@ -68,7 +84,7 @@ export function useEditEventForm({ open, event, calendars, pushAlert }: UseEditE
     };
 
     const performUpdate = async (mode: RecurrenceMode) => {
-        const url = buildUrl(event.id, mode);
+        const url = buildUrl(eventId, mode);
         const { ok, message } = await apiFetch(url, {
             method: "PUT",
             headers: {
@@ -89,7 +105,7 @@ export function useEditEventForm({ open, event, calendars, pushAlert }: UseEditE
     };
 
     const performDelete = async (mode: RecurrenceMode) => {
-        const url = buildUrl(event.id, mode);
+        const url = buildUrl(eventId, mode);
         const { ok, message } = await apiFetch(url, {
             method: "DELETE",
             headers: {
@@ -141,6 +157,7 @@ export function useEditEventForm({ open, event, calendars, pushAlert }: UseEditE
         useCustomColor, setUseCustomColor,
         start, setStart,
         end, setEnd,
+        loading,
         // Estado del diálogo de recurrencia
         recurrenceChoiceOpen,
         pendingAction,
@@ -155,10 +172,6 @@ export function useEditEventForm({ open, event, calendars, pushAlert }: UseEditE
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function toDate(value: Date | string): Date {
-    return typeof value === "string" ? new Date(value) : value;
-}
 
 function buildUrl(eventId: string, mode: RecurrenceMode): string {
     const base = config.backendUrl;

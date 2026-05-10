@@ -56,7 +56,7 @@ describe('taskRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual([mockTask]);
+            expect(res.body.data).toEqual([mockTask]);
         });
 
         it('should return 401 without token', async () => {
@@ -84,7 +84,7 @@ describe('taskRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual(mockTask);
+            expect(res.body.data).toEqual(mockTask);
         });
 
         it('should return 404 if task does not exist', async () => {

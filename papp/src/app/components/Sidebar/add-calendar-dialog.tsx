@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import "../event/add-event-dialog.css";
+import "../Event/add-event-dialog.css";
+import { useApp } from "@/context/AppContext";
+import { apiFetch } from "@/lib/api";
 import { config } from "@/app/config/config";
-import { CALENDAR_COLORS } from "../calendar/calendarHelper";
+import { COLORS } from "@/app/components/shared/lib/eventTypes";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface Props {
     open: boolean;
     onClose: () => void;
@@ -11,13 +12,14 @@ interface Props {
 }
 
 const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
+    const { pushAlert } = useApp();
     const [name, setName] = useState("");
-    const [color, setColor] = useState(CALENDAR_COLORS[0].value);
+    const [color, setColor] = useState(COLORS[0].value);
 
     useEffect(() => {
         if (open) {
             setName("");
-            setColor(CALENDAR_COLORS[0].value);
+            setColor(COLORS[0].value);
         }
     }, [open]);
 
@@ -26,21 +28,17 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
     const handleSave = async () => {
         if (!name.trim()) return;
 
-        try {
-            await fetch(config.backendUrl + "/calendars", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ name, color }),
-            });
+        const { ok, message } = await apiFetch(config.backendUrl + "/calendars", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ name, color }),
+        });
 
-            onSave();
-            onClose();
-        } catch (error) {
-            console.error("Error guardando calendario:", error);
-        }
+        pushAlert(message, ok ? "success" : "error");
+        if (ok) { onSave(); onClose(); }
     };
 
     return (
@@ -51,7 +49,6 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
         >
             <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
 
-                {/* Header */}
                 <div className="aed-header">
                     <div className="aed-header-left">
                         <div className="aed-header-dot" />
@@ -60,10 +57,7 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                     <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
                 </div>
 
-                {/* Body */}
                 <div className="aed-body">
-
-                    {/* Nombre */}
                     <div className="aed-field">
                         <label className="aed-label">Nombre</label>
                         <input
@@ -71,17 +65,15 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                             type="text"
                             placeholder="Nombre del calendario…"
                             value={name}
-                            onChange={e => setName(e.target.value)}
+                            onChange={(e) => setName(e.target.value)}
                             autoFocus
-                            onKeyDown={e => e.key === "Enter" && handleSave()}
+                            onKeyDown={(e) => e.key === "Enter" && handleSave()}
                         />
                     </div>
-
-                    {/* Color */}
                     <div className="aed-field">
                         <label className="aed-label">Color</label>
                         <div className="aed-colors">
-                            {CALENDAR_COLORS.map(c => (
+                            {COLORS.map((c) => (
                                 <button
                                     key={c.value}
                                     className={`aed-color-btn${color === c.value ? " active" : ""}`}
@@ -93,10 +85,8 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                             ))}
                         </div>
                     </div>
-
                 </div>
 
-                {/* Footer */}
                 <div className="aed-footer">
                     <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
                     <button
@@ -108,6 +98,7 @@ const AddCalendarDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                         Guardar calendario
                     </button>
                 </div>
+
             </div>
         </div>
     );

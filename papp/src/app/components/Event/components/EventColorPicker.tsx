@@ -1,5 +1,5 @@
 import React from "react";
-import { EVENT_COLORS } from "@/app/components/calendar/calendarHelper";
+import { COLORS } from "@/app/components/shared/lib/eventTypes";
 
 interface Props {
     useCustomColor: boolean;
@@ -28,7 +28,7 @@ export const EventColorPicker: React.FC<Props> = ({
         </label>
         {useCustomColor && (
             <div className="aed-colors">
-                {EVENT_COLORS.map((c) => (
+                {COLORS.map((c) => (
                     <button
                         key={c.value}
                         className={`aed-color-btn${color === c.value ? " active" : ""}`}

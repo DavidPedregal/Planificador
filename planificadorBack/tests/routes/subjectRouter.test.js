@@ -49,7 +49,7 @@ describe('subjectRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual([mockSubject]);
+            expect(res.body).toEqual({ data: [mockSubject] });
         });
 
         it('should return 401 without token', async () => {
@@ -78,7 +78,7 @@ describe('subjectRouter', () => {
                 .send({ name: 'Matemáticas' });
 
             expect(res.status).toBe(201);
-            expect(res.body).toEqual(mockSubject);
+            expect(res.body).toEqual({ data: mockSubject, message: "Subject created successfully" });
         });
 
         it('should return 400 if service throws ValidationError', async () => {
@@ -137,7 +137,7 @@ describe('subjectRouter', () => {
                 .send({ name: 'Física' });
 
             expect(res.status).toBe(200);
-            expect(res.body.name).toBe('Física');
+            expect(res.body.data.name).toBe('Física');
         });
 
         it('should return 404 if subject does not exist', async () => {

@@ -55,7 +55,6 @@ export function useTasks({ pushAlert }: UseTasksParams) {
             fromThis: `${config.backendUrl}/tasks/forward/${id}`,
             all:      `${config.backendUrl}/tasks/all/${id}`,
         };
-        console.log(urls[mode]);
         const { ok, message } = await apiFetch(urls[mode], {
             method: "DELETE",
             headers: authHeader(),

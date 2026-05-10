@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { config } from "@/app/config/config";
-import { Calendar } from "@/app/components/calendar/calendarHelper";
+import { Calendar } from "@/app/components/shared/lib/eventTypes";
 import { AlertSeverity } from "@/context/AppContext";
 import { apiFetch } from "@/lib/api";
 

@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useEventForm } from "../useEventForm";
-import { Calendar, FREQUENCY_TYPE } from "@/app/components/calendar/calendarHelper";
+import { Calendar } from "@/app/components/shared/lib/eventTypes";
+import { FREQUENCY_TYPE } from "@/app/components/shared/lib/recurrence";
 
 const pushAlert = jest.fn();
 

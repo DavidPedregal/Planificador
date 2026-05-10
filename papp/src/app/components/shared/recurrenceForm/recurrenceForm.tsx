@@ -6,7 +6,7 @@ import {
     WEEKDAYS,
     WEEKDAY_LABELS,
     FREQ_OPTIONS,
-} from "@/app/components/calendar/calendarHelper";
+} from "@/app/components/shared/lib/recurrence";
 
 interface Props {
     recurrence: RecurrenceRule;

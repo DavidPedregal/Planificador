@@ -58,7 +58,7 @@ describe('eventRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body).toEqual([mockEvent]);
+            expect(res.body.data).toEqual([mockEvent]);
         });
 
         it('should return 401 without token', async () => {
@@ -85,7 +85,7 @@ describe('eventRouter', () => {
                 .get(`/events/${mockEventId}`)
                 .set('Authorization', `Bearer ${validToken}`);
             expect(res.status).toBe(200);
-            expect(res.body).toEqual(mockEvent);
+            expect(res.body.data).toEqual(mockEvent);
         });
 
         it('should return 404 if event does not exist', async () => {

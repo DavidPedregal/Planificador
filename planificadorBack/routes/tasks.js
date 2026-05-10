@@ -7,7 +7,7 @@ const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const tasks = await TaskService.getAllTasks(req.userId);
-        res.status(200).json(tasks);
+        res.status(200).json({ data: tasks });
     } catch (error) {
         next(error);
     }
@@ -16,7 +16,7 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.get('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const task = await TaskService.getTaskById(req.userId, req.params.id);
-        res.status(200).json(task);
+        res.status(200).json({ data: task });
     } catch (error) {
         next(error);
     }

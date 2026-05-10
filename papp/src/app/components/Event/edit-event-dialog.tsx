@@ -1,7 +1,6 @@
 import React from "react";
 import "./add-event-dialog.css";
 import { useApp } from "@/context/AppContext";
-import { CalendarEvent } from "../calendar/calendarHelper";
 import { useCalendarList } from "./hooks/useCalendarList";
 import { useEditEventForm } from "./hooks/useEditEventForm";
 import { EventDateStrip } from "./components/EventDateStrip";
@@ -10,13 +9,13 @@ import RecurrenceChoiceDialog from "@/app/components/shared/recurrenceChoiceDial
 
 interface Props {
     open: boolean;
-    event: CalendarEvent;
+    eventId: string;
     onClose: () => void;
     onSave: () => void;
     onDelete: () => void;
 }
 
-const EditEventDialog: React.FC<Props> = ({ open, event, onClose, onSave, onDelete }) => {
+const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDelete }) => {
     const { pushAlert } = useApp();
     const { calendars } = useCalendarList(open, pushAlert);
     const {
@@ -29,13 +28,14 @@ const EditEventDialog: React.FC<Props> = ({ open, event, onClose, onSave, onDele
         end, setEnd,
         recurrenceChoiceOpen,
         pendingAction,
+        loading,
         handleSaveClicked,
         handleDeleteClicked,
         onChooseSingle,
         onChooseFromThis,
         onChooseAll,
         onCancel,
-    } = useEditEventForm({ open, event, calendars, pushAlert });
+    } = useEditEventForm({ open, eventId, calendars, pushAlert });
 
     if (!open) return null;
 
@@ -60,7 +60,9 @@ const EditEventDialog: React.FC<Props> = ({ open, event, onClose, onSave, onDele
                     <div className="aed-header">
                         <div className="aed-header-left">
                             <div className="aed-header-dot" />
-                            <span className="aed-title">Editar evento</span>
+                            <span className="aed-title">
+                                {loading ? "Cargando…" : "Editar tarea"}
+                            </span>
                         </div>
                         <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
                     </div>
@@ -134,8 +136,8 @@ const EditEventDialog: React.FC<Props> = ({ open, event, onClose, onSave, onDele
                         <button
                             className="aed-btn aed-btn-save"
                             onClick={handleSaveClicked}
-                            disabled={!eventTitle.trim()}
-                            style={!eventTitle.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                            disabled={!eventTitle.trim() || loading}
+                            style={(!eventTitle.trim() || loading) ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >
                             Actualizar evento
                         </button>

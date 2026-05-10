@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "../event/add-event-dialog.css";
+import "../Event/add-event-dialog.css";
+import { useApp } from "@/context/AppContext";
+import { apiFetch } from "@/lib/api";
 import { config } from "@/app/config/config";
-import { Subject } from "../calendar/calendarHelper";
+import { Subject } from "@/app/components/shared/lib/subject";
 
 interface Props {
     open: boolean;
@@ -11,91 +13,74 @@ interface Props {
 }
 
 const EditSubjectDialog: React.FC<Props> = ({ open, subject, onClose, onSave }) => {
-    const [subjectName, setSubjectName] = useState(subject.name);
-    const [error, setError] = useState("");
+    const { pushAlert } = useApp();
+    const [name, setName] = useState(subject.name);
 
     useEffect(() => {
-        if (open) {
-            setSubjectName(subject.name);
-            setError("");
-        }
+        if (open) setName(subject.name);
     }, [open, subject]);
 
-    const handleSave = async () => {
-        if (!subjectName.trim()) {
-            setError("El nombre de la asignatura es requerido");
-            return;
-        }
-
-        try {
-            const response = await fetch(config.backendUrl + `/subjects/${subject.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ name: subjectName }),
-            });
-
-            if (!response.ok) throw new Error("Error actualizar asignatura");
-            onSave();
-            onClose();
-        } catch (err) {
-            setError("Error al actualizar la asignatura");
-            console.error(err);
-        }
-    };
-
     if (!open) return null;
+
+    const handleSave = async () => {
+        if (!name.trim()) return;
+
+        const { ok, message } = await apiFetch(`${config.backendUrl}/subjects/${subject.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ name }),
+        });
+
+        pushAlert(message, ok ? "success" : "error");
+        if (ok) { onSave(); onClose(); }
+    };
 
     return (
         <div
             className="aed-overlay"
             onClick={(e) => e.target === e.currentTarget && onClose()}
-            role="dialog" aria-modal="true" aria-label="Crear asignatura"
+            role="dialog" aria-modal="true" aria-label="Editar asignatura"
         >
             <div className="aed-dialog" style={{ "--aed-color": "#34d399" } as React.CSSProperties}>
 
-                {/* Header */}
                 <div className="aed-header">
                     <div className="aed-header-left">
                         <div className="aed-header-dot" />
-                        <span className="aed-title">Actualizar asignatura</span>
+                        <span className="aed-title">Editar asignatura</span>
                     </div>
                     <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
                 </div>
 
-                {/* Body */}
                 <div className="aed-body">
-
-                    {/* Nombre */}
                     <div className="aed-field">
                         <label className="aed-label">Nombre</label>
                         <input
                             className="aed-input"
                             type="text"
                             placeholder="Nombre de la asignatura…"
-                            value={subjectName}
-                            onChange={e => setSubjectName(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             autoFocus
-                            onKeyDown={e => e.key === "Enter" && handleSave()}
+                            onKeyDown={(e) => e.key === "Enter" && handleSave()}
                         />
-                    </div>                           
-
+                    </div>
                 </div>
 
-                {/* Footer */}
                 <div className="aed-footer">
                     <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
                     <button
                         className="aed-btn aed-btn-save"
                         onClick={handleSave}
-                        disabled={!subjectName.trim()}
-                        style={!subjectName.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                        disabled={!name.trim()}
+                        style={!name.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                     >
-                        Actualizar asignatura
+                        Guardar cambios
                     </button>
                 </div>
+
             </div>
         </div>
     );

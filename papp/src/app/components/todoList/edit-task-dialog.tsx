@@ -4,19 +4,20 @@ import InfoIcon from "@mui/icons-material/Info";
 import Tooltip from "@mui/material/Tooltip";
 import { useApp } from "@/context/AppContext";
 import { useEditTaskForm } from "./hooks/useEditTaskForm";
-import { useSubjectList } from "./hooks/useSubjectList";
+import { useSubjects } from "../shared/hooks/useSubjects";
 import RecurrenceChoiceDialog from "@/app/components/shared/recurrenceChoiceDialog/recurrence-choice-dialog";
 
 interface Props {
     open: boolean;
-    taskId: number | null;
+    taskId: string;
     onClose: () => void;
     onSave: () => void;
 }
 
 const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
-    const { pushAlert } = useApp();
-    const { subjects } = useSubjectList({ open, pushAlert });
+    const { user, pushAlert } = useApp();
+    const enabled = !!user;
+    const { subjects } = useSubjects({ enabled, pushAlert });
     const {
         title, setTitle,
         description, setDescription,

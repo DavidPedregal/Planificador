@@ -7,7 +7,7 @@ const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const calendars = await CalendarService.getCustomCalendarsForUser(req.userId);
-        res.status(200).json(calendars);
+        res.status(200).json({ data: calendars });
     } catch (error) {
         next(error);
     }
@@ -16,7 +16,7 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.get('/common', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const commonCalendars = await CalendarService.getSystemCalendarsForUser(req.userId);
-        res.status(200).json(commonCalendars);
+        res.status(200).json({ data: commonCalendars });
     } catch (error) {
         next(error);
     }
@@ -25,7 +25,7 @@ router.get('/common', dbLimiter, authMiddleware, async function(req, res, next) 
 router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const saved = await CalendarService.createCalendarForUser(req.userId, req.body);
-        res.status(201).json(saved);        
+        res.status(201).json({ data: saved, message: "Calendar created successfully" });
     } catch (error) {
         next(error);
     }
@@ -43,7 +43,7 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) 
 router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const updatedCalendar = await CalendarService.updateCalendarForUser(req.userId, req.params.id, req.body);
-        res.status(200).json(updatedCalendar);
+        res.status(200).json({ data: updatedCalendar, message: "Calendar updated successfully" });
     } catch (error) {
         next(error);
     }
@@ -52,7 +52,7 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
 router.put('/toggleVisibility/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const updatedCalendar = await CalendarService.toggleCalendarVisibilityForUser(req.userId, req.params.id);
-        res.status(200).json({ message : "Calendar visibility changed" });
+        res.status(200).json({ data: updatedCalendar, message: "Calendar visibility changed" });
     } catch (error) {
         next(error);
     }

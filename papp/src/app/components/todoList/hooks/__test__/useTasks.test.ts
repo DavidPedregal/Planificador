@@ -22,7 +22,7 @@ beforeEach(() => {
     jest.spyOn(Storage.prototype, "getItem").mockReturnValue("mock-token");
     global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockRawTasks),
+        json: () => Promise.resolve({ data: mockRawTasks, message: "Ok" }),
     }) as jest.Mock;
     jest.clearAllMocks();
 });
@@ -79,9 +79,9 @@ describe("useTasks - deleteTask", () => {
     beforeEach(() => {
         // Primer fetch: carga inicial. Segundo fetch: recarga tras borrar
         global.fetch = jest.fn()
-            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockRawTasks) })
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: mockRawTasks }) })
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: "Eliminada" }) })
-            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([]) }) as jest.Mock;
+            .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) }) as jest.Mock;
     });
 
     it("hace DELETE a /tasks/:id en modo single", async () => {

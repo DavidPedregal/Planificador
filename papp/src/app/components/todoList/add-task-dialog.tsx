@@ -4,8 +4,8 @@ import InfoIcon from "@mui/icons-material/Info";
 import Tooltip from "@mui/material/Tooltip";
 import { useApp } from "@/context/AppContext";
 import { useTaskForm } from "./hooks/useTaskForm";
-import { useSubjectList } from "./hooks/useSubjectList";
 import { RecurrenceForm } from "@/app/components/shared/recurrenceForm/recurrenceForm";
+import { useSubjects } from "../shared/hooks/useSubjects";
 
 interface Props {
     open: boolean;
@@ -14,8 +14,9 @@ interface Props {
 }
 
 const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
-    const { pushAlert } = useApp();
-    const { subjects } = useSubjectList({ open, pushAlert });
+    const { user, pushAlert } = useApp();
+    const enabled = !!user;
+    const { subjects } = useSubjects({ enabled, pushAlert });
     const {
         title, setTitle,
         description, setDescription,

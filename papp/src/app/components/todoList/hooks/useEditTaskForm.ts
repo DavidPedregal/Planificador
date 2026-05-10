@@ -7,7 +7,7 @@ export type UpdateMode = "single" | "fromThis" | "all";
 
 interface UseEditTaskFormParams {
     open: boolean;
-    taskId: number | null;
+    taskId: string;
     pushAlert: (message: string, severity: AlertSeverity) => void;
 }
 
@@ -31,7 +31,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
 
     const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
-    const fetchTask = async (id: number) => {
+    const fetchTask = async (id: string) => {
         setLoading(true);
         const { ok, data, message } = await apiFetch(`${config.backendUrl}/tasks/${id}`, {
             headers: authHeader(),
