@@ -3,6 +3,8 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
+import { apiFetch } from "@/lib/api";
+import { config } from "@/app/config/config";
 
 const GoogleIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -14,26 +16,27 @@ const GoogleIcon = () => (
 );
 
 export default function Login() {
-    const { setUser } = useApp();
+    const { setUser, pushAlert } = useApp();
     const router = useRouter();
+
     const login = useGoogleLogin({
-        onSuccess: async (responseCredentials) =>  {
-            if (responseCredentials.access_token){
-                const response = await fetch("http://localhost:8000/users/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token: responseCredentials.access_token }),
-                });
-                const data = await response.json();
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
-                setUser(data.user);
-                router.push("/home");
-            }
+        onSuccess: async ({ access_token }) => {
+            if (!access_token) return;
+
+            const { ok, data, message } = await apiFetch(`${config.backendUrl}/users/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: access_token }),
+            });
+
+            if (!ok) { pushAlert(message, "error"); return; }
+
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            setUser(data.user);
+            router.push("/home");
         },
-        onError: () => {
-            console.log("Login failed!");
-        },
+        onError: () => pushAlert("Error al iniciar sesión con Google", "error"),
     });
 
     return (

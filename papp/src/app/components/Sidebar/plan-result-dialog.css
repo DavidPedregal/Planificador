@@ -1,0 +1,115 @@
+/* ── Body ── */
+.prd-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 28px 24px;
+}
+
+/* ── Loading ── */
+.prd-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 0;
+}
+
+.prd-spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(124, 111, 247, 0.18);
+    border-top-color: #7c6ff7;
+    border-radius: 50%;
+    animation: prd-spin 0.75s linear infinite;
+}
+@keyframes prd-spin {
+    to { transform: rotate(360deg); }
+}
+
+.prd-loading-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #7a7a96;
+}
+
+/* ── Success row ── */
+.prd-success-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.prd-check {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(52, 211, 153, 0.15);
+    border: 1.5px solid rgba(52, 211, 153, 0.4);
+    color: #34d399;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+
+.prd-success-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #c8c8e0;
+    line-height: 1.5;
+    padding-top: 4px;
+}
+
+/* ── Warnings list ── */
+.prd-warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.prd-warnings-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #55556a;
+}
+
+.prd-warnings-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(124, 111, 247, 0.2) transparent;
+}
+
+.prd-warning-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    background: rgba(255, 107, 107, 0.06);
+    border: 1px solid rgba(255, 107, 107, 0.15);
+    border-radius: 10px;
+}
+
+.prd-warning-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #e2e2ee;
+}
+
+.prd-warning-msg {
+    font-size: 0.77rem;
+    color: #7a7a96;
+    line-height: 1.4;
+}

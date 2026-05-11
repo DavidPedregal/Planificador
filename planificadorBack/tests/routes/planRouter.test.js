@@ -138,7 +138,7 @@ describe('planRouter', () => {
                 .post('/plan')
                 .set('Authorization', `Bearer ${validToken}`);
 
-            expect(res.body.warnings).toHaveLength(1);
+            expect(res.body.data).toHaveLength(1);
         });
 
         it('should return 500 if Python service fails', async () => {

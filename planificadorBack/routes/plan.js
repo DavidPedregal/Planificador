@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require("mongoose");
 const PlanService = require('../services/planService.js');
 const router = express.Router();
 const authMiddleware = require("../middlewares/authmiddleware");
@@ -27,9 +26,8 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
             throw new Error('Planner service failed');
         }
         const planData = await response.json(); 
-
-        await PlanService.addPlan(planData, req.userId);
-        res.status(201).json({ message: 'Plan created successfully', warnings: planData.warnings });
+        await PlanService.addPlan(planData.scheduled, req.userId);
+        res.status(201).json({ message: 'Plan created successfully', data: planData.warnings });
     } catch (error){
         next(error);
     }
@@ -50,9 +48,9 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
         }
         const planData = await response.json();
 
-        await PlanService.addPlan(planData, req.userId);
+        await PlanService.addPlan(planData.scheduled, req.userId);
 
-        res.status(201).json({ message: 'Plan created successfully', warnings: planData.warnings });
+        res.status(201).json({ message: 'Plan created successfully', data: planData.warnings });
     } catch (error){
         next(error);
     }
@@ -60,7 +58,7 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
 
 router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
-        const updated = await PlanService.updatePlanEvent(req.userId, req.params.id, req.body)
+        await PlanService.updatePlanEvent(req.userId, req.params.id, req.body)
         res.status(200).json({ message: 'Plan event updated successfully' });
     } catch (error) {
         next(error);
@@ -69,7 +67,7 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
 
 router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
-        const deleted = await PlanService.deletePlanEvent(req.userId, req.params.id);
+        await PlanService.deletePlanEvent(req.userId, req.params.id);
         res.status(200).json({ message: 'Plan event deleted successfully' });
     } catch (error) {
         next(error);
@@ -78,7 +76,7 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) 
 
 router.delete('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
-        const deleted = await PlanService.deletePlan(req.userId);
+        await PlanService.deletePlan(req.userId);
         res.status(200).json({ message: 'Plan deleted successfully' });
     } catch(error) {
         next(error);

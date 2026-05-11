@@ -28,8 +28,8 @@ const mockEventData = {
     userId: mockUserId,
     title: 'Test Event',
     calendarId: mockCalendarId.toString(),
-    start: new Date('2026-05-01T10:00:00Z'),
-    end: new Date('2026-05-01T11:00:00Z'),
+    start: new Date('2030-01-01T10:00:00Z'),
+    end: new Date('2030-01-01T11:00:00Z'),
     useCalendarColor: true,
     color: '#ff0000',
 };
@@ -133,6 +133,34 @@ describe('eventRepository', () => {
             await EventRepo.createEvent([{ ...mockEventData, userId: otherUserId }]);
             const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
             expect(events).toHaveLength(0);
+        });
+
+        it('should not return events whose start date is in the past', async () => {
+            const pastEvent = {
+                ...mockEventData,
+                start: new Date('2020-01-01T10:00:00Z'),
+                end: new Date('2020-01-01T11:00:00Z'),
+            };
+            await EventRepo.createEvent([pastEvent]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(0);
+        });
+
+        it('should return empty array if all plannable events are in the past', async () => {
+            const past1 = { ...mockEventData, start: new Date('2020-03-01T09:00:00Z'), end: new Date('2020-03-01T10:00:00Z') };
+            const past2 = { ...mockEventData, start: new Date('2021-06-15T14:00:00Z'), end: new Date('2021-06-15T15:00:00Z') };
+            await EventRepo.createEvent([past1, past2]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(0);
+        });
+
+        it('should return only future events when both past and future events exist', async () => {
+            const pastEvent   = { ...mockEventData, start: new Date('2020-01-01T10:00:00Z'), end: new Date('2020-01-01T11:00:00Z') };
+            const futureEvent = { ...mockEventData, start: new Date('2030-06-01T10:00:00Z'), end: new Date('2030-06-01T11:00:00Z') };
+            await EventRepo.createEvent([pastEvent, futureEvent]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(1);
+            expect(events[0].start.toISOString()).toBe(futureEvent.start.toISOString());
         });
     });
 

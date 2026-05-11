@@ -131,6 +131,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
             <EditPlanEventDialog
                 open={editPlanEventDialogOpen}
                 planEventId={selectedPlanEventId ?? ""}
+                status={visibleEvents.find(e => e.id === selectedPlanEventId)?.status ?? "pending"}
                 onClose={() => { setEditPlanEventDialogOpen(false); setSelectedPlanEventId(null); }}
                 onSave={(status) => updatePlannedEventStatus(selectedPlanEventId ?? "", status)}
                 onDelete={() => removePlannedEvent(selectedPlanEventId ?? "")}

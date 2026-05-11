@@ -30,6 +30,7 @@ const getDataToPlan = async (userId) => {
 };
 
 const addPlan = async (planEvents, userId) => {
+    if (!planEvents) { return; }
     const systemCalendars = await CalendarService.getSystemCalendarsForUser(userId);
     const plannedCalendar = systemCalendars.find(cal => cal.name === "Planned");
 

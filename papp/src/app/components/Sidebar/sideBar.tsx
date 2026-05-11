@@ -16,6 +16,7 @@ import EditCalendarDialog from "./edit-calendar-dialog";
 import AddSubjectDialog from "./add-subject-dialog";
 import EditSubjectDialog from "./edit-subject-dialog";
 import ConfirmDialog from "./confirm-dialog";
+import PlanResultDialog from "./plan-result-dialog";
 import "./sideBar.css";
 
 interface SidebarProps {
@@ -71,13 +72,26 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
     const [addCalendarOpen, setAddCalendarOpen] = useState(false);
     const [addSubjectOpen, setAddSubjectOpen] = useState(false);
 
-    // ── Plan request ──────────────────────────────────────────────────────────
+    // ── Plan dialog ───────────────────────────────────────────────────────────
+    const [planDialogOpen, setPlanDialogOpen] = useState(false);
+    const [planLoading, setPlanLoading] = useState(false);
+    const [planWarnings, setPlanWarnings] = useState<{ taskId: string; title: string; message: string }[]>([]);
+
     const sendPlanRequest = async () => {
-        const { ok, message } = await apiFetch(`${config.backendUrl}/plan`, {
+        setPlanWarnings([]);
+        setPlanLoading(true);
+        setPlanDialogOpen(true);
+        const { ok, data, message } = await apiFetch(`${config.backendUrl}/plan`, {
             method: "POST",
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        pushAlert(message, ok ? "success" : "error");
+        setPlanLoading(false);
+        if (ok) {
+            setPlanWarnings(Array.isArray(data) ? data : []);
+        } else {
+            setPlanDialogOpen(false);
+            pushAlert(message, "error");
+        }
     };
 
     // ── Derived ───────────────────────────────────────────────────────────────
@@ -214,6 +228,13 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 isDangerous={true}
                 onConfirm={subjectConfirm.confirm}
                 onCancel={subjectConfirm.cancel}
+            />
+
+            <PlanResultDialog
+                open={planDialogOpen}
+                loading={planLoading}
+                warnings={planWarnings}
+                onClose={() => setPlanDialogOpen(false)}
             />
         </>
     );
