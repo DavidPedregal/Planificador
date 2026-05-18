@@ -4,7 +4,7 @@ import { apiFetch } from "@/lib/api";
 import { AlertSeverity } from "@/context/AppContext";
 
 export interface Task {
-    id: number;
+    id: string;
     title: string;
     completed: boolean;
     estimatedTime: number;
@@ -49,7 +49,7 @@ export function useTasks({ pushAlert }: UseTasksParams) {
 
     // ── Delete ────────────────────────────────────────────────────────────────
 
-    const deleteTask = async (id: number, mode: DeleteMode): Promise<boolean> => {
+    const deleteTask = async (id: string, mode: DeleteMode): Promise<boolean> => {
         const urls: Record<DeleteMode, string> = {
             single:   `${config.backendUrl}/tasks/${id}`,
             fromThis: `${config.backendUrl}/tasks/forward/${id}`,

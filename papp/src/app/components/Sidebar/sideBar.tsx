@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { config } from "@/app/config/config";
 import { apiFetch } from "@/lib/api";
@@ -26,6 +27,7 @@ interface SidebarProps {
 
 export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted }: SidebarProps) {
     const { user, pushAlert } = useApp();
+    const { t } = useTranslation();
     const enabled = !!user;
 
     const {
@@ -44,13 +46,9 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
 
     const { subjects, fetchSubjects, deleteSubject } = useSubjects({ enabled, pushAlert });
 
-    // ── Confirm delete calendars ──────────────────────────────────────────────
     const calendarConfirm = useConfirmDelete<string>({ onConfirm: deleteCalendar });
-
-    // ── Confirm delete subjects ───────────────────────────────────────────────
     const subjectConfirm = useConfirmDelete<string>({ onConfirm: deleteSubject });
 
-    // ── Edit calendar ─────────────────────────────────────────────────────────
     const [editCalendarOpen, setEditCalendarOpen] = useState(false);
     const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
 
@@ -59,7 +57,6 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
         setEditCalendarOpen(true);
     };
 
-    // ── Edit subject ──────────────────────────────────────────────────────────
     const [editSubjectOpen, setEditSubjectOpen] = useState(false);
     const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
 
@@ -68,11 +65,9 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
         setEditSubjectOpen(true);
     };
 
-    // ── Add dialogs ───────────────────────────────────────────────────────────
     const [addCalendarOpen, setAddCalendarOpen] = useState(false);
     const [addSubjectOpen, setAddSubjectOpen] = useState(false);
 
-    // ── Plan dialog ───────────────────────────────────────────────────────────
     const [planDialogOpen, setPlanDialogOpen] = useState(false);
     const [planLoading, setPlanLoading] = useState(false);
     const [planWarnings, setPlanWarnings] = useState<{ taskId: string; title: string; message: string }[]>([]);
@@ -94,7 +89,6 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
         }
     };
 
-    // ── Derived ───────────────────────────────────────────────────────────────
     const allCalendars = [...defaultCalendars, ...customCalendars];
     const selectedCalendar = allCalendars.find(c => c.id === selectedCalendarId) ?? {
         id: "", name: "", color: "", visible: true,
@@ -108,24 +102,24 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
             <div className="sidebar">
 
                 {/* ── General ── */}
-                <span className="sidebar-label">General</span>
+                <span className="sidebar-label">{t("sidebar.general")}</span>
                 <button className="sidebar-nav-item">
                     <SettingsIcon size="1.25rem" />
-                    Ajustes
+                    {t("sidebar.settings")}
                 </button>
                 <button className="sidebar-nav-item" onClick={sendPlanRequest}>
                     <AutoFixNormalIcon />
-                    Planificar
+                    {t("sidebar.plan")}
                 </button>
                 <button className="sidebar-nav-item">
                     <ConstructionIcon />
-                    Herramientas
+                    {t("sidebar.tools")}
                 </button>
 
                 <div className="sidebar-divider" />
 
                 {/* ── Calendarios por defecto ── */}
-                <span className="sidebar-label">Calendarios por defecto</span>
+                <span className="sidebar-label">{t("sidebar.defaultCalendars")}</span>
                 <div className="sidebar-default-calendars">
                     {defaultCalendars.map(cal => (
                         <CalendarItem
@@ -139,7 +133,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 </div>
 
                 {/* ── Mis calendarios ── */}
-                <span className="sidebar-label">Mis calendarios</span>
+                <span className="sidebar-label">{t("sidebar.myCalendars")}</span>
                 <div className="sidebar-calendars">
                     {customCalendars.map(cal => (
                         <CalendarItem
@@ -155,13 +149,13 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                 </div>
 
                 <button className="sidebar-add-btn" onClick={() => setAddCalendarOpen(true)}>
-                    + Nuevo calendario
+                    {t("sidebar.newCalendar")}
                 </button>
 
                 <div className="sidebar-divider" />
 
                 {/* ── Asignaturas ── */}
-                <span className="sidebar-label">Mis asignaturas</span>
+                <span className="sidebar-label">{t("sidebar.mySubjects")}</span>
                 <div className="sidebar-subjects">
                     {subjects.map(subj => (
                         <div key={subj.id} className="sidebar-subj-item">
@@ -176,7 +170,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                     ))}
                 </div>
                 <button className="sidebar-add-btn" onClick={() => setAddSubjectOpen(true)}>
-                    + Nueva asignatura
+                    {t("sidebar.newSubject")}
                 </button>
 
             </div>
@@ -197,10 +191,10 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
 
             <ConfirmDialog
                 open={calendarConfirm.open}
-                title="Eliminar calendario"
-                message="¿Estás seguro de que deseas eliminar este calendario? Esta acción no se puede deshacer."
-                confirmText="Eliminar"
-                cancelText="Cancelar"
+                title={t("sidebar.deleteCalendarTitle")}
+                message={t("sidebar.deleteCalendarMsg")}
+                confirmText={t("common.delete")}
+                cancelText={t("common.cancel")}
                 isDangerous={true}
                 onConfirm={calendarConfirm.confirm}
                 onCancel={calendarConfirm.cancel}
@@ -221,10 +215,10 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
 
             <ConfirmDialog
                 open={subjectConfirm.open}
-                title="Eliminar asignatura"
-                message="¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer."
-                confirmText="Eliminar"
-                cancelText="Cancelar"
+                title={t("sidebar.deleteSubjectTitle")}
+                message={t("sidebar.deleteSubjectMsg")}
+                confirmText={t("common.delete")}
+                cancelText={t("common.cancel")}
                 isDangerous={true}
                 onConfirm={subjectConfirm.confirm}
                 onCancel={subjectConfirm.cancel}

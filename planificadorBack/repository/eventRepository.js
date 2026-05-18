@@ -24,8 +24,11 @@ const getEventById = async (userId, eventId) => {
     return CalendarEvent.findOne({ _id: eventId, userId });
 };
 
-const getPlannableEventsForUser = async (userId, calendarId) =>
-    CalendarEvent.find({userId: userId, calendarId: calendarId, start: { $gte: new Date() }});
+const getPlannableEventsForUser = async (userId, calendarId) => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return CalendarEvent.find({ userId, calendarId, start: { $gte: startOfToday } });
+};
 
 const createEvent = async (events) => 
     CalendarEvent.insertMany(events);

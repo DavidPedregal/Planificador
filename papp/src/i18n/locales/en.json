@@ -1,0 +1,248 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "name": "Name",
+    "color": "Color",
+    "none": "None",
+    "loading": "Loading…",
+    "saveChanges": "Save changes",
+    "title": "Title"
+  },
+  "landing": {
+    "hero": {
+      "line1": "Everything in its",
+      "line2": "place and time",
+      "subtitle": "Calendars, tasks and reminders in one space. Designed for those who need clarity, not chaos.",
+      "note": "no password · no registration · free"
+    },
+    "preview": {
+      "general": "General",
+      "navCalendar": "📅 Calendar",
+      "navTasks": "✅ Tasks",
+      "navSettings": "⚙️ Settings",
+      "calendarsLabel": "Calendars",
+      "personal": "🟣 Personal",
+      "work": "🟢 Work",
+      "family": "🟠 Family",
+      "month": "March 2025",
+      "weekdays": ["M", "T", "W", "T", "F", "S", "S"],
+      "events": {
+        "meeting": "Meeting",
+        "gym": "Gym",
+        "dentist": "Dentist",
+        "sprint": "Sprint",
+        "review": "Review",
+        "dinner": "Dinner"
+      },
+      "tasksTitle": "Tasks",
+      "task1": "Review PR",
+      "task2": "Prepare demo",
+      "task3": "Update docs",
+      "task4": "Standup",
+      "task5": "Deploy staging"
+    },
+    "features": {
+      "tag": "Features",
+      "titleLine1": "Designed for",
+      "titleLine2": "how you work",
+      "calendarTitle": "Smart calendar",
+      "calendarDesc": "Day, week or month view. Events with recurrence, colors per calendar and drag to reorganize.",
+      "tasksTitle": "Task list",
+      "tasksDesc": "Manage your to-dos alongside the calendar. No tab switching, no lost context.",
+      "multiCalTitle": "Multiple calendars",
+      "multiCalDesc": "Personal, work, family… each with its own color. Enable or hide them as needed.",
+      "recurringTitle": "Recurring events",
+      "recurringDesc": "Daily, weekly, monthly or yearly. Set when the recurrence ends or how many occurrences.",
+      "googleTitle": "Secure Google access",
+      "googleDesc": "No passwords to remember. Sign in with your Google account securely in one click.",
+      "mobileTitle": "Mobile-ready",
+      "mobileDesc": "Sidebar and task list as sliding panels. The same experience on any device."
+    },
+    "cta": {
+      "line1": "Start",
+      "line2": "organizing today",
+      "subtitle": "One click with your Google account. Nothing more."
+    },
+    "footer": {
+      "logo": "Menti",
+      "made": "Made with ☕ — David Pedregal Ribas"
+    }
+  },
+  "login": {
+    "signIn": "Sign in with Google",
+    "error": "Error signing in with Google"
+  },
+  "navbar": {
+    "logo": "Menti",
+    "changeTheme": "Change theme",
+    "logout": "Log out"
+  },
+  "home": {
+    "sidebarAriaLabel": "Sidebar",
+    "calendarAriaLabel": "Calendar",
+    "taskListAriaLabel": "Task list",
+    "panelsAriaLabel": "Panels",
+    "openSettingsAriaLabel": "Open settings",
+    "settingsTitle": "Settings",
+    "openTaskListAriaLabel": "Open task list",
+    "tasksTitle": "Tasks"
+  },
+  "sidebar": {
+    "general": "General",
+    "settings": "Settings",
+    "plan": "Plan",
+    "tools": "Tools",
+    "defaultCalendars": "Default calendars",
+    "myCalendars": "My calendars",
+    "newCalendar": "+ New calendar",
+    "mySubjects": "My subjects",
+    "newSubject": "+ New subject",
+    "deleteCalendarTitle": "Delete calendar",
+    "deleteCalendarMsg": "Are you sure you want to delete this calendar? This action cannot be undone.",
+    "deleteSubjectTitle": "Delete subject",
+    "deleteSubjectMsg": "Are you sure you want to delete this subject? This action cannot be undone."
+  },
+  "todo": {
+    "title": "Tasks",
+    "add": "Add",
+    "noTasks": "No pending tasks",
+    "enjoyDay": "Enjoy your day!",
+    "overdue": "Overdue ({{count}})",
+    "completed": "Completed ({{count}})",
+    "deleteRecurringTitle": "Delete recurring task",
+    "deleteRecurringMsg": "Do you want to delete only this task or all tasks in the series?"
+  },
+  "task": {
+    "newTitle": "New task",
+    "editTitle": "Edit task",
+    "save": "Save task",
+    "update": "Update task",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Add title…",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "Add description…",
+    "estimatedTime": "Estimated time",
+    "hoursAriaLabel": "Hours",
+    "hoursUnit": "h",
+    "minutesAriaLabel": "Minutes",
+    "minutesUnit": "min",
+    "dueDate": "Due date",
+    "givenDate": "Teaching date",
+    "givenDateTooltip": "Date on which the knowledge to complete the task was acquired",
+    "subject": "Subject (optional)",
+    "includePlanning": "Include in planning",
+    "addReviews": "Add reviews",
+    "updateRecurringTitle": "Update recurring task",
+    "updateRecurringMsg": "Do you want to update only this task or all tasks in the series?",
+    "editAriaLabel": "Edit task",
+    "deleteAriaLabel": "Delete task",
+    "createAriaLabel": "Create task",
+    "editDialogAriaLabel": "Edit task"
+  },
+  "event": {
+    "newTitle": "New event",
+    "editTitle": "Edit event",
+    "loadingTitle": "Loading…",
+    "save": "Save event",
+    "update": "Update event",
+    "delete": "Delete event",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Add title…",
+    "calendarLabel": "Calendar",
+    "selectCalendarAriaLabel": "Select calendar",
+    "labelField": "Label",
+    "labelPlaceholder": "Add label (optional)…",
+    "customColor": "Use custom color",
+    "startDateAriaLabel": "Start date",
+    "startTimeAriaLabel": "Start time",
+    "endDateAriaLabel": "End date",
+    "endTimeAriaLabel": "End time",
+    "deleteRecurringTitle": "Delete recurring event",
+    "deleteRecurringMsg": "Do you want to delete only this event or all events in the series?",
+    "updateRecurringTitle": "Update recurring event",
+    "updateRecurringMsg": "Do you want to update only this event or all events in the series?",
+    "createAriaLabel": "Create event",
+    "editAriaLabel": "Edit event"
+  },
+  "calendar": {
+    "newTitle": "New calendar",
+    "editTitle": "Edit calendar",
+    "createAriaLabel": "Create calendar",
+    "editAriaLabel": "Edit calendar",
+    "save": "Save calendar",
+    "nameLabel": "Name",
+    "namePlaceholder": "Calendar name…",
+    "colorLabel": "Color"
+  },
+  "subject": {
+    "newTitle": "New subject",
+    "editTitle": "Edit subject",
+    "createAriaLabel": "Create subject",
+    "editAriaLabel": "Edit subject",
+    "save": "Save subject",
+    "nameLabel": "Name",
+    "namePlaceholder": "Subject name…"
+  },
+  "recurrence": {
+    "periodicity": "Periodicity",
+    "typeAriaLabel": "Periodicity type",
+    "every": "Every",
+    "intervalAriaLabel": "Repetition interval",
+    "weekdays": "Days of the week",
+    "ends": "Ends",
+    "onDay": "On",
+    "endDateAriaLabel": "End date of recurrence",
+    "afterOccurrences": "After occurrences",
+    "occurrencesAriaLabel": "Number of occurrences",
+    "times": "times",
+    "freq": {
+      "none": "No repetition",
+      "day": "Daily",
+      "week": "Weekly",
+      "month": "Monthly",
+      "year": "Yearly"
+    },
+    "interval": {
+      "day": "day(s)",
+      "week": "week(s)",
+      "month": "month(s)",
+      "year": "year(s)",
+      "daily": "day(s)",
+      "weekly": "week(s)",
+      "monthly": "month(s)",
+      "yearly": "year(s)"
+    },
+    "weekdaysShort": ["S", "M", "T", "W", "T", "F", "S"],
+    "weekdaysLong": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
+  "recurrenceChoice": {
+    "single": "{{action}} only this event",
+    "fromThis": "{{action}} from this event onwards",
+    "all": "{{action}} the entire series",
+    "actionDelete": "Delete",
+    "actionUpdate": "Update"
+  },
+  "planResult": {
+    "ariaLabel": "Planning result",
+    "planning": "Planning…",
+    "resultTitle": "Plan result",
+    "generating": "Generating your plan…",
+    "success": "Plan created successfully! All tasks have been planned.",
+    "partial_one": "Plan created. 1 task could not be planned.",
+    "partial_other": "Plan created. {{count}} tasks could not be planned.",
+    "unplanned": "Unplanned tasks",
+    "close": "Close"
+  },
+  "planEvent": {
+    "ariaLabel": "Edit planned event",
+    "title": "Planned event",
+    "actualTime": "Actual time dedicated",
+    "actualTimeAriaLabel": "Actual time dedicated",
+    "markCompleted": "Mark as completed",
+    "completed": "Completed ✓",
+    "alreadyCompleted": "This event is already completed"
+  }
+}

@@ -1,28 +1,24 @@
 import React from "react";
 import "./recurrenceForm.css";
+import { useTranslation } from "react-i18next";
 import {
     FREQUENCY_TYPE,
     RecurrenceRule,
-    WEEKDAYS,
-    WEEKDAY_LABELS,
     FREQ_OPTIONS,
 } from "@/app/components/shared/lib/recurrence";
 
 interface Props {
     recurrence: RecurrenceRule;
-    start?: Date;           // opcional — solo necesario si se muestra el date picker de fin
+    start?: Date;
     onChange: (recurrence: RecurrenceRule) => void;
     onToggleWeekday: (day: number) => void;
 }
 
-const INTERVAL_LABELS: Record<string, string> = {
-    day:   "día(s)",
-    week:  "semana(s)",
-    month: "mes(es)",
-    year:  "año(s)",
-};
-
 export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, onToggleWeekday }) => {
+    const { t } = useTranslation();
+    const weekdaysShort = t("recurrence.weekdaysShort", { returnObjects: true }) as string[];
+    const weekdaysLong = t("recurrence.weekdaysLong", { returnObjects: true }) as string[];
+
     const showWeekdays  = recurrence.frequencyType === FREQUENCY_TYPE.WEEKS;
     const showEndOptions = recurrence.frequencyType !== FREQUENCY_TYPE.NONE;
 
@@ -35,7 +31,7 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
 
     return (
         <div className="rf-field">
-            <label className="rf-label">Periodicidad</label>
+            <label className="rf-label">{t("recurrence.periodicity")}</label>
             <div className="rf-box">
 
                 {/* Tipo de frecuencia */}
@@ -43,29 +39,29 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                     className="rf-input rf-select"
                     value={recurrence.frequencyType}
                     onChange={(e) => update({ frequencyType: e.target.value as RecurrenceRule["frequencyType"] })}
-                    aria-label="Tipo de periodicidad"
+                    aria-label={t("recurrence.typeAriaLabel")}
                 >
                     {FREQ_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
+                        <option key={o.value} value={o.value}>{t(`recurrence.freq.${o.value}`)}</option>
                     ))}
                 </select>
 
                 {/* Intervalo */}
                 {recurrence.frequencyType !== FREQUENCY_TYPE.NONE && (
                     <div className="rf-row">
-                        <span className="rf-row-label">Cada</span>
+                        <span className="rf-row-label">{t("recurrence.every")}</span>
                         <input
                             className="rf-input"
                             type="number"
                             min={1}
                             max={99}
                             value={recurrence.frequencyInterval}
-                            aria-label="Intervalo de repetición"
+                            aria-label={t("recurrence.intervalAriaLabel")}
                             onChange={(e) => update({ frequencyInterval: Math.max(1, +e.target.value) })}
                             style={{ width: 64, flex: "none", textAlign: "center" }}
                         />
                         <span className="rf-row-label">
-                            {INTERVAL_LABELS[recurrence.frequencyType]}
+                            {t(`recurrence.interval.${recurrence.frequencyType}`)}
                         </span>
                     </div>
                 )}
@@ -73,15 +69,15 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                 {/* Días de la semana */}
                 {showWeekdays && (
                     <div className="rf-field">
-                        <span className="rf-label">Días de la semana</span>
+                        <span className="rf-label">{t("recurrence.weekdays")}</span>
                         <div className="rf-weekdays">
-                            {WEEKDAYS.map((d, i) => (
+                            {weekdaysShort.map((d, i) => (
                                 <button
                                     key={`weekday-${i}`}
                                     className={`rf-wd-btn${recurrence.frequencyDaysOfWeek?.includes(i) ? " active" : ""}`}
                                     onClick={() => onToggleWeekday(i)}
-                                    title={WEEKDAY_LABELS[i]}
-                                    aria-label={WEEKDAY_LABELS[i]}
+                                    title={weekdaysLong[i]}
+                                    aria-label={weekdaysLong[i]}
                                     aria-pressed={recurrence.frequencyDaysOfWeek?.includes(i)}
                                 >
                                     {d}
@@ -94,7 +90,7 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                 {/* Opciones de fin */}
                 {showEndOptions && (
                     <div className="rf-field">
-                        <span className="rf-label">Finaliza</span>
+                        <span className="rf-label">{t("recurrence.ends")}</span>
                         <div className="rf-end-options">
 
                             <label className="rf-radio-row">
@@ -103,7 +99,7 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                                     onClick={() => update({ frequencyEndType: "on" })}
                                 />
                                 <span className="rf-radio-label" onClick={() => update({ frequencyEndType: "on" })}>
-                                    El día
+                                    {t("recurrence.onDay")}
                                 </span>
                                 {recurrence.frequencyEndType === "on" && (
                                     <input
@@ -111,7 +107,7 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                                         type="date"
                                         value={recurrence.frequencyEndDate}
                                         min={minEndDate}
-                                        aria-label="Fecha de fin de recurrencia"
+                                        aria-label={t("recurrence.endDateAriaLabel")}
                                         onChange={(e) => update({ frequencyEndDate: e.target.value })}
                                         style={{ marginLeft: 8, flex: 1 }}
                                     />
@@ -124,7 +120,7 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                                     onClick={() => update({ frequencyEndType: "after" })}
                                 />
                                 <span className="rf-radio-label" onClick={() => update({ frequencyEndType: "after" })}>
-                                    Después de ocurrencias
+                                    {t("recurrence.afterOccurrences")}
                                 </span>
                                 {recurrence.frequencyEndType === "after" && (
                                     <div className="rf-row" style={{ marginLeft: 8, flex: 1 }}>
@@ -134,11 +130,11 @@ export const RecurrenceForm: React.FC<Props> = ({ recurrence, start, onChange, o
                                             min={1}
                                             max={999}
                                             value={recurrence.frequencyOccurrencesLeft}
-                                            aria-label="Número de ocurrencias"
+                                            aria-label={t("recurrence.occurrencesAriaLabel")}
                                             onChange={(e) => update({ frequencyOccurrencesLeft: Math.max(1, +e.target.value) })}
                                             style={{ width: 64, flex: "none", textAlign: "center" }}
                                         />
-                                        <span className="rf-row-label">veces</span>
+                                        <span className="rf-row-label">{t("recurrence.times")}</span>
                                     </div>
                                 )}
                             </label>

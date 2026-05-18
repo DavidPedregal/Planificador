@@ -23,7 +23,7 @@ const deletePlanEvent = async (userId, planEventId) => {
 };
 
 const deletePlan = async (userId) =>
-    PlanEvent.deleteMany({ userId }); 
+    PlanEvent.deleteMany({ userId, status: { $ne: 'completed' } });
 
 const updatePlanEvent = async (userId, planEventId, updateData) => {
     if (!mongoose.Types.ObjectId.isValid(planEventId)) {

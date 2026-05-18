@@ -130,6 +130,31 @@
   color: #f76f6f;
 }
 .todo-section-overdue svg { opacity: 1; }
+.todo-section-divider {
+  height: 1px;
+  background: var(--border, rgba(255,255,255,0.07));
+  margin: 6px 8px;
+}
+
+.todo-section-collapsible {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  justify-content: flex-start;
+}
+.todo-section-collapsible:hover {
+  color: var(--text-secondary, #a0a0b8);
+}
+.todo-section-chevron {
+  margin-left: auto;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.todo-section-chevron.expanded {
+  transform: rotate(180deg);
+}
 
 /* ── Task item ── */
 .todo-item {

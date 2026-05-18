@@ -1,0 +1,248 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "name": "Nombre",
+    "color": "Color",
+    "none": "Ninguna",
+    "loading": "Cargando…",
+    "saveChanges": "Guardar cambios",
+    "title": "Título"
+  },
+  "landing": {
+    "hero": {
+      "line1": "Todo en su",
+      "line2": "lugar y momento",
+      "subtitle": "Calendarios, tareas y recordatorios en un solo espacio. Diseñado para quienes necesitan claridad, no caos.",
+      "note": "sin contraseña · sin registro · gratis"
+    },
+    "preview": {
+      "general": "General",
+      "navCalendar": "📅 Calendario",
+      "navTasks": "✅ Tareas",
+      "navSettings": "⚙️ Ajustes",
+      "calendarsLabel": "Calendarios",
+      "personal": "🟣 Personal",
+      "work": "🟢 Trabajo",
+      "family": "🟠 Familia",
+      "month": "Marzo 2025",
+      "weekdays": ["L", "M", "X", "J", "V", "S", "D"],
+      "events": {
+        "meeting": "Reunión",
+        "gym": "Gym",
+        "dentist": "Dentista",
+        "sprint": "Sprint",
+        "review": "Review",
+        "dinner": "Cena"
+      },
+      "tasksTitle": "Tareas",
+      "task1": "Revisar PR",
+      "task2": "Preparar demo",
+      "task3": "Actualizar docs",
+      "task4": "Standup",
+      "task5": "Deploy staging"
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "titleLine1": "Pensado para",
+      "titleLine2": "cómo trabajas",
+      "calendarTitle": "Calendario inteligente",
+      "calendarDesc": "Vista por día, semana o mes. Eventos con recurrencia, colores por calendario y arrastrar para reorganizar.",
+      "tasksTitle": "Lista de tareas",
+      "tasksDesc": "Gestiona tus pendientes junto al calendario. Sin cambiar de pestaña, sin perder el contexto.",
+      "multiCalTitle": "Múltiples calendarios",
+      "multiCalDesc": "Personal, trabajo, familia… cada uno con su color. Actívalos o ocúltalos según lo que necesites ver.",
+      "recurringTitle": "Eventos periódicos",
+      "recurringDesc": "Diario, semanal, mensual o anual. Configura cuándo termina la repetición o con cuántas ocurrencias.",
+      "googleTitle": "Acceso seguro con Google",
+      "googleDesc": "Sin contraseñas que recordar. Entra con tu cuenta de Google de forma segura en un clic.",
+      "mobileTitle": "Adaptado a móvil",
+      "mobileDesc": "Sidebar y lista de tareas como paneles deslizables. La misma experiencia en cualquier dispositivo."
+    },
+    "cta": {
+      "line1": "Empieza a",
+      "line2": "organizarte hoy",
+      "subtitle": "Un solo clic con tu cuenta de Google. Nada más."
+    },
+    "footer": {
+      "logo": "Menti",
+      "made": "Hecho con ☕ — David Pedregal Ribas"
+    }
+  },
+  "login": {
+    "signIn": "Iniciar sesión con Google",
+    "error": "Error al iniciar sesión con Google"
+  },
+  "navbar": {
+    "logo": "Menti",
+    "changeTheme": "Cambiar tema",
+    "logout": "Cerrar sesión"
+  },
+  "home": {
+    "sidebarAriaLabel": "Barra lateral",
+    "calendarAriaLabel": "Calendario",
+    "taskListAriaLabel": "Lista de tareas",
+    "panelsAriaLabel": "Paneles",
+    "openSettingsAriaLabel": "Abrir configuración",
+    "settingsTitle": "Configuración",
+    "openTaskListAriaLabel": "Abrir lista de tareas",
+    "tasksTitle": "Tareas"
+  },
+  "sidebar": {
+    "general": "General",
+    "settings": "Ajustes",
+    "plan": "Planificar",
+    "tools": "Herramientas",
+    "defaultCalendars": "Calendarios por defecto",
+    "myCalendars": "Mis calendarios",
+    "newCalendar": "+ Nuevo calendario",
+    "mySubjects": "Mis asignaturas",
+    "newSubject": "+ Nueva asignatura",
+    "deleteCalendarTitle": "Eliminar calendario",
+    "deleteCalendarMsg": "¿Estás seguro de que deseas eliminar este calendario? Esta acción no se puede deshacer.",
+    "deleteSubjectTitle": "Eliminar asignatura",
+    "deleteSubjectMsg": "¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer."
+  },
+  "todo": {
+    "title": "Tareas",
+    "add": "Añadir",
+    "noTasks": "Sin tareas pendientes",
+    "enjoyDay": "¡Disfruta tu día!",
+    "overdue": "Retrasadas ({{count}})",
+    "completed": "Completadas ({{count}})",
+    "deleteRecurringTitle": "Eliminar tarea recurrente",
+    "deleteRecurringMsg": "¿Quieres eliminar solo esta tarea o todas las tareas de la serie?"
+  },
+  "task": {
+    "newTitle": "Nueva tarea",
+    "editTitle": "Editar tarea",
+    "save": "Guardar tarea",
+    "update": "Actualizar tarea",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Añadir título…",
+    "description": "Descripción (opcional)",
+    "descriptionPlaceholder": "Añadir descripción…",
+    "estimatedTime": "Tiempo estimado",
+    "hoursAriaLabel": "Horas",
+    "hoursUnit": "h",
+    "minutesAriaLabel": "Minutos",
+    "minutesUnit": "min",
+    "dueDate": "Fecha de entrega",
+    "givenDate": "Fecha de impartición",
+    "givenDateTooltip": "Fecha en la que se adquirieron los conocimientos para realizar la tarea",
+    "subject": "Asignatura (opcional)",
+    "includePlanning": "Incluir en planificación",
+    "addReviews": "Añadir repasos",
+    "updateRecurringTitle": "Actualizar tarea recurrente",
+    "updateRecurringMsg": "¿Quieres actualizar solo esta tarea o todas las tareas de la serie?",
+    "editAriaLabel": "Editar tarea",
+    "deleteAriaLabel": "Eliminar tarea",
+    "createAriaLabel": "Crear tarea",
+    "editDialogAriaLabel": "Editar tarea"
+  },
+  "event": {
+    "newTitle": "Nuevo evento",
+    "editTitle": "Editar tarea",
+    "loadingTitle": "Cargando…",
+    "save": "Guardar evento",
+    "update": "Actualizar evento",
+    "delete": "Eliminar evento",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Añadir título…",
+    "calendarLabel": "Calendario",
+    "selectCalendarAriaLabel": "Seleccionar calendario",
+    "labelField": "Etiqueta",
+    "labelPlaceholder": "Añadir etiqueta (opcional)…",
+    "customColor": "Usar color personalizado",
+    "startDateAriaLabel": "Fecha de inicio",
+    "startTimeAriaLabel": "Hora de inicio",
+    "endDateAriaLabel": "Fecha de fin",
+    "endTimeAriaLabel": "Hora de fin",
+    "deleteRecurringTitle": "Eliminar evento recurrente",
+    "deleteRecurringMsg": "¿Quieres eliminar solo este evento o todos los eventos de la serie?",
+    "updateRecurringTitle": "Actualizar evento recurrente",
+    "updateRecurringMsg": "¿Quieres actualizar solo este evento o todos los eventos de la serie?",
+    "createAriaLabel": "Crear evento",
+    "editAriaLabel": "Editar evento"
+  },
+  "calendar": {
+    "newTitle": "Nuevo calendario",
+    "editTitle": "Editar calendario",
+    "createAriaLabel": "Crear calendario",
+    "editAriaLabel": "Editar calendario",
+    "save": "Guardar calendario",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Nombre del calendario…",
+    "colorLabel": "Color"
+  },
+  "subject": {
+    "newTitle": "Nueva asignatura",
+    "editTitle": "Editar asignatura",
+    "createAriaLabel": "Crear asignatura",
+    "editAriaLabel": "Editar asignatura",
+    "save": "Guardar asignatura",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Nombre de la asignatura…"
+  },
+  "recurrence": {
+    "periodicity": "Periodicidad",
+    "typeAriaLabel": "Tipo de periodicidad",
+    "every": "Cada",
+    "intervalAriaLabel": "Intervalo de repetición",
+    "weekdays": "Días de la semana",
+    "ends": "Finaliza",
+    "onDay": "El día",
+    "endDateAriaLabel": "Fecha de fin de recurrencia",
+    "afterOccurrences": "Después de ocurrencias",
+    "occurrencesAriaLabel": "Número de ocurrencias",
+    "times": "veces",
+    "freq": {
+      "none": "Sin repetición",
+      "day": "Diario",
+      "week": "Semanal",
+      "month": "Mensual",
+      "year": "Anual"
+    },
+    "interval": {
+      "day": "día(s)",
+      "week": "semana(s)",
+      "month": "mes(es)",
+      "year": "año(s)",
+      "daily": "día(s)",
+      "weekly": "semana(s)",
+      "monthly": "mes(es)",
+      "yearly": "año(s)"
+    },
+    "weekdaysShort": ["D", "L", "M", "X", "J", "V", "S"],
+    "weekdaysLong": ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+  },
+  "recurrenceChoice": {
+    "single": "{{action}} solo este evento",
+    "fromThis": "{{action}} a partir de este evento",
+    "all": "{{action}} toda la serie",
+    "actionDelete": "Eliminar",
+    "actionUpdate": "Actualizar"
+  },
+  "planResult": {
+    "ariaLabel": "Resultado de planificación",
+    "planning": "Planificando…",
+    "resultTitle": "Resultado del plan",
+    "generating": "Generando tu plan…",
+    "success": "¡Plan creado con éxito! Todas las tareas han sido planificadas.",
+    "partial_one": "Plan creado. 1 tarea no pudo ser planificada.",
+    "partial_other": "Plan creado. {{count}} tareas no pudieron ser planificadas.",
+    "unplanned": "Tareas sin planificar",
+    "close": "Cerrar"
+  },
+  "planEvent": {
+    "ariaLabel": "Editar evento planificado",
+    "title": "Evento planificado",
+    "actualTime": "Tiempo real dedicado",
+    "actualTimeAriaLabel": "Tiempo real dedicado",
+    "markCompleted": "Marcar como completado",
+    "completed": "Completado ✓",
+    "alreadyCompleted": "Este evento ya está completado"
+  }
+}

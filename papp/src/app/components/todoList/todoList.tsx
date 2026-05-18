@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Sun, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Check, Sun, AlertTriangle, ChevronDown } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useTasks } from "./hooks/useTasks";
 import { useDeleteTask } from "./hooks/useDeleteTask";
@@ -13,19 +14,22 @@ import "./todoList.css";
 
 export default function TodoList() {
     const { pushAlert } = useApp();
+    const { t, i18n } = useTranslation();
     const { overdue, pending, completed, fetchTasks, deleteTask, addTasks } = useTasks({ pushAlert });
     const { recurrenceChoiceOpen, handleDeleteTask, confirmDelete, cancelDelete } = useDeleteTask({ deleteTask });
 
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+    const [selectedTaskId, setSelectedTaskId] = useState<string>("");
+    const [completedExpanded, setCompletedExpanded] = useState(false);
 
-    const handleEditTask = (id: number) => {
+    const handleEditTask = (id: string) => {
         setSelectedTaskId(id);
         setEditDialogOpen(true);
     };
 
-    const todayLabel = new Date().toLocaleDateString("es-ES", {
+    const locale = i18n.language === "es" ? "es-ES" : "en-US";
+    const todayLabel = new Date().toLocaleDateString(locale, {
         weekday: "long", day: "numeric", month: "long",
     });
 
@@ -38,13 +42,13 @@ export default function TodoList() {
             <div className="todo-header">
                 <div className="todo-header-top">
                     <div className="todo-header-icon"><Sun size={15} /></div>
-                    <span className="todo-header-title">Tareas</span>
+                    <span className="todo-header-title">{t("todo.title")}</span>
                     {totalPending > 0 && (
                         <span className="todo-count-pill">{totalPending}</span>
                     )}
                     <div className="todo-form">
                         <button className="todo-add-btn" onClick={() => setAddDialogOpen(true)}>
-                            Añadir
+                            {t("todo.add")}
                         </button>
                     </div>
                 </div>
@@ -56,8 +60,8 @@ export default function TodoList() {
                 {totalPending === 0 && completed.length === 0 ? (
                     <div className="todo-empty">
                         <div className="todo-empty-icon"><Sun size={18} /></div>
-                        <p>Sin tareas pendientes</p>
-                        <span>¡Disfruta tu día!</span>
+                        <p>{t("todo.noTasks")}</p>
+                        <span>{t("todo.enjoyDay")}</span>
                     </div>
                 ) : (
                     <>
@@ -66,7 +70,7 @@ export default function TodoList() {
                             <>
                                 <div className="todo-section-label todo-section-overdue">
                                     <AlertTriangle size={11} />
-                                    Retrasadas ({overdue.length})
+                                    {t("todo.overdue", { count: overdue.length })}
                                 </div>
                                 {overdue.map(task => (
                                     <TaskItem
@@ -76,6 +80,7 @@ export default function TodoList() {
                                         onDelete={handleDeleteTask}
                                     />
                                 ))}
+                                {pending.length > 0 && <div className="todo-section-divider" />}
                             </>
                         )}
 
@@ -92,11 +97,18 @@ export default function TodoList() {
                         {/* Completadas */}
                         {completed.length > 0 && (
                             <>
-                                <div className="todo-section-label">
+                                <button
+                                    className="todo-section-label todo-section-collapsible"
+                                    onClick={() => setCompletedExpanded(prev => !prev)}
+                                >
                                     <Check size={11} />
-                                    Completadas ({completed.length})
-                                </div>
-                                {completed.map(task => (
+                                    {t("todo.completed", { count: completed.length })}
+                                    <ChevronDown
+                                        size={12}
+                                        className={`todo-section-chevron${completedExpanded ? " expanded" : ""}`}
+                                    />
+                                </button>
+                                {completedExpanded && completed.map(task => (
                                     <TaskItem
                                         key={task.id}
                                         task={task}
@@ -130,8 +142,8 @@ export default function TodoList() {
             <RecurrenceChoiceDialog
                 open={recurrenceChoiceOpen}
                 action="delete"
-                title="Eliminar tarea recurrente"
-                message="¿Quieres eliminar solo esta tarea o todas las tareas de la serie?"
+                title={t("todo.deleteRecurringTitle")}
+                message={t("todo.deleteRecurringMsg")}
                 onChooseSingle={() => confirmDelete("single")}
                 onChooseFromThis={() => confirmDelete("fromThis")}
                 onChooseAll={() => confirmDelete("all")}

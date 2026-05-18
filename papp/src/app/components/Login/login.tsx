@@ -2,6 +2,7 @@
 
 import { useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { apiFetch } from "@/lib/api";
 import { config } from "@/app/config/config";
@@ -18,6 +19,7 @@ const GoogleIcon = () => (
 export default function Login() {
     const { setUser, pushAlert } = useApp();
     const router = useRouter();
+    const { t } = useTranslation();
 
     const login = useGoogleLogin({
         onSuccess: async ({ access_token }) => {
@@ -36,14 +38,14 @@ export default function Login() {
             setUser(data.user);
             router.push("/home");
         },
-        onError: () => pushAlert("Error al iniciar sesión con Google", "error"),
+        onError: () => pushAlert(t("login.error"), "error"),
     });
 
     return (
         <div style={{ display: "flex", justifyContent: "center" }}>
             <button className="landing-google-btn" onClick={() => login()}>
                 <GoogleIcon />
-                Iniciar sesión con Google
+                {t("login.signIn")}
             </button>
         </div>
     );

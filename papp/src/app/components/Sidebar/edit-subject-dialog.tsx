@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../Event/add-event-dialog.css";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { apiFetch } from "@/lib/api";
 import { config } from "@/app/config/config";
@@ -14,6 +15,7 @@ interface Props {
 
 const EditSubjectDialog: React.FC<Props> = ({ open, subject, onClose, onSave }) => {
     const { pushAlert } = useApp();
+    const { t } = useTranslation();
     const [name, setName] = useState(subject.name);
 
     useEffect(() => {
@@ -42,25 +44,25 @@ const EditSubjectDialog: React.FC<Props> = ({ open, subject, onClose, onSave }) 
         <div
             className="aed-overlay"
             onClick={(e) => e.target === e.currentTarget && onClose()}
-            role="dialog" aria-modal="true" aria-label="Editar asignatura"
+            role="dialog" aria-modal="true" aria-label={t("subject.editAriaLabel")}
         >
             <div className="aed-dialog" style={{ "--aed-color": "#34d399" } as React.CSSProperties}>
 
                 <div className="aed-header">
                     <div className="aed-header-left">
                         <div className="aed-header-dot" />
-                        <span className="aed-title">Editar asignatura</span>
+                        <span className="aed-title">{t("subject.editTitle")}</span>
                     </div>
-                    <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
+                    <button className="aed-close" onClick={onClose} aria-label={t("common.close")}>✕</button>
                 </div>
 
                 <div className="aed-body">
                     <div className="aed-field">
-                        <label className="aed-label">Nombre</label>
+                        <label className="aed-label">{t("subject.nameLabel")}</label>
                         <input
                             className="aed-input"
                             type="text"
-                            placeholder="Nombre de la asignatura…"
+                            placeholder={t("subject.namePlaceholder")}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             autoFocus
@@ -70,14 +72,14 @@ const EditSubjectDialog: React.FC<Props> = ({ open, subject, onClose, onSave }) 
                 </div>
 
                 <div className="aed-footer">
-                    <button className="aed-btn aed-btn-cancel" onClick={onClose}>Cancelar</button>
+                    <button className="aed-btn aed-btn-cancel" onClick={onClose}>{t("common.cancel")}</button>
                     <button
                         className="aed-btn aed-btn-save"
                         onClick={handleSave}
                         disabled={!name.trim()}
                         style={!name.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                     >
-                        Guardar cambios
+                        {t("common.saveChanges")}
                     </button>
                 </div>
 

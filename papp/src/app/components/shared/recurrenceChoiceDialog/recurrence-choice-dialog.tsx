@@ -1,5 +1,6 @@
 import React from "react";
 import "./recurrence-choice-dialog.css";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     open: boolean;
@@ -22,9 +23,10 @@ const RecurrenceChoiceDialog: React.FC<Props> = ({
     onChooseAll,
     onCancel,
 }) => {
+    const { t } = useTranslation();
     if (!open) return null;
 
-    const buttonLabel = action === "delete" ? "Eliminar" : "Actualizar";
+    const actionLabel = action === "delete" ? t("recurrenceChoice.actionDelete") : t("recurrenceChoice.actionUpdate");
 
     return (
         <div
@@ -44,7 +46,7 @@ const RecurrenceChoiceDialog: React.FC<Props> = ({
                         <div className="rcd-header-dot" />
                         <span className="rcd-title">{title}</span>
                     </div>
-                    <button className="rcd-close" onClick={onCancel} aria-label="Cerrar">
+                    <button className="rcd-close" onClick={onCancel} aria-label={t("common.close")}>
                         ✕
                     </button>
                 </div>
@@ -59,16 +61,16 @@ const RecurrenceChoiceDialog: React.FC<Props> = ({
                 {/* Footer */}
                 <div className="rcd-footer">
                     <button className="rcd-btn rcd-btn-cancel" onClick={onCancel}>
-                        Cancelar
+                        {t("common.cancel")}
                     </button>
                     <button className="rcd-btn rcd-btn-save" onClick={onChooseSingle}>
-                        {buttonLabel} solo este evento
+                        {t("recurrenceChoice.single", { action: actionLabel })}
                     </button>
                     <button className="rcd-btn rcd-btn-save" onClick={onChooseFromThis}>
-                        {buttonLabel} a partir de este evento
+                        {t("recurrenceChoice.fromThis", { action: actionLabel })}
                     </button>
                     <button className="rcd-btn rcd-btn-save" onClick={onChooseAll}>
-                        {buttonLabel} toda la serie
+                        {t("recurrenceChoice.all", { action: actionLabel })}
                     </button>
                 </div>
             </div>

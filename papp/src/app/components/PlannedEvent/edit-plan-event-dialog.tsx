@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./edit-plan-event-dialog.css";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { apiFetch } from "@/lib/api";
 import { config } from "@/app/config/config";
@@ -23,6 +24,7 @@ const EditPlanEventDialog: React.FC<Props> = ({
     onDelete,
 }) => {
     const { pushAlert } = useApp();
+    const { t } = useTranslation();
     const [actualTime, setActualTime] = useState("");
 
     useEffect(() => {
@@ -62,7 +64,7 @@ const EditPlanEventDialog: React.FC<Props> = ({
             onClick={(e) => e.target === e.currentTarget && onClose()}
             role="dialog"
             aria-modal="true"
-            aria-label="Editar evento planificado"
+            aria-label={t("planEvent.ariaLabel")}
         >
             <div className="eped-dialog">
 
@@ -70,9 +72,9 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 <div className="eped-header">
                     <div className="eped-header-left">
                         <div className="eped-header-dot" />
-                        <h2 className="eped-title">Evento planificado</h2>
+                        <h2 className="eped-title">{t("planEvent.title")}</h2>
                     </div>
-                    <button className="eped-close" onClick={onClose} aria-label="Cerrar">
+                    <button className="eped-close" onClick={onClose} aria-label={t("common.close")}>
                         <CloseIcon fontSize="inherit" />
                     </button>
                 </div>
@@ -80,13 +82,13 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 {/* Body */}
                 <div className="eped-body">
                     <div className="eped-field">
-                        <label className="eped-label">Tiempo real dedicado</label>
+                        <label className="eped-label">{t("planEvent.actualTime")}</label>
                         <input
                             type="time"
                             value={actualTime}
                             onChange={(e) => setActualTime(e.target.value)}
                             className="eped-input eped-time-input"
-                            aria-label="Tiempo real dedicado"
+                            aria-label={t("planEvent.actualTimeAriaLabel")}
                             disabled={isCompleted}
                         />
                     </div>
@@ -95,21 +97,21 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 {/* Footer */}
                 <div className="eped-footer">
                     <button className="eped-btn eped-btn-cancel" onClick={onClose}>
-                        Cancelar
+                        {t("common.cancel")}
                     </button>
                     <button
                         className="eped-btn eped-btn-danger"
                         onClick={handleDelete}
                     >
-                        Eliminar
+                        {t("common.delete")}
                     </button>
                     <button
                         className="eped-btn eped-btn-primary"
                         onClick={handleMarkCompleted}
                         disabled={isCompleted || !actualTime}
-                        title={isCompleted ? "Este evento ya está completado" : undefined}
+                        title={isCompleted ? t("planEvent.alreadyCompleted") : undefined}
                     >
-                        {isCompleted ? "Completado ✓" : "Marcar como completado"}
+                        {isCompleted ? t("planEvent.completed") : t("planEvent.markCompleted")}
                     </button>
                 </div>
 

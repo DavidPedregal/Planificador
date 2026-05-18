@@ -1,5 +1,6 @@
 import React from "react";
 import EastIcon from "@mui/icons-material/East";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     start: Date;
@@ -28,6 +29,7 @@ function createDateFromParts(dateStr: string, timeStr: string): Date {
 }
 
 export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onEndChange, mode }) => {
+    const { t } = useTranslation();
     const isDate = mode === "date";
 
     const handleStartChange = (value: string) => {
@@ -35,7 +37,6 @@ export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onE
             ? createDateFromParts(value, getTimeString(start))
             : createDateFromParts(getDateString(start), value);
         onStartChange(newStart);
-        // Auto-advance end if it would be before start
         if (end <= newStart) {
             onEndChange(new Date(newStart.getTime() + 60 * 60 * 1000));
         }
@@ -56,8 +57,7 @@ export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onE
                     className="aed-date-input"
                     type={isDate ? "date" : "time"}
                     value={isDate ? getDateString(start) : getTimeString(start)}
-                    min={isDate ? undefined : undefined}
-                    aria-label={isDate ? "Fecha de inicio" : "Hora de inicio"}
+                    aria-label={isDate ? t("event.startDateAriaLabel") : t("event.startTimeAriaLabel")}
                     onChange={(e) => handleStartChange(e.target.value)}
                 />
             </div>
@@ -70,7 +70,7 @@ export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onE
                     type={isDate ? "date" : "time"}
                     value={isDate ? getDateString(end) : getTimeString(end)}
                     min={isDate ? getDateString(start) : undefined}
-                    aria-label={isDate ? "Fecha de fin" : "Hora de fin"}
+                    aria-label={isDate ? t("event.endDateAriaLabel") : t("event.endTimeAriaLabel")}
                     onChange={(e) => handleEndChange(e.target.value)}
                 />
             </div>

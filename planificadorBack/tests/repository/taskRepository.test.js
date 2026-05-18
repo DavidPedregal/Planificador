@@ -152,6 +152,19 @@ describe('taskRepository', () => {
             expect(tasks).toHaveLength(0);
         });
 
+        it('should return a task whose finishDate is today at midnight', async () => {
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            await TaskRepo.createTasks([{
+                ...mockTaskData,
+                plannable: true,
+                completed: false,
+                finishDate: startOfToday,
+            }]);
+            const tasks = await TaskRepo.getTasksToPlan(mockUserId);
+            expect(tasks).toHaveLength(1);
+        });
+
         it('should not return tasks with past finishDate', async () => {
             await TaskRepo.createTasks([{
                 ...mockTaskData,

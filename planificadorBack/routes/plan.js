@@ -16,6 +16,7 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const { mappedPreviousPlan, mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
+        console.log('Data to plan:', { mappedPreviousPlan, mappedPlannableSlots, mappedTasks }); // Log para verificar los datos enviados al planner
 
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
@@ -26,6 +27,7 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
             throw new Error('Planner service failed');
         }
         const planData = await response.json(); 
+        console.log('Received plan data:', planData); // Log para verificar la estructura de planData
         await PlanService.addPlan(planData.scheduled, req.userId);
         res.status(201).json({ message: 'Plan created successfully', data: planData.warnings });
     } catch (error){

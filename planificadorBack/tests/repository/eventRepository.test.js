@@ -154,6 +154,15 @@ describe('eventRepository', () => {
             expect(events).toHaveLength(0);
         });
 
+        it('should return an event whose start is at midnight today', async () => {
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            const endOfToday = new Date(startOfToday.getTime() + 60 * 60 * 1000);
+            await EventRepo.createEvent([{ ...mockEventData, start: startOfToday, end: endOfToday }]);
+            const events = await EventRepo.getPlannableEventsForUser(mockUserId, mockCalendarId);
+            expect(events).toHaveLength(1);
+        });
+
         it('should return only future events when both past and future events exist', async () => {
             const pastEvent   = { ...mockEventData, start: new Date('2020-01-01T10:00:00Z'), end: new Date('2020-01-01T11:00:00Z') };
             const futureEvent = { ...mockEventData, start: new Date('2030-06-01T10:00:00Z'), end: new Date('2030-06-01T11:00:00Z') };

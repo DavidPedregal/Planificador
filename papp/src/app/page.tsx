@@ -1,13 +1,14 @@
 "use client";
 import "./page.css"
 import { useRouter } from "next/navigation";
-
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Login from "@/app/components/login/login";
 import { config } from "./config/config";
 
 export default function Landing() {
     const router = useRouter();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -29,23 +30,57 @@ export default function Landing() {
         });
     }, []);
 
+    const previewWeekdays = t("landing.preview.weekdays", { returnObjects: true }) as string[];
+
+    const calendarCells = [
+        { n: "24" }, { n: "25", ev: { title: t("landing.preview.events.meeting"), c: "ev-purple" } },
+        { n: "26" }, { n: "27", ev: { title: t("landing.preview.events.gym"), c: "ev-teal" } },
+        { n: "28" }, { n: "1" }, { n: "2" },
+        { n: "3" }, { n: "4", ev: { title: t("landing.preview.events.dentist"), c: "ev-coral" } },
+        { n: "5" }, { n: "6", today: true, ev: { title: t("landing.preview.events.sprint"), c: "ev-purple" } },
+        { n: "7" }, { n: "8" }, { n: "9" },
+        { n: "10", ev: { title: t("landing.preview.events.gym"), c: "ev-teal" } }, { n: "11" },
+        { n: "12", ev: { title: t("landing.preview.events.review"), c: "ev-purple" } },
+        { n: "13" }, { n: "14" }, { n: "15" }, { n: "16" },
+        { n: "17" }, { n: "18", ev: { title: t("landing.preview.events.dinner"), c: "ev-coral" } },
+        { n: "19" }, { n: "20", ev: { title: t("landing.preview.events.gym"), c: "ev-teal" } },
+        { n: "21" }, { n: "22" }, { n: "23" },
+    ];
+
+    const previewTasks = [
+        { text: t("landing.preview.task1"), done: true },
+        { text: t("landing.preview.task2"), done: false },
+        { text: t("landing.preview.task3"), done: false },
+        { text: t("landing.preview.task4"), done: true },
+        { text: t("landing.preview.task5"), done: false },
+    ];
+
+    const features = [
+        { icon: "📅", title: t("landing.features.calendarTitle"), desc: t("landing.features.calendarDesc") },
+        { icon: "✅", title: t("landing.features.tasksTitle"), desc: t("landing.features.tasksDesc") },
+        { icon: "🗂️", title: t("landing.features.multiCalTitle"), desc: t("landing.features.multiCalDesc") },
+        { icon: "🔁", title: t("landing.features.recurringTitle"), desc: t("landing.features.recurringDesc") },
+        { icon: "🔒", title: t("landing.features.googleTitle"), desc: t("landing.features.googleDesc") },
+        { icon: "📱", title: t("landing.features.mobileTitle"), desc: t("landing.features.mobileDesc") },
+    ];
+
     return (
         <>
             <div className="landing-root">
                 <div className="landing-orb landing-orb-1" />
-                <div className="landing-orb landing-orb-2" />               
+                <div className="landing-orb landing-orb-2" />
 
                 {/* ── Hero ── */}
                 <section className="landing-hero">
                     <h1 className="landing-hero-title">
-                        Todo en su<br /><em>lugar y momento</em>
+                        {t("landing.hero.line1")}<br /><em>{t("landing.hero.line2")}</em>
                     </h1>
                     <p className="landing-hero-sub">
-                        Calendarios, tareas y recordatorios en un solo espacio. Diseñado para quienes necesitan claridad, no caos.
+                        {t("landing.hero.subtitle")}
                     </p>
                     <div className="landing-hero-cta">
                         <Login />
-                        <span className="landing-hero-note">sin contraseña · sin registro · gratis</span>
+                        <span className="landing-hero-note">{t("landing.hero.note")}</span>
                     </div>
                 </section>
 
@@ -59,57 +94,38 @@ export default function Landing() {
                         </div>
                         <div className="landing-preview-body">
                             <div className="landing-preview-sidebar">
-                                <span className="landing-ps-label">General</span>
-                                <div className="landing-ps-item active">📅 Calendario</div>
-                                <div className="landing-ps-item">✅ Tareas</div>
-                                <div className="landing-ps-item">⚙️ Ajustes</div>
-                                <span className="landing-ps-label">Calendarios</span>
-                                <div className="landing-ps-item">🟣 Personal</div>
-                                <div className="landing-ps-item">🟢 Trabajo</div>
-                                <div className="landing-ps-item">🟠 Familia</div>
+                                <span className="landing-ps-label">{t("landing.preview.general")}</span>
+                                <div className="landing-ps-item active">{t("landing.preview.navCalendar")}</div>
+                                <div className="landing-ps-item">{t("landing.preview.navTasks")}</div>
+                                <div className="landing-ps-item">{t("landing.preview.navSettings")}</div>
+                                <span className="landing-ps-label">{t("landing.preview.calendarsLabel")}</span>
+                                <div className="landing-ps-item">{t("landing.preview.personal")}</div>
+                                <div className="landing-ps-item">{t("landing.preview.work")}</div>
+                                <div className="landing-ps-item">{t("landing.preview.family")}</div>
                             </div>
                             <div className="landing-preview-cal">
                                 <div className="landing-cal-header">
-                                    <span className="landing-cal-title">Marzo 2025</span>
+                                    <span className="landing-cal-title">{t("landing.preview.month")}</span>
                                     <div className="landing-cal-nav">
                                         <div className="landing-cal-nav-btn">‹</div>
                                         <div className="landing-cal-nav-btn">›</div>
                                     </div>
                                 </div>
                                 <div className="landing-cal-days">
-                                    {["L","M","X","J","V","S","D"].map(d => <span key={d}>{d}</span>)}
+                                    {previewWeekdays.map((d, i) => <span key={i}>{d}</span>)}
                                 </div>
                                 <div className="landing-cal-grid">
-                                    {[
-                                        { n: "24" }, { n: "25", ev: { t: "Reunión", c: "ev-purple" } },
-                                        { n: "26" }, { n: "27", ev: { t: "Gym", c: "ev-teal" } },
-                                        { n: "28" }, { n: "1" }, { n: "2" },
-                                        { n: "3" }, { n: "4", ev: { t: "Dentista", c: "ev-coral" } },
-                                        { n: "5" }, { n: "6", today: true, ev: { t: "Sprint", c: "ev-purple" } },
-                                        { n: "7" }, { n: "8" }, { n: "9" },
-                                        { n: "10", ev: { t: "Gym", c: "ev-teal" } }, { n: "11" },
-                                        { n: "12", ev: { t: "Review", c: "ev-purple" } },
-                                        { n: "13" }, { n: "14" }, { n: "15" }, { n: "16" },
-                                        { n: "17" }, { n: "18", ev: { t: "Cena", c: "ev-coral" } },
-                                        { n: "19" }, { n: "20", ev: { t: "Gym", c: "ev-teal" } },
-                                        { n: "21" }, { n: "22" }, { n: "23" },
-                                    ].map((cell, i) => (
+                                    {calendarCells.map((cell, i) => (
                                         <div key={i} className={`landing-cal-cell${cell.today ? " today" : ""}`}>
                                             <span>{cell.n}</span>
-                                            {cell.ev && <div className={`landing-cal-event ${cell.ev.c}`}>{cell.ev.t}</div>}
+                                            {cell.ev && <div className={`landing-cal-event ${cell.ev.c}`}>{cell.ev.title}</div>}
                                         </div>
                                     ))}
                                 </div>
                             </div>
                             <div className="landing-preview-todo">
-                                <div className="landing-todo-title">Tareas</div>
-                                {[
-                                    { text: "Revisar PR", done: true },
-                                    { text: "Preparar demo", done: false },
-                                    { text: "Actualizar docs", done: false },
-                                    { text: "Standup", done: true },
-                                    { text: "Deploy staging", done: false },
-                                ].map((item, i) => (
+                                <div className="landing-todo-title">{t("landing.preview.tasksTitle")}</div>
+                                {previewTasks.map((item, i) => (
                                     <div key={i} className="landing-todo-item">
                                         <div className={`landing-todo-check${item.done ? " done" : ""}`} />
                                         <span style={item.done ? { textDecoration: "line-through", opacity: 0.5 } : {}}>
@@ -124,17 +140,10 @@ export default function Landing() {
 
                 {/* ── Features ── */}
                 <section className="landing-features">
-                    <p className="landing-section-tag">Funcionalidades</p>
-                    <h2 className="landing-section-title">Pensado para<br /><em>cómo trabajas</em></h2>
+                    <p className="landing-section-tag">{t("landing.features.tag")}</p>
+                    <h2 className="landing-section-title">{t("landing.features.titleLine1")}<br /><em>{t("landing.features.titleLine2")}</em></h2>
                     <div className="landing-features-grid">
-                        {[
-                            { icon: "📅", title: "Calendario inteligente", desc: "Vista por día, semana o mes. Eventos con recurrencia, colores por calendario y arrastrar para reorganizar." },
-                            { icon: "✅", title: "Lista de tareas", desc: "Gestiona tus pendientes junto al calendario. Sin cambiar de pestaña, sin perder el contexto." },
-                            { icon: "🗂️", title: "Múltiples calendarios", desc: "Personal, trabajo, familia… cada uno con su color. Actívalos o ocúltalos según lo que necesites ver." },
-                            { icon: "🔁", title: "Eventos periódicos", desc: "Diario, semanal, mensual o anual. Configura cuándo termina la repetición o con cuántas ocurrencias." },
-                            { icon: "🔒", title: "Acceso seguro con Google", desc: "Sin contraseñas que recordar. Entra con tu cuenta de Google de forma segura en un clic." },
-                            { icon: "📱", title: "Adaptado a móvil", desc: "Sidebar y lista de tareas como paneles deslizables. La misma experiencia en cualquier dispositivo." },
-                        ].map((f, i) => (
+                        {features.map((f, i) => (
                             <div key={i} className="landing-feature-card">
                                 <div className="landing-feature-icon">{f.icon}</div>
                                 <div className="landing-feature-title">{f.title}</div>
@@ -147,16 +156,16 @@ export default function Landing() {
                 {/* ── CTA ── */}
                 <section className="landing-cta-section">
                     <div className="landing-cta-card">
-                        <h2 className="landing-cta-title">Empieza a<br /><em>organizarte hoy</em></h2>
-                        <p className="landing-cta-sub">Un solo clic con tu cuenta de Google. Nada más.</p>
+                        <h2 className="landing-cta-title">{t("landing.cta.line1")}<br /><em>{t("landing.cta.line2")}</em></h2>
+                        <p className="landing-cta-sub">{t("landing.cta.subtitle")}</p>
                         <Login />
                     </div>
                 </section>
 
                 {/* ── Footer ── */}
                 <footer className="landing-footer">
-                    <span className="landing-footer-logo">Menti</span>
-                    <span className="landing-footer-note">Hecho con ☕ — David Pedregal Ribas</span>
+                    <span className="landing-footer-logo">{t("landing.footer.logo")}</span>
+                    <span className="landing-footer-note">{t("landing.footer.made")}</span>
                 </footer>
             </div>
         </>

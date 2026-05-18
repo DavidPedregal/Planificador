@@ -61,10 +61,12 @@ export function useEventForm({ open, propsStart, propsEnd, calendars, pushAlert 
     };
 
     const handleSave = async (): Promise<boolean> => {
-        if (!eventTitle.trim()) return false;
+        const selectedCalendar = calendars.find((cal) => cal.id === calendarId);
+        const isPlannableCalendar = selectedCalendar?.name?.toLowerCase() === "plannable";
+        if (!eventTitle.trim() && !isPlannableCalendar) return false;
 
         const newEvent = {
-            title: eventTitle,
+            title: eventTitle.trim() || "Planificable",
             label: label || undefined,
             color: resolveColor(),
             calendarId,

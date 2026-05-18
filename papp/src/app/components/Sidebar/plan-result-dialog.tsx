@@ -1,6 +1,7 @@
 import React from "react";
 import "../event/add-event-dialog.css";
 import "./plan-result-dialog.css";
+import { useTranslation } from "react-i18next";
 
 interface PlanWarning {
     taskId: string;
@@ -16,6 +17,7 @@ interface PlanResultDialogProps {
 }
 
 const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warnings, onClose }) => {
+    const { t } = useTranslation();
     if (!open) return null;
 
     return (
@@ -24,7 +26,7 @@ const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warn
             onClick={(e) => !loading && e.target === e.currentTarget && onClose()}
             role="dialog"
             aria-modal="true"
-            aria-label="Resultado de planificación"
+            aria-label={t("planResult.ariaLabel")}
         >
             <div className="aed-dialog" style={{ "--aed-color": "#7c6ff7" } as React.CSSProperties}>
 
@@ -32,11 +34,11 @@ const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warn
                     <div className="aed-header-left">
                         <div className="aed-header-dot" />
                         <span className="aed-title">
-                            {loading ? "Planificando…" : "Resultado del plan"}
+                            {loading ? t("planResult.planning") : t("planResult.resultTitle")}
                         </span>
                     </div>
                     {!loading && (
-                        <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
+                        <button className="aed-close" onClick={onClose} aria-label={t("common.close")}>✕</button>
                     )}
                 </div>
 
@@ -44,7 +46,7 @@ const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warn
                     {loading ? (
                         <div className="prd-loading">
                             <div className="prd-spinner" />
-                            <p className="prd-loading-text">Generando tu plan…</p>
+                            <p className="prd-loading-text">{t("planResult.generating")}</p>
                         </div>
                     ) : (
                         <>
@@ -52,15 +54,15 @@ const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warn
                                 <div className="prd-check">✓</div>
                                 <p className="prd-success-text">
                                     {warnings.length === 0
-                                        ? "¡Plan creado con éxito! Todas las tareas han sido planificadas."
-                                        : `Plan creado. ${warnings.length === 1 ? "1 tarea no pudo" : `${warnings.length} tareas no pudieron`} ser planificada${warnings.length === 1 ? "" : "s"}.`
+                                        ? t("planResult.success")
+                                        : t("planResult.partial", { count: warnings.length })
                                     }
                                 </p>
                             </div>
 
                             {warnings.length > 0 && (
                                 <div className="prd-warnings">
-                                    <span className="prd-warnings-label">Tareas sin planificar</span>
+                                    <span className="prd-warnings-label">{t("planResult.unplanned")}</span>
                                     <ul className="prd-warnings-list">
                                         {warnings.map((w) => (
                                             <li key={w.taskId} className="prd-warning-item">
@@ -78,7 +80,7 @@ const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warn
                 {!loading && (
                     <div className="aed-footer">
                         <button className="aed-button primary" onClick={onClose}>
-                            Cerrar
+                            {t("planResult.close")}
                         </button>
                     </div>
                 )}

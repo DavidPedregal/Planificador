@@ -1,5 +1,6 @@
 import React from "react";
 import "./add-event-dialog.css";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { useCalendarList } from "./hooks/useCalendarList";
 import { useEditEventForm } from "./hooks/useEditEventForm";
@@ -17,6 +18,7 @@ interface Props {
 
 const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDelete }) => {
     const { pushAlert } = useApp();
+    const { t } = useTranslation();
     const { calendars } = useCalendarList(open, pushAlert);
     const {
         eventTitle, setEventTitle,
@@ -52,7 +54,7 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                 onClick={(e) => e.target === e.currentTarget && onClose()}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Editar evento"
+                aria-label={t("event.editAriaLabel")}
             >
                 <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
 
@@ -61,10 +63,10 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                         <div className="aed-header-left">
                             <div className="aed-header-dot" />
                             <span className="aed-title">
-                                {loading ? "Cargando…" : "Editar tarea"}
+                                {loading ? t("event.loadingTitle") : t("event.editTitle")}
                             </span>
                         </div>
-                        <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
+                        <button className="aed-close" onClick={onClose} aria-label={t("common.close")}>✕</button>
                     </div>
 
                     {/* Fechas y horas */}
@@ -76,11 +78,11 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
 
                         {/* Título */}
                         <div className="aed-field">
-                            <label className="aed-label">Título</label>
+                            <label className="aed-label">{t("event.titleLabel")}</label>
                             <input
                                 className="aed-input"
                                 type="text"
-                                placeholder="Añadir título…"
+                                placeholder={t("event.titlePlaceholder")}
                                 value={eventTitle}
                                 onChange={(e) => setEventTitle(e.target.value)}
                                 autoFocus
@@ -90,12 +92,12 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
 
                         {/* Calendario */}
                         <div className="aed-field">
-                            <label className="aed-label">Calendario</label>
+                            <label className="aed-label">{t("event.calendarLabel")}</label>
                             <select
                                 className="aed-input aed-select"
                                 value={calendarId}
                                 onChange={(e) => setCalendarId(e.target.value)}
-                                aria-label="Seleccionar calendario"
+                                aria-label={t("event.selectCalendarAriaLabel")}
                             >
                                 {calendars.map((cal) => (
                                     <option key={cal.id} value={cal.id}>{cal.name}</option>
@@ -105,11 +107,11 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
 
                         {/* Etiqueta */}
                         <div className="aed-field">
-                            <label className="aed-label">Etiqueta</label>
+                            <label className="aed-label">{t("event.labelField")}</label>
                             <input
                                 className="aed-input"
                                 type="text"
-                                placeholder="Añadir etiqueta (opcional)…"
+                                placeholder={t("event.labelPlaceholder")}
                                 value={label}
                                 onChange={(e) => setLabel(e.target.value)}
                             />
@@ -128,10 +130,10 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                     {/* Footer */}
                     <div className="aed-footer">
                         <button className="aed-btn aed-btn-cancel" onClick={onClose}>
-                            Cancelar
+                            {t("common.cancel")}
                         </button>
                         <button className="aed-btn aed-btn-delete" onClick={handleDeleteClicked}>
-                            Eliminar evento
+                            {t("event.delete")}
                         </button>
                         <button
                             className="aed-btn aed-btn-save"
@@ -139,7 +141,7 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                             disabled={!eventTitle.trim() || loading}
                             style={(!eventTitle.trim() || loading) ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >
-                            Actualizar evento
+                            {t("event.update")}
                         </button>
                     </div>
 
@@ -149,11 +151,11 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
             <RecurrenceChoiceDialog
                 open={recurrenceChoiceOpen}
                 action={pendingAction ?? "update"}
-                title={pendingAction === "delete" ? "Eliminar evento recurrente" : "Actualizar evento recurrente"}
+                title={pendingAction === "delete" ? t("event.deleteRecurringTitle") : t("event.updateRecurringTitle")}
                 message={
                     pendingAction === "delete"
-                        ? "¿Quieres eliminar solo este evento o todos los eventos de la serie?"
-                        : "¿Quieres actualizar solo este evento o todos los eventos de la serie?"
+                        ? t("event.deleteRecurringMsg")
+                        : t("event.updateRecurringMsg")
                 }
                 onChooseSingle={() => onChooseSingle(() => handleSuccess(pendingAction === "delete" ? "delete" : "save"))}
                 onChooseFromThis={() => onChooseFromThis(() => handleSuccess(pendingAction === "delete" ? "delete" : "save"))}

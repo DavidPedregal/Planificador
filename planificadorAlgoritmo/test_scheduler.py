@@ -120,6 +120,18 @@ class TestSchedule:
             end_dt = datetime.fromisoformat(block.end)
             assert end_dt <= finish_dt
 
+    def test_no_planifica_antes_de_givenDate(self):
+        request = make_request(
+            tasks=[make_task("t1", "Mates", 60, "2026-05-10T23:59:00Z", "2026-05-06T00:00:00Z")],
+            slots=[make_slot("2026-05-05T09:00:00Z", "2026-05-05T12:00:00Z"),
+                make_slot("2026-05-06T09:00:00Z", "2026-05-06T12:00:00Z")]
+        )
+        result = schedule(request)
+        given = datetime.fromisoformat("2026-05-06T00:00:00+00:00")
+        for block in result.scheduled:
+            block_start = datetime.fromisoformat(block.start)
+            assert block_start >= given
+
     def test_scheduledTime_cubre_estimatedTime(self):
         request = make_request(
             tasks=[make_task("t1", "Mates", 90, "2026-05-10T23:59:00Z", "2026-05-01T00:00:00Z")],

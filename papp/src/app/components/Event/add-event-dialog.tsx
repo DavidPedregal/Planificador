@@ -1,5 +1,6 @@
 import React from "react";
 import "./add-event-dialog.css";
+import { useTranslation } from "react-i18next";
 import { useCalendarList } from "./hooks/useCalendarList";
 import { useEventForm } from "./hooks/useEventForm";
 import { EventDateStrip } from "./components/EventDateStrip";
@@ -17,6 +18,7 @@ interface Props {
 
 const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEnd, onClose, onSave }) => {
     const { pushAlert } = useApp();
+    const { t } = useTranslation();
     const { calendars } = useCalendarList(open, pushAlert);
     const {
         eventTitle, setEventTitle,
@@ -33,6 +35,10 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
 
     if (!open || !start || !end) return null;
 
+    const selectedCalendar = calendars.find(c => c.id === calendarId);
+    const isPlannableCalendar = selectedCalendar?.name?.toLowerCase() === "plannable";
+    const canSave = !!eventTitle.trim() || isPlannableCalendar;
+
     const onClickSave = async () => {
         const ok = await handleSave();
         if (ok) {
@@ -47,7 +53,7 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
             onClick={(e) => e.target === e.currentTarget && onClose()}
             role="dialog"
             aria-modal="true"
-            aria-label="Crear evento"
+            aria-label={t("event.createAriaLabel")}
         >
             <div className="aed-dialog" style={{ "--aed-color": color } as React.CSSProperties}>
 
@@ -55,9 +61,9 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
                 <div className="aed-header">
                     <div className="aed-header-left">
                         <div className="aed-header-dot" />
-                        <span className="aed-title">Nuevo evento</span>
+                        <span className="aed-title">{t("event.newTitle")}</span>
                     </div>
-                    <button className="aed-close" onClick={onClose} aria-label="Cerrar">✕</button>
+                    <button className="aed-close" onClick={onClose} aria-label={t("common.close")}>✕</button>
                 </div>
 
                 {/* Fechas y horas */}
@@ -69,11 +75,11 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
 
                     {/* Título */}
                     <div className="aed-field">
-                        <label className="aed-label">Título</label>
+                        <label className="aed-label">{t("event.titleLabel")}</label>
                         <input
                             className="aed-input"
                             type="text"
-                            placeholder="Añadir título…"
+                            placeholder={t("event.titlePlaceholder")}
                             value={eventTitle}
                             onChange={(e) => setEventTitle(e.target.value)}
                             autoFocus
@@ -83,12 +89,12 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
 
                     {/* Calendario */}
                     <div className="aed-field">
-                        <label className="aed-label">Calendario</label>
+                        <label className="aed-label">{t("event.calendarLabel")}</label>
                         <select
                             className="aed-input aed-select"
                             value={calendarId}
                             onChange={(e) => setCalendarId(e.target.value)}
-                            aria-label="Seleccionar calendario"
+                            aria-label={t("event.selectCalendarAriaLabel")}
                         >
                             {calendars.map((cal) => (
                                 <option key={cal.id} value={cal.id}>{cal.name}</option>
@@ -98,11 +104,11 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
 
                     {/* Etiqueta */}
                     <div className="aed-field">
-                        <label className="aed-label">Etiqueta</label>
+                        <label className="aed-label">{t("event.labelField")}</label>
                         <input
                             className="aed-input"
                             type="text"
-                            placeholder="Añadir etiqueta (opcional)…"
+                            placeholder={t("event.labelPlaceholder")}
                             value={label}
                             onChange={(e) => setLabel(e.target.value)}
                         />
@@ -129,15 +135,15 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
                 {/* Footer */}
                 <div className="aed-footer">
                     <button className="aed-btn aed-btn-cancel" onClick={onClose}>
-                        Cancelar
+                        {t("common.cancel")}
                     </button>
                     <button
                         className="aed-btn aed-btn-save"
                         onClick={onClickSave}
-                        disabled={!eventTitle.trim()}
-                        style={!eventTitle.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                        disabled={!canSave}
+                        style={!canSave ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                     >
-                        Guardar evento
+                        {t("event.save")}
                     </button>
                 </div>
 

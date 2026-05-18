@@ -136,6 +136,18 @@ describe('planRepository', () => {
             const events = await PlanRepo.findPlanForUser(otherUserId);
             expect(events).toHaveLength(1);
         });
+
+        it('should delete pending and uncompleted events but keep completed ones', async () => {
+            await PlanRepo.addPlan([
+                { ...mockPlanEventData, status: 'pending' },
+                { ...mockPlanEventData, status: 'uncompleted' },
+                { ...mockPlanEventData, status: 'completed' },
+            ]);
+            await PlanRepo.deletePlan(mockUserId);
+            const events = await PlanRepo.findPlanForUser(mockUserId);
+            expect(events).toHaveLength(1);
+            expect(events[0].status).toBe('completed');
+        });
     });
 
     describe('deletePlanEvent', () => {

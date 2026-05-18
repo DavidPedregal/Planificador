@@ -12,8 +12,11 @@ const getTaskById = async (userId, taskId) => {
     return Task.findOne({ _id: taskId, userId });
 }
 
-const getTasksToPlan = async (userId) =>
-    Task.find({userId: userId, finishDate: { $gte: Date.now() }, plannable: true, completed: false });
+const getTasksToPlan = async (userId) => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return Task.find({ userId, finishDate: { $gte: startOfToday }, plannable: true, completed: false });
+};
 
 const createTasks = (tasks) =>
     Task.insertMany(tasks);

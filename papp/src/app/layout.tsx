@@ -5,6 +5,7 @@ import {GoogleOAuthProvider} from "@react-oauth/google";
 import { AppProvider } from "@/context/AppContext";
 import Navbar from "./components/navbar/Navbar";
 import AlertStack from "./components/AlertStack";
+import { I18nProvider } from "@/i18n/I18nProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +33,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased pt-16`}
       >
           <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-              <AppProvider>
-                  <AlertStack />
-                  <Navbar />
-                  {children}
-              </AppProvider>
+              <I18nProvider>
+                  <AppProvider>
+                      <AlertStack />
+                      <Navbar />
+                      {children}
+                  </AppProvider>
+              </I18nProvider>
           </GoogleOAuthProvider>
       </body>
     </html>

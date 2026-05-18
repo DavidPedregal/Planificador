@@ -2,6 +2,7 @@ import React from "react";
 import "./add-task-dialog.css";
 import InfoIcon from "@mui/icons-material/Info";
 import Tooltip from "@mui/material/Tooltip";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { useTaskForm } from "./hooks/useTaskForm";
 import { RecurrenceForm } from "@/app/components/shared/recurrenceForm/recurrenceForm";
@@ -15,6 +16,7 @@ interface Props {
 
 const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
     const { user, pushAlert } = useApp();
+    const { t } = useTranslation();
     const enabled = !!user;
     const { subjects } = useSubjects({ enabled, pushAlert });
     const {
@@ -47,7 +49,7 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
             onClick={(e) => e.target === e.currentTarget && onClose()}
             role="dialog"
             aria-modal="true"
-            aria-label="Crear tarea"
+            aria-label={t("task.createAriaLabel")}
         >
             <div className="atd-dialog">
 
@@ -55,9 +57,9 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                 <div className="atd-header">
                     <div className="atd-header-left">
                         <div className="atd-header-dot" />
-                        <span className="atd-title">Nueva tarea</span>
+                        <span className="atd-title">{t("task.newTitle")}</span>
                     </div>
-                    <button className="atd-close" onClick={onClose} aria-label="Cerrar">✕</button>
+                    <button className="atd-close" onClick={onClose} aria-label={t("common.close")}>✕</button>
                 </div>
 
                 {/* Body */}
@@ -65,11 +67,11 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
 
                     {/* Título */}
                     <div className="atd-field">
-                        <label className="atd-label">Título</label>
+                        <label className="atd-label">{t("task.titleLabel")}</label>
                         <input
                             className="atd-input"
                             type="text"
-                            placeholder="Añadir título…"
+                            placeholder={t("task.titlePlaceholder")}
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             autoFocus
@@ -79,10 +81,10 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
 
                     {/* Descripción */}
                     <div className="atd-field">
-                        <label className="atd-label">Descripción (opcional)</label>
+                        <label className="atd-label">{t("task.description")}</label>
                         <textarea
                             className="atd-input atd-textarea"
-                            placeholder="Añadir descripción…"
+                            placeholder={t("task.descriptionPlaceholder")}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             rows={3}
@@ -91,7 +93,7 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
 
                     {/* Tiempo estimado */}
                     <div className="atd-field">
-                        <label className="atd-label">Tiempo estimado</label>
+                        <label className="atd-label">{t("task.estimatedTime")}</label>
                         <div className="aed-date-strip">
                             <div className="aed-date-field">
                                 <input
@@ -100,13 +102,13 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                                     min={0}
                                     max={99}
                                     value={String(Math.floor(estimatedTime / 60)).padStart(2, "0")}
-                                    aria-label="Horas"
+                                    aria-label={t("task.hoursAriaLabel")}
                                     onChange={(e) => {
                                         const hours = Math.min(99, Math.max(0, +e.target.value));
                                         setEstimatedTime(hours * 60 + (estimatedTime % 60));
                                     }}
                                 />
-                                <span className="aed-date-icon">h</span>
+                                <span className="aed-date-icon">{t("task.hoursUnit")}</span>
                             </div>
                             <div className="aed-date-field">
                                 <input
@@ -115,20 +117,20 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                                     min={0}
                                     max={59}
                                     value={String(estimatedTime % 60).padStart(2, "0")}
-                                    aria-label="Minutos"
+                                    aria-label={t("task.minutesAriaLabel")}
                                     onChange={(e) => {
                                         const minutes = Math.min(59, Math.max(0, +e.target.value));
                                         setEstimatedTime(Math.floor(estimatedTime / 60) * 60 + minutes);
                                     }}
                                 />
-                                <span className="aed-date-icon">min</span>
+                                <span className="aed-date-icon">{t("task.minutesUnit")}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Fecha de entrega */}
                     <div className="atd-field">
-                        <label className="atd-label">Fecha de entrega</label>
+                        <label className="atd-label">{t("task.dueDate")}</label>
                         <input
                             className="atd-input"
                             type="date"
@@ -140,8 +142,8 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                     {/* Fecha de impartición */}
                     <div className="atd-field">
                         <label className="atd-label">
-                            Fecha de impartición
-                            <Tooltip title="Fecha en la que se adquirieron los conocimientos para realizar la tarea">
+                            {t("task.givenDate")}
+                            <Tooltip title={t("task.givenDateTooltip")}>
                                 <InfoIcon sx={{ fontSize: "1rem", marginLeft: "6px", cursor: "help", color: "var(--accent, #7c6ff7)" }} />
                             </Tooltip>
                         </label>
@@ -155,14 +157,14 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
 
                     {/* Asignatura */}
                     <div className="atd-field">
-                        <label className="atd-label">Asignatura (opcional)</label>
+                        <label className="atd-label">{t("task.subject")}</label>
                         <select
                             className="atd-input atd-select"
                             value={subjectId}
                             onChange={(e) => setSubjectId(e.target.value)}
-                            aria-label="Asignatura"
+                            aria-label={t("task.subject")}
                         >
-                            <option value="">Ninguna</option>
+                            <option value="">{t("common.none")}</option>
                             {subjects.map((s) => (
                                 <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
@@ -178,7 +180,7 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                                 onChange={(e) => setPlannable(e.target.checked)}
                                 style={{ marginRight: "8px" }}
                             />
-                            Incluir en planificación
+                            {t("task.includePlanning")}
                         </label>
                     </div>
 
@@ -191,7 +193,7 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                                 onChange={(e) => setIncludeReviews(e.target.checked)}
                                 style={{ marginRight: "8px" }}
                             />
-                            Añadir repasos
+                            {t("task.addReviews")}
                         </label>
                     </div>
 
@@ -206,14 +208,14 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
 
                 {/* Footer */}
                 <div className="atd-footer">
-                    <button className="atd-btn atd-btn-cancel" onClick={onClose}>Cancelar</button>
+                    <button className="atd-btn atd-btn-cancel" onClick={onClose}>{t("common.cancel")}</button>
                     <button
                         className="atd-btn atd-btn-save"
                         onClick={onClickSave}
                         disabled={!title.trim()}
                         style={!title.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                     >
-                        Guardar tarea
+                        {t("task.save")}
                     </button>
                 </div>
 

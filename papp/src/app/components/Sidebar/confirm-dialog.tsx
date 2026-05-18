@@ -1,5 +1,6 @@
 import React from "react";
 import "../event/add-event-dialog.css";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmDialogProps {
     open: boolean;
@@ -16,12 +17,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     open,
     title,
     message,
-    confirmText = "Confirmar",
-    cancelText = "Cancelar",
+    confirmText,
+    cancelText,
     isDangerous = false,
     onConfirm,
     onCancel,
 }) => {
+    const { t } = useTranslation();
     if (!open) return null;
 
     return (
@@ -39,7 +41,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                         <div className="aed-header-dot" />
                         <span className="aed-title">{title}</span>
                     </div>
-                    <button className="aed-close" onClick={onCancel} aria-label="Cerrar">✕</button>
+                    <button className="aed-close" onClick={onCancel} aria-label={t("common.close")}>✕</button>
                 </div>
 
                 {/* Body */}
@@ -52,13 +54,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 {/* Footer */}
                 <div className="aed-footer">
                     <button className="aed-button" onClick={onCancel}>
-                        {cancelText}
+                        {cancelText ?? t("common.cancel")}
                     </button>
-                    <button 
+                    <button
                         className={`aed-button ${isDangerous ? "danger" : "primary"}`}
                         onClick={onConfirm}
                     >
-                        {confirmText}
+                        {confirmText ?? t("common.confirm")}
                     </button>
                 </div>
             </div>
