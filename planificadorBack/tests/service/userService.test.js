@@ -88,14 +88,14 @@ describe('userService', () => {
             it('should create the Planned system calendar', async () => {
                 await login(mockGooglePayload);
                 expect(CalendarRepo.createCalendar).toHaveBeenCalledWith(
-                    expect.objectContaining({ name: 'Planned', isSystem: true })
+                    expect.objectContaining({ name: 'calendar.planned', isSystem: true })
                 );
             });
 
             it('should create the Plannable system calendar', async () => {
                 await login(mockGooglePayload);
                 expect(CalendarRepo.createCalendar).toHaveBeenCalledWith(
-                    expect.objectContaining({ name: 'Plannable', isSystem: true })
+                    expect.objectContaining({ name: 'calendar.plannable', isSystem: true })
                 );
             });
 

@@ -78,7 +78,7 @@ describe('subjectRouter', () => {
                 .send({ name: 'Matemáticas' });
 
             expect(res.status).toBe(201);
-            expect(res.body).toEqual({ data: mockSubject, message: "Subject created successfully" });
+            expect(res.body).toEqual({ data: mockSubject, message: "api.subject.created" });
         });
 
         it('should return 400 if service throws ValidationError', async () => {
@@ -107,7 +107,7 @@ describe('subjectRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.message).toBe('Subject deleted successfully');
+            expect(res.body.message).toBe('api.subject.deleted');
         });
 
         it('should return 404 if subject does not exist', async () => {

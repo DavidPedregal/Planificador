@@ -27,6 +27,6 @@ async function login(userData) {
 
 async function createDefaultCalendarsForUser(userId) {
     await CalendarRepo.createCalendar({ userId, name: "Default", color: "#ff0000", isSystem: false });
-    await CalendarRepo.createCalendar({ userId, name: "Planned", color: "#505050", isSystem: true });
-    await CalendarRepo.createCalendar({ userId, name: "Plannable", color: "#bbbbbb", isSystem: true });
+    await CalendarRepo.createCalendar({ userId, name: "calendar.planned", color: "#505050", isSystem: true });
+    await CalendarRepo.createCalendar({ userId, name: "calendar.plannable", color: "#bbbbbb", isSystem: true });
 };

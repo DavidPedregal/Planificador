@@ -32,7 +32,7 @@ export default function Login() {
             });
 
             if (!ok) { pushAlert(message, "error"); return; }
-
+            console.log("Login successful:", data);
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
             setUser(data.user);

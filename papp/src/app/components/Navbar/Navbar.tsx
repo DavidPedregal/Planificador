@@ -7,13 +7,17 @@ import Login from "@/app/components/login/login";
 import "./Navbar.css";
 
 export default function Navbar() {
-    const { theme, toggleTheme, user, logout } = useApp();
+    const { user, logout } = useApp();
     const router = useRouter();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const handleLogout = () => {
         logout();
         router.push("/");
+    };
+
+    const toggleLanguage = () => {
+        i18n.changeLanguage(i18n.language === "es" ? "en" : "es");
     };
 
     return (
@@ -25,8 +29,8 @@ export default function Navbar() {
                     {user && <span className="navbar-logo-user">{user.name}</span>}
                 </div>
                 <div className="navbar-actions">
-                    <button className="navbar-theme-btn" onClick={toggleTheme} title={t("navbar.changeTheme")}>
-                        {theme === "dark" ? "☀️" : "🌙"}
+                    <button className="navbar-theme-btn" onClick={toggleLanguage} title={t("navbar.changeLanguage")}>
+                        {i18n.language === "es" ? "EN" : "ES"}
                     </button>
                     {user ? (
                         <button className="navbar-logout-btn" onClick={handleLogout}>

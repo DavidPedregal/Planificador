@@ -77,7 +77,7 @@
   },
   "navbar": {
     "logo": "Menti",
-    "changeTheme": "Cambiar tema",
+    "changeLanguage": "Cambiar idioma",
     "logout": "Cerrar sesión"
   },
   "home": {
@@ -175,7 +175,9 @@
     "save": "Guardar calendario",
     "nameLabel": "Nombre",
     "namePlaceholder": "Nombre del calendario…",
-    "colorLabel": "Color"
+    "colorLabel": "Color",
+    "plannableLabel": "Planificable",
+    "plannedLabel": "Planificado"
   },
   "subject": {
     "newTitle": "Nueva asignatura",
@@ -244,5 +246,66 @@
     "markCompleted": "Marcar como completado",
     "completed": "Completado ✓",
     "alreadyCompleted": "Este evento ya está completado"
+  },
+  "fullcalendar": {
+    "today":    "Hoy",
+    "month":    "Mes",
+    "week":     "Semana",
+    "day":      "Día",
+    "listWeek": "Agenda"
+  },
+  "api": {
+    "auth": {
+      "failed": "Error de autenticación",
+      "notGoogle": "No autenticado con Google",
+      "unauthorized": "No autorizado",
+      "userNotFound": "Usuario no encontrado",
+      "invalidToken": "Token inválido"
+    },
+    "error": {
+      "internal": "Error interno del servidor",
+      "connectionFailed": "No se pudo conectar con el servidor"
+    },
+    "calendar": {
+      "created": "Calendario creado",
+      "deleted": "Calendario eliminado",
+      "updated": "Calendario actualizado",
+      "visibilityChanged": "Visibilidad del calendario actualizada"
+    },
+    "task": {
+      "created": "Tarea creada",
+      "updated": "Tarea actualizada",
+      "forwarded": "Tarea actualizada desde este punto",
+      "allUpdated": "Todas las tareas de la serie actualizadas",
+      "toggled": "Estado de la tarea actualizado",
+      "deleted": "Tarea eliminada",
+      "forwardDeleted": "Tareas eliminadas desde este punto",
+      "allDeleted": "Todas las tareas de la serie eliminadas"
+    },
+    "event": {
+      "created": "Evento creado",
+      "updated": "Evento actualizado",
+      "forwardUpdated": "Evento actualizado desde este punto",
+      "allUpdated": "Todos los eventos de la serie actualizados",
+      "labelDeleted": "Eventos con esa etiqueta eliminados",
+      "deleted": "Evento eliminado",
+      "forwardDeleted": "Eventos eliminados desde este punto",
+      "allDeleted": "Todos los eventos de la serie eliminados"
+    },
+    "subject": {
+      "created": "Asignatura creada",
+      "deleted": "Asignatura eliminada",
+      "updated": "Asignatura actualizada"
+    },
+    "plan": {
+      "created": "Plan creado",
+      "eventUpdated": "Evento planificado actualizado",
+      "eventDeleted": "Evento planificado eliminado",
+      "deleted": "Plan eliminado"
+    },
+    "scheduler": {
+      "noSlots": "No hay huecos disponibles para planificar esta tarea",
+      "cannotFinish": "No es posible terminar esta tarea antes de su fecha de entrega"
+    }
   }
 }

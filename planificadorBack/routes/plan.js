@@ -16,7 +16,6 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const { mappedPreviousPlan, mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
-        console.log('Data to plan:', { mappedPreviousPlan, mappedPlannableSlots, mappedTasks }); // Log para verificar los datos enviados al planner
 
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
@@ -26,10 +25,9 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
         if (!response.ok) {
             throw new Error('Planner service failed');
         }
-        const planData = await response.json(); 
-        console.log('Received plan data:', planData); // Log para verificar la estructura de planData
+        const planData = await response.json();
         await PlanService.addPlan(planData.scheduled, req.userId);
-        res.status(201).json({ message: 'Plan created successfully', data: planData.warnings });
+        res.status(201).json({ message: 'api.plan.created', data: planData.warnings });
     } catch (error){
         next(error);
     }
@@ -52,7 +50,7 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
 
         await PlanService.addPlan(planData.scheduled, req.userId);
 
-        res.status(201).json({ message: 'Plan created successfully', data: planData.warnings });
+        res.status(201).json({ message: 'api.plan.created', data: planData.warnings });
     } catch (error){
         next(error);
     }
@@ -61,7 +59,7 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
 router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await PlanService.updatePlanEvent(req.userId, req.params.id, req.body)
-        res.status(200).json({ message: 'Plan event updated successfully' });
+        res.status(200).json({ message: 'api.plan.eventUpdated' });
     } catch (error) {
         next(error);
     }
@@ -70,7 +68,7 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
 router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await PlanService.deletePlanEvent(req.userId, req.params.id);
-        res.status(200).json({ message: 'Plan event deleted successfully' });
+        res.status(200).json({ message: 'api.plan.eventDeleted' });
     } catch (error) {
         next(error);
     }
@@ -79,7 +77,7 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) 
 router.delete('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await PlanService.deletePlan(req.userId);
-        res.status(200).json({ message: 'Plan deleted successfully' });
+        res.status(200).json({ message: 'api.plan.deleted' });
     } catch(error) {
         next(error);
     }

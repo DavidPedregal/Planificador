@@ -20,7 +20,7 @@ def schedule(request: PlanRequest) -> PlanResponse:
 
     if not available_blocks or not tasks_with_remaining:
         warnings = [
-            Warning(taskId=t["taskId"], title=t["title"], message="No hay huecos disponibles para planificar esta tarea")
+            Warning(taskId=t["taskId"], title=t["title"], message="api.scheduler.noSlots")
             for t in tasks_with_remaining
         ]
         return PlanResponse(scheduled=[], warnings=warnings)
@@ -154,7 +154,7 @@ def resolver(tasks, available_blocks):
                 warnings.append(Warning(
                     taskId=task["taskId"],
                     title=task["title"],
-                    message="No es posible terminar esta tarea antes de su fecha de entrega"
+                    message="api.scheduler.cannotFinish"
                 ))
                 continue
 

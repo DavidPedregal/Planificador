@@ -77,7 +77,7 @@
   },
   "navbar": {
     "logo": "Menti",
-    "changeTheme": "Change theme",
+    "changeLanguage": "Change language",
     "logout": "Log out"
   },
   "home": {
@@ -175,7 +175,9 @@
     "save": "Save calendar",
     "nameLabel": "Name",
     "namePlaceholder": "Calendar name…",
-    "colorLabel": "Color"
+    "colorLabel": "Color",
+    "plannableLabel": "Plannable",
+    "plannedLabel": "Planned"
   },
   "subject": {
     "newTitle": "New subject",
@@ -244,5 +246,66 @@
     "markCompleted": "Mark as completed",
     "completed": "Completed ✓",
     "alreadyCompleted": "This event is already completed"
+  },
+  "fullcalendar": {
+    "today":    "Today",
+    "month":    "Month",
+    "week":     "Week",
+    "day":      "Day",
+    "listWeek": "Agenda"
+  },
+  "api": {
+    "auth": {
+      "failed": "Authentication failed",
+      "notGoogle": "Not authenticated with Google",
+      "unauthorized": "Unauthorized",
+      "userNotFound": "User not found",
+      "invalidToken": "Invalid token"
+    },
+    "error": {
+      "internal": "Internal server error",
+      "connectionFailed": "Could not connect to the server"
+    },
+    "calendar": {
+      "created": "Calendar created",
+      "deleted": "Calendar deleted",
+      "updated": "Calendar updated",
+      "visibilityChanged": "Calendar visibility updated"
+    },
+    "task": {
+      "created": "Task created",
+      "updated": "Task updated",
+      "forwarded": "Task updated from this point onwards",
+      "allUpdated": "All tasks in series updated",
+      "toggled": "Task status updated",
+      "deleted": "Task deleted",
+      "forwardDeleted": "Tasks deleted from this point onwards",
+      "allDeleted": "All tasks in series deleted"
+    },
+    "event": {
+      "created": "Event created",
+      "updated": "Event updated",
+      "forwardUpdated": "Event updated from this point onwards",
+      "allUpdated": "All events in series updated",
+      "labelDeleted": "Events with label deleted",
+      "deleted": "Event deleted",
+      "forwardDeleted": "Events deleted from this point onwards",
+      "allDeleted": "All events in series deleted"
+    },
+    "subject": {
+      "created": "Subject created",
+      "deleted": "Subject deleted",
+      "updated": "Subject updated"
+    },
+    "plan": {
+      "created": "Plan created",
+      "eventUpdated": "Planned event updated",
+      "eventDeleted": "Planned event deleted",
+      "deleted": "Plan deleted"
+    },
+    "scheduler": {
+      "noSlots": "No available slots to schedule this task",
+      "cannotFinish": "Cannot finish this task before its due date"
+    }
   }
 }

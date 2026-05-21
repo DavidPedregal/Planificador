@@ -1,3 +1,5 @@
+import i18n from "@/i18n/i18n";
+
 export async function apiFetch(
   url: string,
   options?: RequestInit
@@ -5,8 +7,9 @@ export async function apiFetch(
   try {
     const res = await fetch(url, options);
     const data = await res.json();
-    return { data: data.data, ok: res.ok, message: data.message ?? '' };
+    const key = data.message ?? '';
+    return { data: data.data, ok: res.ok, message: key ? i18n.t(key, { defaultValue: key }) : '' };
   } catch {
-    return { data: null, ok: false, message: 'Error de conexión con el servidor' };
+    return { data: null, ok: false, message: i18n.t("api.error.connectionFailed") };
   }
 }

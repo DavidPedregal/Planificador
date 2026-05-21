@@ -67,7 +67,7 @@ const PlanResultDialog: React.FC<PlanResultDialogProps> = ({ open, loading, warn
                                         {warnings.map((w) => (
                                             <li key={w.taskId} className="prd-warning-item">
                                                 <span className="prd-warning-title">{w.title}</span>
-                                                <span className="prd-warning-msg">{w.message}</span>
+                                                <span className="prd-warning-msg">{t(w.message)}</span>
                                             </li>
                                         ))}
                                     </ul>

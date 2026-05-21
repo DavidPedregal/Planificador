@@ -200,7 +200,7 @@ describe('planRouter', () => {
                 .send({ status: 'completed', userTime: 90 });
 
             expect(res.status).toBe(200);
-            expect(res.body.message).toBe('Plan event updated successfully');
+            expect(res.body.message).toBe('api.plan.eventUpdated');
         });
 
         it('should return 400 if service throws ValidationError', async () => {
@@ -244,7 +244,7 @@ describe('planRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.message).toBe('Plan event deleted successfully');
+            expect(res.body.message).toBe('api.plan.eventDeleted');
         });
 
         it('should return 404 if plan event does not exist', async () => {
@@ -274,7 +274,7 @@ describe('planRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.message).toBe('Plan deleted successfully');
+            expect(res.body.message).toBe('api.plan.deleted');
         });
 
         it('should return 401 without token', async () => {

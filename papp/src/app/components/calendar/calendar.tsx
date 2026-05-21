@@ -5,7 +5,9 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import esLocale from "@fullcalendar/core/locales/es";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import AddEventDialog from "../event/add-event-dialog";
@@ -18,6 +20,7 @@ interface CalendarProps {
 }
 
 export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
+    const { i18n, t } = useTranslation();
     const { pushAlert } = useApp();
     const {
         visibleEvents,
@@ -83,6 +86,14 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                     initialView="timeGridWeek"
+                    locale={i18n.language === "es" ? esLocale : undefined}
+                    buttonText={{
+                        today:    t("fullcalendar.today"),
+                        month:    t("fullcalendar.month"),
+                        week:     t("fullcalendar.week"),
+                        day:      t("fullcalendar.day"),
+                        listWeek: t("fullcalendar.listWeek"),
+                    }}
                     slotMinTime="08:00:00"
                     slotMaxTime="22:00:00"
                     headerToolbar={{

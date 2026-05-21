@@ -25,7 +25,7 @@ router.get('/common', dbLimiter, authMiddleware, async function(req, res, next) 
 router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const saved = await CalendarService.createCalendarForUser(req.userId, req.body);
-        res.status(201).json({ data: saved, message: "Calendar created successfully" });
+        res.status(201).json({ data: saved, message: "api.calendar.created" });
     } catch (error) {
         next(error);
     }
@@ -34,7 +34,7 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await CalendarService.deleteCalendarForUser(req.userId, req.params.id);
-        res.status(200).json({ message: "Calendar deleted" });
+        res.status(200).json({ message: "api.calendar.deleted" });
     } catch (error) {
         next(error);
     }
@@ -43,7 +43,7 @@ router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) 
 router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const updatedCalendar = await CalendarService.updateCalendarForUser(req.userId, req.params.id, req.body);
-        res.status(200).json({ data: updatedCalendar, message: "Calendar updated successfully" });
+        res.status(200).json({ data: updatedCalendar, message: "api.calendar.updated" });
     } catch (error) {
         next(error);
     }
@@ -52,7 +52,7 @@ router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
 router.put('/toggleVisibility/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const updatedCalendar = await CalendarService.toggleCalendarVisibilityForUser(req.userId, req.params.id);
-        res.status(200).json({ data: updatedCalendar, message: "Calendar visibility changed" });
+        res.status(200).json({ data: updatedCalendar, message: "api.calendar.visibilityChanged" });
     } catch (error) {
         next(error);
     }

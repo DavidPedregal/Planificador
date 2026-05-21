@@ -133,7 +133,7 @@ describe('calendarRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(res.status).toBe(200);
-            expect(res.body.message).toBe('Calendar deleted');
+            expect(res.body.message).toBe('api.calendar.deleted');
         });
 
         it('should return 404 if calendar does not exist', async () => {
@@ -225,7 +225,7 @@ describe('calendarRouter', () => {
 
             expect(res.status).toBe(200);
             expect(res.body.data.visible).toBe(false);
-            expect(res.body.message).toBe('Calendar visibility changed');
+            expect(res.body.message).toBe('api.calendar.visibilityChanged');
         });
 
         it('should return 404 if calendar does not exist', async () => {

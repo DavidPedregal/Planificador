@@ -8,21 +8,20 @@ const { authLimiter } = require('../middlewares/rateLimiterMiddleware');
 router.post('/login', authLimiter, async function(req, res, next) {
   const { token } = req.body;
 
-  if (!token) return res.status(401).send('Authentication failed.');
+  if (!token) return res.status(401).json({ message: 'api.auth.failed' });
 
   try {
-    // Llama a la API de Google con el access_token para obtener el perfil
     const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (!googleRes.ok) return res.status(401).send('Not authenticated with Google.');
+    if (!googleRes.ok) return res.status(401).json({ message: 'api.auth.notGoogle' });
 
     const payload = await googleRes.json();
 
     const user = await UserService.login(payload);
     const userId = user._id;
-    
+
     const user_token = jwt.sign(
         { userId },
         process.env.JWT_SECRET,
@@ -30,12 +29,14 @@ router.post('/login', authLimiter, async function(req, res, next) {
     );
 
     return res.status(200).json(
-      { token: user_token, 
+      { data: {
+        token: user_token,
         user: {
           id: userId,
           name: payload.given_name,
           email: payload.email,
-        } 
+        }
+      }
       });
   } catch (error) {
     next(error);
@@ -43,7 +44,7 @@ router.post('/login', authLimiter, async function(req, res, next) {
 });
 
 router.get('/verify', authMiddleware, (req, res) => {
-  res.status(200).json({ ok: true }); 
+  res.status(200).json({ ok: true });
 });
 
 module.exports = router;

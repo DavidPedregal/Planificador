@@ -68,9 +68,9 @@ describe('userRouter', () => {
             const res = await request(app).post('/users/login').send({ token: 'valid_token' });
 
             expect(res.status).toBe(200);
-            expect(res.body.token).toBeDefined();
-            expect(res.body.user.email).toBe(mockGooglePayload.email);
-            expect(res.body.user.name).toBe(mockGooglePayload.given_name);
+            expect(res.body.data.token).toBeDefined();
+            expect(res.body.data.user.email).toBe(mockGooglePayload.email);
+            expect(res.body.data.user.name).toBe(mockGooglePayload.given_name);
         });
 
         it('should return a valid JWT signed with the user id', async () => {
@@ -82,7 +82,7 @@ describe('userRouter', () => {
 
             const res = await request(app).post('/users/login').send({ token: 'valid_token' });
 
-            const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(res.body.data.token, process.env.JWT_SECRET);
             expect(decoded.userId).toBe(mockDbUser._id);
         });
 
