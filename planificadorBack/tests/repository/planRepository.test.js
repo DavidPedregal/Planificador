@@ -173,6 +173,83 @@ describe('planRepository', () => {
         });
     });
 
+    describe('findPlanEventsByTaskId', () => {
+        it('should return all plan events for a task', async () => {
+            await PlanRepo.addPlan([mockPlanEventData, mockPlanEventData]);
+            const events = await PlanRepo.findPlanEventsByTaskId(mockTaskId.toString());
+            expect(events).toHaveLength(2);
+        });
+
+        it('should return empty array if no events exist for the task', async () => {
+            const otherTaskId = new mongoose.Types.ObjectId();
+            await PlanRepo.addPlan([mockPlanEventData]);
+            const events = await PlanRepo.findPlanEventsByTaskId(otherTaskId.toString());
+            expect(events).toHaveLength(0);
+        });
+
+        it('should throw RepositoryError if taskId format is invalid', () => {
+            expect(() => PlanRepo.findPlanEventsByTaskId(invalidId)).toThrow(RepositoryError);
+        });
+    });
+
+    describe('expirePendingPlanEvents', () => {
+        it('should set pending events with past end date to uncompleted', async () => {
+            await PlanRepo.addPlan([{
+                ...mockPlanEventData,
+                status: 'pending',
+                end: new Date(Date.now() - 60 * 60 * 1000)
+            }]);
+            await PlanRepo.expirePendingPlanEvents(mockUserId);
+            const events = await PlanRepo.findPlanForUser(mockUserId);
+            expect(events[0].status).toBe('uncompleted');
+        });
+
+        it('should not affect pending events with future end date', async () => {
+            await PlanRepo.addPlan([{
+                ...mockPlanEventData,
+                status: 'pending',
+                end: new Date(Date.now() + 60 * 60 * 1000)
+            }]);
+            await PlanRepo.expirePendingPlanEvents(mockUserId);
+            const events = await PlanRepo.findPlanForUser(mockUserId);
+            expect(events[0].status).toBe('pending');
+        });
+
+        it('should not affect completed events with past end date', async () => {
+            await PlanRepo.addPlan([{
+                ...mockPlanEventData,
+                status: 'completed',
+                end: new Date(Date.now() - 60 * 60 * 1000)
+            }]);
+            await PlanRepo.expirePendingPlanEvents(mockUserId);
+            const events = await PlanRepo.findPlanForUser(mockUserId);
+            expect(events[0].status).toBe('completed');
+        });
+
+        it('should not affect events from other users', async () => {
+            const otherUserId = new mongoose.Types.ObjectId();
+            await PlanRepo.addPlan([{
+                ...mockPlanEventData,
+                userId: otherUserId,
+                status: 'pending',
+                end: new Date(Date.now() - 60 * 60 * 1000)
+            }]);
+            await PlanRepo.expirePendingPlanEvents(mockUserId);
+            const events = await PlanRepo.findPlanForUser(otherUserId);
+            expect(events[0].status).toBe('pending');
+        });
+
+        it('should return the number of modified documents', async () => {
+            await PlanRepo.addPlan([
+                { ...mockPlanEventData, status: 'pending', end: new Date(Date.now() - 60 * 60 * 1000) },
+                { ...mockPlanEventData, status: 'pending', end: new Date(Date.now() - 60 * 60 * 1000) },
+                { ...mockPlanEventData, status: 'pending', end: new Date(Date.now() + 60 * 60 * 1000) },
+            ]);
+            const result = await PlanRepo.expirePendingPlanEvents(mockUserId);
+            expect(result.modifiedCount).toBe(2);
+        });
+    });
+
     describe('updatePlanEvent', () => {
         it('should update status of a plan event', async () => {
             const [created] = await PlanRepo.addPlan([mockPlanEventData]);

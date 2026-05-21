@@ -176,8 +176,8 @@
     "nameLabel": "Name",
     "namePlaceholder": "Calendar name…",
     "colorLabel": "Color",
-    "plannableLabel": "Plannable",
-    "plannedLabel": "Planned"
+    "plannable": "Plannable",
+    "planned": "Planned"
   },
   "subject": {
     "newTitle": "New subject",

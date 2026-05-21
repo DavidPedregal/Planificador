@@ -136,6 +136,39 @@ const deleteAllTasksInGroup = async (userId, taskId) => {
     return { message: "Task(s) deleted successfully", modifiedCount: result.deletedCount };
 };
 
+const updateTaskAfterPlanEventCompletion = async (userId, taskId, timeSpent, rating) => {
+    const task = await TaskRepo.getTaskById(userId, taskId);
+    if (!task) {
+        throw new NotFoundError("Task not found");
+    }
+
+    if (timeSpent >= task.estimatedTime) {
+        await TaskRepo.markTaskAsCompleted(userId, taskId);
+        if (task.includeReviews) {
+            if (task.isReview) {
+                generateReviewForNextInterval(userId, task, rating);
+            } else {
+                generateFirstReview(userId, task);
+            }
+        }
+    }
+};
+
+const generateFirstReview = async (userId, task) => {
+    const reviewTask = {
+        userId,
+        subjectId: task.subjectId,
+        title: `Review: ${task.title}`,
+
+    };
+};
+
+const generateReviewForNextInterval = async (userId, task, rating) => {
+    const ef = task.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+};
+
+
+
 module.exports = {
     getAllTasks,
     getTaskById,
@@ -147,5 +180,6 @@ module.exports = {
     toggleTaskCompletion,
     deleteTask,
     deleteForwardTasks,
-    deleteAllTasksInGroup
+    deleteAllTasksInGroup,
+    updateTaskAfterPlanEventCompletion
 }

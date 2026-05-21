@@ -17,7 +17,7 @@ const getEventById = async (userId, eventId) => {
 
 const getPlannableEventsForUser = async (userId) => {
     const systemCalendars = await CalendarRepo.findSystemCalendarsForUser(userId);
-    const plannableCalendar = systemCalendars.find(cal => cal.name === "Plannable");
+    const plannableCalendar = systemCalendars.find(cal => cal.name === "calendar.plannable");
     if (!plannableCalendar) {
         throw new NotFoundError('Plannable calendar not found');
     }

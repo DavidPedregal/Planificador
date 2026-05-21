@@ -283,6 +283,41 @@ describe('taskService', () => {
         });
     });
 
+    describe('updateTaskAfterPlanEventCompletion', () => {
+        it('should mark task as completed when timeSpent >= estimatedTime', async () => {
+            TaskRepo.getTaskById.mockResolvedValue(mockTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({ ...mockTask, completed: true });
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime);
+
+            expect(TaskRepo.markTaskAsCompleted).toHaveBeenCalledWith(mockUserId, mockTaskId);
+        });
+
+        it('should mark task as completed when timeSpent exceeds estimatedTime', async () => {
+            TaskRepo.getTaskById.mockResolvedValue(mockTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({ ...mockTask, completed: true });
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime + 30);
+
+            expect(TaskRepo.markTaskAsCompleted).toHaveBeenCalledWith(mockUserId, mockTaskId);
+        });
+
+        it('should not mark task as completed when timeSpent < estimatedTime', async () => {
+            TaskRepo.getTaskById.mockResolvedValue(mockTask);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime - 1);
+
+            expect(TaskRepo.markTaskAsCompleted).not.toHaveBeenCalled();
+        });
+
+        it('should throw NotFoundError if task does not exist', async () => {
+            TaskRepo.getTaskById.mockResolvedValue(null);
+            await expect(
+                TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, 60)
+            ).rejects.toThrow(NotFoundError);
+        });
+    });
+
     describe('deleteAllTasksInGroup', () => {
         it('should delete all tasks in group and return modifiedCount', async () => {
             TaskRepo.getTaskById.mockResolvedValue(mockTask);

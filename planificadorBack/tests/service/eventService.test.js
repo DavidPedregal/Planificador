@@ -19,7 +19,7 @@ const mockGroupId = 'some-uuid-group-id';
 
 const mockPlannableCalendar = {
     _id: mockCalendarId,
-    name: 'Plannable',
+    name: 'calendar.plannable',
     isSystem: true,
     userId: mockUserId
 };

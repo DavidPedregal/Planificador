@@ -48,7 +48,7 @@ const mockSlot = {
 
 const mockPlannedCalendar = {
     _id: mockPlannedCalendarId,
-    name: 'Planned',
+    name: 'calendar.planned',
     isSystem: true
 };
 
@@ -185,9 +185,26 @@ describe('planService', () => {
         });
     });
 
+    describe('expirePendingPlanEvents', () => {
+        it('should call repo with userId', async () => {
+            PlanRepo.expirePendingPlanEvents.mockResolvedValue({ modifiedCount: 2 });
+            await PlanService.expirePendingPlanEvents(mockUserId);
+            expect(PlanRepo.expirePendingPlanEvents).toHaveBeenCalledWith(mockUserId);
+        });
+
+        it('should return the repo result', async () => {
+            PlanRepo.expirePendingPlanEvents.mockResolvedValue({ modifiedCount: 3 });
+            const result = await PlanService.expirePendingPlanEvents(mockUserId);
+            expect(result.modifiedCount).toBe(3);
+        });
+    });
+
     describe('updatePlanEvent', () => {
         it('should update status to completed with userTime', async () => {
-            PlanRepo.updatePlanEvent.mockResolvedValue({ ...mockPlanEvent, status: 'completed', userTime: 90 });
+            const completedEvent = { ...mockPlanEvent, status: 'completed', userTime: 90 };
+            PlanRepo.updatePlanEvent.mockResolvedValue(completedEvent);
+            PlanRepo.findPlanEventsByTaskId.mockResolvedValue([completedEvent]);
+            TaskService.updateTaskAfterPlanEventCompletion.mockResolvedValue();
 
             const result = await PlanService.updatePlanEvent(mockUserId, mockPlanEventId, {
                 status: 'completed',
@@ -236,6 +253,47 @@ describe('planService', () => {
             await expect(
                 PlanService.updatePlanEvent(mockUserId, mockPlanEventId, { status: 'uncompleted' })
             ).rejects.toThrow(NotFoundError);
+        });
+
+        it('should call findPlanEventsByTaskId and updateTaskAfterPlanEventCompletion when completing', async () => {
+            const completedEvent = { ...mockPlanEvent, status: 'completed', userTime: 90 };
+            PlanRepo.updatePlanEvent.mockResolvedValue(completedEvent);
+            PlanRepo.findPlanEventsByTaskId.mockResolvedValue([completedEvent]);
+            TaskService.updateTaskAfterPlanEventCompletion.mockResolvedValue();
+
+            await PlanService.updatePlanEvent(mockUserId, mockPlanEventId, { status: 'completed', userTime: 90 });
+
+            expect(PlanRepo.findPlanEventsByTaskId).toHaveBeenCalledWith(completedEvent.taskId);
+            expect(TaskService.updateTaskAfterPlanEventCompletion).toHaveBeenCalledWith(
+                mockUserId,
+                completedEvent.taskId,
+                90
+            );
+        });
+
+        it('should sum userTime across all plan events for the task', async () => {
+            const completedEvent = { ...mockPlanEvent, status: 'completed', userTime: 60 };
+            const otherEvent = { ...mockPlanEvent, userTime: 45 };
+            PlanRepo.updatePlanEvent.mockResolvedValue(completedEvent);
+            PlanRepo.findPlanEventsByTaskId.mockResolvedValue([completedEvent, otherEvent]);
+            TaskService.updateTaskAfterPlanEventCompletion.mockResolvedValue();
+
+            await PlanService.updatePlanEvent(mockUserId, mockPlanEventId, { status: 'completed', userTime: 60 });
+
+            expect(TaskService.updateTaskAfterPlanEventCompletion).toHaveBeenCalledWith(
+                mockUserId,
+                completedEvent.taskId,
+                105
+            );
+        });
+
+        it('should not call findPlanEventsByTaskId when status is not completed', async () => {
+            PlanRepo.updatePlanEvent.mockResolvedValue({ ...mockPlanEvent, status: 'uncompleted' });
+
+            await PlanService.updatePlanEvent(mockUserId, mockPlanEventId, { status: 'uncompleted' });
+
+            expect(PlanRepo.findPlanEventsByTaskId).not.toHaveBeenCalled();
+            expect(TaskService.updateTaskAfterPlanEventCompletion).not.toHaveBeenCalled();
         });
     });
 });

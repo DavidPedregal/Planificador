@@ -176,8 +176,8 @@
     "nameLabel": "Nombre",
     "namePlaceholder": "Nombre del calendario…",
     "colorLabel": "Color",
-    "plannableLabel": "Planificable",
-    "plannedLabel": "Planificado"
+    "plannable": "Planificable",
+    "planned": "Planificado"
   },
   "subject": {
     "newTitle": "Nueva asignatura",

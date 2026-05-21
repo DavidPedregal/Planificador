@@ -90,6 +90,17 @@ const deleteAllTasksInGroup = async (userId, groupId) => {
     return await Task.deleteMany({ groupId, userId });
 };
 
+const markTaskAsCompleted = async (userId, taskId) => {
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        throw new RepositoryError('Invalid ID format');
+    }
+    return Task.findOneAndUpdate(
+        { _id: taskId, userId },
+        { $set: { completed: true } },
+        { returnDocument: 'after' }
+    );
+};
+
 module.exports = {
     getAllTasks,
     getTaskById,
@@ -101,6 +112,7 @@ module.exports = {
     deleteTask,
     deleteForwardTasks,
     deleteAllTasksInGroup,
-    toggleTaskCompletion
+    toggleTaskCompletion,
+    markTaskAsCompleted
 }
 

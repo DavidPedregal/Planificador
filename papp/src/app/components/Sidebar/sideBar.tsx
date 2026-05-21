@@ -124,7 +124,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
                     {defaultCalendars.map(cal => (
                         <CalendarItem
                             key={cal.id}
-                            name={cal.name}
+                            name={t(cal.name)}
                             color={cal.color}
                             visible={cal.visible}
                             onToggle={() => toggleVisibility(cal.id)}

@@ -189,6 +189,18 @@ function getChangedFields(newData, originalEvent) {
     return changedFields;
 }
 
+function calculateReviewDuration(actualTime, n, ef) {
+    const MIN_REVIEW_MINUTES = 15;
+    const DECAY_RATE = 0.5;
+
+    const factor = Math.pow(ef, -(n - 1) * DECAY_RATE);
+    return Math.max(MIN_REVIEW_MINUTES, Math.round(actualTime * factor));
+}
+
+function calculateNextReviewDate(lastInterval, n, ef) {
+    
+};
+
 module.exports = {
     validateData,
     generateRecurringTasks,

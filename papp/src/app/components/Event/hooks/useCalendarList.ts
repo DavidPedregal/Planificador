@@ -36,7 +36,7 @@ export function useCalendarList(open: boolean, pushAlert: (message: string, type
         }));
 
         const commonCalendars: Calendar[] = commonRes.data
-            .filter((cal: any) => cal.name !== "Planned")
+            .filter((cal: any) => cal.name !== "calendar.planned")
             .map((cal: any) => ({
                 id: cal._id, 
                 name: cal.name, 

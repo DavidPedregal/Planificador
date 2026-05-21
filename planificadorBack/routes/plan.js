@@ -16,7 +16,6 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const { mappedPreviousPlan, mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
-
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

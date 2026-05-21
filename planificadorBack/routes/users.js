@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const UserService = require('../services/userService');
+const PlanService = require('../services/planService');
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authmiddleware");
 const { authLimiter } = require('../middlewares/rateLimiterMiddleware');
@@ -21,6 +22,7 @@ router.post('/login', authLimiter, async function(req, res, next) {
 
     const user = await UserService.login(payload);
     const userId = user._id;
+    await PlanService.expirePendingPlanEvents(userId);
 
     const user_token = jwt.sign(
         { userId },

@@ -37,11 +37,26 @@ const updatePlanEvent = async (userId, planEventId, updateData) => {
     );
 };
 
+const expirePendingPlanEvents = (userId) =>
+    PlanEvent.updateMany(
+        { userId, status: 'pending', end: { $lt: new Date() } },
+        { $set: { status: 'uncompleted' } }
+    );
+
+const findPlanEventsByTaskId = (taskId) => {
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        throw new RepositoryError('Invalid ID format');
+    }
+    return PlanEvent.find({ taskId });
+}
+
 module.exports = {
     findPlanEventForUser,
     findPlanForUser,
     addPlan,
     deletePlan,
     deletePlanEvent,
-    updatePlanEvent
+    updatePlanEvent,
+    expirePendingPlanEvents,
+    findPlanEventsByTaskId
 }

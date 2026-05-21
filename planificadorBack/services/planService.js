@@ -32,7 +32,7 @@ const getDataToPlan = async (userId) => {
 const addPlan = async (planEvents, userId) => {
     if (!planEvents) { return; }
     const systemCalendars = await CalendarService.getSystemCalendarsForUser(userId);
-    const plannedCalendar = systemCalendars.find(cal => cal.name === "Planned");
+    const plannedCalendar = systemCalendars.find(cal => cal.name === "calendar.planned");
 
     if (!plannedCalendar) {
         throw new NotFoundError('Planned calendar not found for user');
@@ -52,6 +52,9 @@ const deletePlanEvent = async (userId, planEventId) => {
     }
     await PlanRepo.deletePlanEvent(userId, planEventId);
 }
+
+const expirePendingPlanEvents = (userId) =>
+    PlanRepo.expirePendingPlanEvents(userId);
 
 const updatePlanEvent = async (userId, planEventId, updateData) => {
     if (!updateData.status) {
@@ -77,6 +80,14 @@ const updatePlanEvent = async (userId, planEventId, updateData) => {
     if (!updated) {
         throw new NotFoundError('Plan not found');
     }
+
+    if (updateData.status === 'completed') {
+        const planEventsForTask = await PlanRepo.findPlanEventsByTaskId(updated.taskId);
+        const totaltime = planEventsForTask.reduce((sum, event) => sum + (event.userTime || 0), 0);
+        await TaskService.updateTaskAfterPlanEventCompletion(userId, updated.taskId, totaltime, 
+            updateData.rating !== undefined ? updateData.rating : null
+        );
+    }
     return updated;
 };
 
@@ -87,5 +98,6 @@ module.exports = {
     addPlan,
     deletePlan,
     deletePlanEvent,
-    updatePlanEvent
+    updatePlanEvent,
+    expirePendingPlanEvents
 }

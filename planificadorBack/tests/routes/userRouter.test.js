@@ -1,9 +1,11 @@
 const request = require('supertest');
 const app = require('../../app');
 const UserService = require('../../services/userService');
+const PlanService = require('../../services/planService');
 const jwt = require('jsonwebtoken');
 
 jest.mock('../../services/userService');
+jest.mock('../../services/planService');
 jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
     authLimiter: (req, res, next) => next(),
     dbLimiter: (req, res, next) => next()
@@ -84,6 +86,19 @@ describe('userRouter', () => {
 
             const decoded = jwt.verify(res.body.data.token, process.env.JWT_SECRET);
             expect(decoded.userId).toBe(mockDbUser._id);
+        });
+
+        it('should call expirePendingPlanEvents with the user id on successful login', async () => {
+            global.fetch.mockResolvedValue({
+                ok: true,
+                json: async () => mockGooglePayload
+            });
+            UserService.login.mockResolvedValue(mockDbUser);
+            PlanService.expirePendingPlanEvents.mockResolvedValue({ modifiedCount: 0 });
+
+            await request(app).post('/users/login').send({ token: 'valid_token' });
+
+            expect(PlanService.expirePendingPlanEvents).toHaveBeenCalledWith(mockDbUser._id);
         });
 
         it('should return 500 if the service throws an unexpected error', async () => {

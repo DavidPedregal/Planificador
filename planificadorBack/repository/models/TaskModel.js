@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const {FREQUENCY_TYPE} = require("./enums/enums");
 
 const taskModel = new mongoose.Schema({
     userId: {
@@ -42,6 +41,26 @@ const taskModel = new mongoose.Schema({
     includeReviews: {
         type: Boolean,
         default: false,
+    },
+    isReview: {
+        type: Boolean,
+        default: false,
+    },
+    reviewOf: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+    },
+    ef : {
+        type: Number,
+        default: 2.5
+    },
+    interval: {
+        type: Number,
+        default: 0
+    },
+    iteration : {
+        type: Number,
+        default: 0
     }
 });
 

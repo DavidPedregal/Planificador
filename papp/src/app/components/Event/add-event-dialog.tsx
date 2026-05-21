@@ -36,7 +36,7 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
     if (!open || !start || !end) return null;
 
     const selectedCalendar = calendars.find(c => c.id === calendarId);
-    const isPlannableCalendar = selectedCalendar?.name?.toLowerCase() === "plannable";
+    const isPlannableCalendar = selectedCalendar?.name === "calendar.plannable";
     const canSave = !!eventTitle.trim() || isPlannableCalendar;
 
     const onClickSave = async () => {
@@ -97,7 +97,9 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
                             aria-label={t("event.selectCalendarAriaLabel")}
                         >
                             {calendars.map((cal) => (
-                                <option key={cal.id} value={cal.id}>{cal.name}</option>
+                                <option key={cal.id} value={cal.id}>
+                                    {cal.name.startsWith("calendar.") ? t(cal.name) : cal.name}
+                                </option>
                             ))}
                         </select>
                     </div>

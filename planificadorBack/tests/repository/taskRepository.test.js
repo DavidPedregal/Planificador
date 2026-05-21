@@ -320,6 +320,31 @@ describe('taskRepository', () => {
         });
     });
 
+    describe('markTaskAsCompleted', () => {
+        it('should set completed to true', async () => {
+            const [created] = await TaskRepo.createTasks([mockTaskData]);
+            const updated = await TaskRepo.markTaskAsCompleted(mockUserId, created._id.toString());
+            expect(updated.completed).toBe(true);
+        });
+
+        it('should return null if task does not exist', async () => {
+            const fakeId = new mongoose.Types.ObjectId().toString();
+            const result = await TaskRepo.markTaskAsCompleted(mockUserId, fakeId);
+            expect(result).toBeNull();
+        });
+
+        it('should not mark a task belonging to another user', async () => {
+            const otherUserId = new mongoose.Types.ObjectId();
+            const [created] = await TaskRepo.createTasks([{ ...mockTaskData, userId: otherUserId }]);
+            const result = await TaskRepo.markTaskAsCompleted(mockUserId, created._id.toString());
+            expect(result).toBeNull();
+        });
+
+        it('should throw RepositoryError if taskId format is invalid', async () => {
+            await expect(TaskRepo.markTaskAsCompleted(mockUserId, invalidId)).rejects.toThrow(RepositoryError);
+        });
+    });
+
     describe('deleteAllTasksInGroup', () => {
         it('should delete all tasks in a group', async () => {
             const groupId = 'group-1';

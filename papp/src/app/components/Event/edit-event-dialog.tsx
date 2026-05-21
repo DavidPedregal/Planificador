@@ -100,7 +100,9 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                                 aria-label={t("event.selectCalendarAriaLabel")}
                             >
                                 {calendars.map((cal) => (
-                                    <option key={cal.id} value={cal.id}>{cal.name}</option>
+                                    <option key={cal.id} value={cal.id}>
+                                        {cal.name.startsWith("calendar.") ? t(cal.name) : cal.name}
+                                    </option>
                                 ))}
                             </select>
                         </div>
