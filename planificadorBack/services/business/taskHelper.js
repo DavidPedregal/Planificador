@@ -189,6 +189,13 @@ function getChangedFields(newData, originalEvent) {
     return changedFields;
 }
 
+/**
+ * Calculates the review duration based on the actual time taken, repetition count (n), and easiness factor (ef) using a decay function.
+ * @param {number} actualTime - The actual time taken for the review in minutes
+ * @param {number} n - The repetition count (1 for first review, 2 for second, etc.)
+ * @param {number} ef - The easiness factor for the item
+ * @return {number} The calculated review duration in minutes, with a minimum threshold applied
+ */
 function calculateReviewDuration(actualTime, n, ef) {
     const MIN_REVIEW_MINUTES = 15;
     const DECAY_RATE = 0.5;
@@ -197,12 +204,32 @@ function calculateReviewDuration(actualTime, n, ef) {
     return Math.max(MIN_REVIEW_MINUTES, Math.round(actualTime * factor));
 }
 
+/**
+ * Calculates the next review date based on the last interval, repetition count (n), and easiness factor (ef) using the SM-2 algorithm.
+ * @param {number} lastInterval - The number of days since the last review
+ * @param {number} n - The repetition count (1 for first review, 2 for second, etc.)
+ * @param {number} ef - The easiness factor for the item
+ * @return {Object} An object containing the next interval in days (daysSM2) and the margin for scheduling flexibility (margen)
+ */
 function calculateNextReviewDate(lastInterval, n, ef) {
-    
-};
+    // Intervalo según SM-2
+    let daysSM2;
+    if (n === 1) daysSM2 = 1;
+    else if (n === 2) daysSM2 = 6;
+    else daysSM2 = Math.round(lastInterval * ef);
+
+    const dateSM2 = new Date();
+    dateSM2.setDate(dateSM2.getDate() + daysSM2);
+
+    const margin = Math.max(1, Math.round(daysSM2 * 0.2));
+
+    return { interval: daysSM2, margin };
+}
 
 module.exports = {
     validateData,
     generateRecurringTasks,
-    getChangedFields
+    getChangedFields,
+    calculateReviewDuration,
+    calculateNextReviewDate
 }

@@ -267,7 +267,9 @@ describe('planService', () => {
             expect(TaskService.updateTaskAfterPlanEventCompletion).toHaveBeenCalledWith(
                 mockUserId,
                 completedEvent.taskId,
-                90
+                90,
+                null,
+                completedEvent.end
             );
         });
 
@@ -283,7 +285,9 @@ describe('planService', () => {
             expect(TaskService.updateTaskAfterPlanEventCompletion).toHaveBeenCalledWith(
                 mockUserId,
                 completedEvent.taskId,
-                105
+                105,
+                null,
+                completedEvent.end
             );
         });
 

@@ -1,6 +1,6 @@
 const TaskRepo = require('../repository/taskRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
-const { generateRecurringTasks, validateData, getChangedFields } = require('./business/taskHelper');
+const { generateRecurringTasks, validateData, getChangedFields, calculateReviewDuration, calculateNextReviewDate } = require('./business/taskHelper');
 const { randomUUID } = require('crypto');
 
 const getAllTasks = async (userId) => 
@@ -136,7 +136,7 @@ const deleteAllTasksInGroup = async (userId, taskId) => {
     return { message: "Task(s) deleted successfully", modifiedCount: result.deletedCount };
 };
 
-const updateTaskAfterPlanEventCompletion = async (userId, taskId, timeSpent, rating) => {
+const updateTaskAfterPlanEventCompletion = async (userId, taskId, timeSpent, rating, date) => {
     const task = await TaskRepo.getTaskById(userId, taskId);
     if (!task) {
         throw new NotFoundError("Task not found");
@@ -146,27 +146,44 @@ const updateTaskAfterPlanEventCompletion = async (userId, taskId, timeSpent, rat
         await TaskRepo.markTaskAsCompleted(userId, taskId);
         if (task.includeReviews) {
             if (task.isReview) {
-                generateReviewForNextInterval(userId, task, rating);
+                const originalTask = await TaskRepo.getTaskById(userId, task.reviewOf);
+                generateReviewForNextInterval(task, rating, originalTask.estimatedTime, date);
             } else {
-                generateFirstReview(userId, task);
+                generateFirstReview(task, date);
             }
         }
     }
 };
 
-const generateFirstReview = async (userId, task) => {
+const generateFirstReview = async (task, date) => {
+    generateReviewForNextInterval(task, 5, task.estimatedTime, date); // Start with a perfect rating for the first review
+};
+
+const generateReviewForNextInterval = async (task, rating, estimatedTime, date) => {
+    const ef = task.ef + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02));
+    const n = task.iteration + 1;
+    const reviewDuration = calculateReviewDuration(estimatedTime, n, ef);
+    const {interval, margin} = calculateNextReviewDate(task.interval, n, ef);
+
     const reviewTask = {
-        userId,
+        userId: task.userId,
         subjectId: task.subjectId,
-        title: `Review: ${task.title}`,
-
+        title: `Review for ${task.title}`,
+        estimatedTime: reviewDuration,
+        finishDate: new Date(date.getTime() + (interval + margin) * 24 * 60 * 60 * 1000),
+        givenDate: new Date(date.getTime() + (interval - margin) * 24 * 60 * 60 * 1000),
+        completed: false,
+        plannable: true,
+        includeReviews: true,
+        isReview: true,
+        reviewOf: task.reviewOf || task._id,
+        ef: ef,
+        interval: interval,
+        iteration: n
     };
-};
 
-const generateReviewForNextInterval = async (userId, task, rating) => {
-    const ef = task.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+    await TaskRepo.createTasks([reviewTask]);
 };
-
 
 
 module.exports = {

@@ -85,7 +85,7 @@ const updatePlanEvent = async (userId, planEventId, updateData) => {
         const planEventsForTask = await PlanRepo.findPlanEventsByTaskId(updated.taskId);
         const totaltime = planEventsForTask.reduce((sum, event) => sum + (event.userTime || 0), 0);
         await TaskService.updateTaskAfterPlanEventCompletion(userId, updated.taskId, totaltime, 
-            updateData.rating !== undefined ? updateData.rating : null
+            updateData.rating !== undefined ? updateData.rating : null, updated.end
         );
     }
     return updated;

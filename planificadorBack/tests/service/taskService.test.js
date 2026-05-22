@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const TaskRepo = require('../../repository/taskRepository');
 const TaskService = require('../../services/taskService');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
@@ -284,11 +285,13 @@ describe('taskService', () => {
     });
 
     describe('updateTaskAfterPlanEventCompletion', () => {
+        const completionDate = new Date('2026-05-22T10:00:00Z');
+
         it('should mark task as completed when timeSpent >= estimatedTime', async () => {
             TaskRepo.getTaskById.mockResolvedValue(mockTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({ ...mockTask, completed: true });
 
-            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime);
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, completionDate);
 
             expect(TaskRepo.markTaskAsCompleted).toHaveBeenCalledWith(mockUserId, mockTaskId);
         });
@@ -297,7 +300,7 @@ describe('taskService', () => {
             TaskRepo.getTaskById.mockResolvedValue(mockTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({ ...mockTask, completed: true });
 
-            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime + 30);
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime + 30, null, completionDate);
 
             expect(TaskRepo.markTaskAsCompleted).toHaveBeenCalledWith(mockUserId, mockTaskId);
         });
@@ -305,7 +308,7 @@ describe('taskService', () => {
         it('should not mark task as completed when timeSpent < estimatedTime', async () => {
             TaskRepo.getTaskById.mockResolvedValue(mockTask);
 
-            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime - 1);
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime - 1, null, completionDate);
 
             expect(TaskRepo.markTaskAsCompleted).not.toHaveBeenCalled();
         });
@@ -313,8 +316,108 @@ describe('taskService', () => {
         it('should throw NotFoundError if task does not exist', async () => {
             TaskRepo.getTaskById.mockResolvedValue(null);
             await expect(
-                TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, 60)
+                TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, 60, null, completionDate)
             ).rejects.toThrow(NotFoundError);
+        });
+
+        it('should not create a review when includeReviews is false', async () => {
+            TaskRepo.getTaskById.mockResolvedValue({ ...mockTask, includeReviews: false });
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, completionDate);
+
+            expect(TaskRepo.createTasks).not.toHaveBeenCalled();
+        });
+
+        it('should create a first review when task has includeReviews and is not a review', async () => {
+            const reviewableTask = {
+                ...mockTask,
+                includeReviews: true,
+                isReview: false,
+                ef: 2.5,
+                interval: 0,
+                iteration: 0,
+            };
+            TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+            TaskRepo.createTasks.mockResolvedValue([{}]);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, completionDate);
+
+            expect(TaskRepo.createTasks).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        isReview: true,
+                        includeReviews: true,
+                        plannable: true,
+                        reviewOf: reviewableTask._id,
+                    })
+                ])
+            );
+        });
+
+        it('should set givenDate before finishDate on the generated review', async () => {
+            const reviewableTask = {
+                ...mockTask,
+                includeReviews: true,
+                isReview: false,
+                ef: 2.5,
+                interval: 0,
+                iteration: 0,
+            };
+            TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+            TaskRepo.createTasks.mockResolvedValue([{}]);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, completionDate);
+
+            const [reviewTasks] = TaskRepo.createTasks.mock.calls;
+            const review = reviewTasks[0][0];
+            expect(new Date(review.givenDate) < new Date(review.finishDate)).toBe(true);
+        });
+
+        it('should create next review using original task when completing a review', async () => {
+            const originalTaskId = new mongoose.Types.ObjectId().toString();
+            const reviewTask = {
+                ...mockTask,
+                _id: mockTaskId,
+                includeReviews: true,
+                isReview: true,
+                reviewOf: originalTaskId,
+                ef: 2.5,
+                interval: 6,
+                iteration: 1,
+            };
+            const originalTask = {
+                ...mockTask,
+                _id: originalTaskId,
+                estimatedTime: 120,
+            };
+            TaskRepo.getTaskById
+                .mockResolvedValueOnce(reviewTask)
+                .mockResolvedValueOnce(originalTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+            TaskRepo.createTasks.mockResolvedValue([{}]);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, reviewTask.estimatedTime, 4, completionDate);
+
+            expect(TaskRepo.createTasks).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        isReview: true,
+                        reviewOf: originalTaskId,
+                    })
+                ])
+            );
+        });
+
+        it('should not create a review when timeSpent < estimatedTime even if includeReviews is true', async () => {
+            const reviewableTask = { ...mockTask, includeReviews: true, isReview: false };
+            TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime - 1, null, completionDate);
+
+            expect(TaskRepo.createTasks).not.toHaveBeenCalled();
         });
     });
 
