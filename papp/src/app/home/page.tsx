@@ -11,9 +11,12 @@ import Sidebar from "../components/sidebar/sideBar";
 export default function Home() {
     const [drawerOpen, setDrawerOpen] = useState<"sidebar" | "todo" | null>(null);
     const [refreshEvents, setRefreshEvents] = useState(0);
+    const [refreshTasks, setRefreshTasks] = useState(0);
     const { t } = useTranslation();
 
     const closeDrawer = () => setDrawerOpen(null);
+    const bumpEvents = () => setRefreshEvents(prev => prev + 1);
+    const bumpTasks  = () => setRefreshTasks(prev => prev + 1);
 
     return (
         <>
@@ -21,20 +24,23 @@ export default function Home() {
 
                 {/* ── Sidebar izquierdo ─────────────────────────────────────────── */}
                 <aside className="home-sidebar" aria-label={t("home.sidebarAriaLabel")}>
-                   <Sidebar onCalendarDeleted={() => setRefreshEvents(prev => prev + 1)} />
+                   <Sidebar onCalendarDeleted={bumpEvents} onPlanSuccess={bumpEvents} />
                 </aside>
 
                 {/* ── Calendario (centro) ───────────────────────────────────────── */}
                 <main className="home-calendar" aria-label={t("home.calendarAriaLabel")}>
                     <div className="home-calendar-inner">
-                        <Calendar refreshTrigger={refreshEvents} />
+                        <Calendar
+                            refreshTrigger={refreshEvents}
+                            onPlanEventCompleted={bumpTasks}
+                        />
                     </div>
                 </main>
 
                 {/* ── To do-list (derecha) ───────────────────────────────────────── */}
                 <aside className="home-todo" aria-label={t("home.taskListAriaLabel")}>
                     <div className="home-todo-inner">
-                        <TodoList />
+                        <TodoList refreshTrigger={refreshTasks} />
                     </div>
                 </aside>
             </div>
@@ -72,7 +78,7 @@ export default function Home() {
                         <button className="mobile-drawer-close" onClick={closeDrawer}>✕</button>
                     </div>
                     <div className="mobile-drawer-body">
-                        <Sidebar onCalendarDeleted={() => setRefreshEvents(prev => prev + 1)} />
+                        <Sidebar onCalendarDeleted={bumpEvents} onPlanSuccess={bumpEvents} />
                     </div>
                 </div>
             )}
@@ -85,7 +91,7 @@ export default function Home() {
                         <button className="mobile-drawer-close" onClick={closeDrawer}>✕</button>
                     </div>
                     <div className="mobile-drawer-body" style={{ padding: 0 }}>
-                        <TodoList />
+                        <TodoList refreshTrigger={refreshTasks} />
                     </div>
                 </div>
             )}

@@ -13,13 +13,15 @@ import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import AddEventDialog from "../event/add-event-dialog";
 import EditEventDialog from "../event/edit-event-dialog";
 import EditPlanEventDialog from "../plannedEvent/edit-plan-event-dialog";
+import EditReviewPlanEventDialog from "../plannedEvent/edit-review-plan-event-dialog";
 import "./calendar.css";
 
 interface CalendarProps {
     refreshTrigger?: number;
+    onPlanEventCompleted?: () => void;
 }
 
-export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
+export default function Calendar({ refreshTrigger = 0, onPlanEventCompleted }: CalendarProps) {
     const { i18n, t } = useTranslation();
     const { pushAlert } = useApp();
     const {
@@ -48,6 +50,7 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
 
     // ── Edit planned event ────────────────────────────────────────────────────
     const [editPlanEventDialogOpen, setEditPlanEventDialogOpen] = useState(false);
+    const [editReviewPlanEventDialogOpen, setEditReviewPlanEventDialogOpen] = useState(false);
     const [selectedPlanEventId, setSelectedPlanEventId] = useState<string | null>(null);
 
     // ── Handlers ──────────────────────────────────────────────────────────────
@@ -55,7 +58,11 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
     const handleEventClick = (info: any) => {
         if (info.event.extendedProps.isPlannedEvent) {
             setSelectedPlanEventId(info.event.id);
-            setEditPlanEventDialogOpen(true);
+            if (info.event.extendedProps.isReview) {
+                setEditReviewPlanEventDialogOpen(true);
+            } else {
+                setEditPlanEventDialogOpen(true);
+            }
         } else {
             setSelectedEventId(info.event.id);
             setEditDialogOpen(true);
@@ -144,7 +151,16 @@ export default function Calendar({ refreshTrigger = 0 }: CalendarProps) {
                 planEventId={selectedPlanEventId ?? ""}
                 status={visibleEvents.find(e => e.id === selectedPlanEventId)?.status ?? "pending"}
                 onClose={() => { setEditPlanEventDialogOpen(false); setSelectedPlanEventId(null); }}
-                onSave={(status) => updatePlannedEventStatus(selectedPlanEventId ?? "", status)}
+                onSave={(status) => { updatePlannedEventStatus(selectedPlanEventId ?? "", status); onPlanEventCompleted?.(); }}
+                onDelete={() => removePlannedEvent(selectedPlanEventId ?? "")}
+            />
+
+            <EditReviewPlanEventDialog
+                open={editReviewPlanEventDialogOpen}
+                planEventId={selectedPlanEventId ?? ""}
+                status={visibleEvents.find(e => e.id === selectedPlanEventId)?.status ?? "pending"}
+                onClose={() => { setEditReviewPlanEventDialogOpen(false); setSelectedPlanEventId(null); }}
+                onSave={(status) => { updatePlannedEventStatus(selectedPlanEventId ?? "", status); onPlanEventCompleted?.(); }}
                 onDelete={() => removePlannedEvent(selectedPlanEventId ?? "")}
             />
         </>

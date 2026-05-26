@@ -164,7 +164,7 @@ function getChangedFields(newData, originalEvent) {
     if (!newData.subjectId){
         newData.subjectId = null; 
     }
-    const allowedFields = ['title', 'description', 'estimatedTime', 'subjectId', 'plannable'];
+    const allowedFields = ['title', 'description', 'estimatedTime', 'subjectId', 'plannable', 'includeReviews'];
     const changedFields = {};
     for (const field of allowedFields) {
         if (!Object.prototype.hasOwnProperty.call(newData, field)) continue;

@@ -63,7 +63,7 @@ const updateCalendarForUser = async (userId, calendarId, updateData) => {
         isSystem: false,
         userId
     }
-    const updatedCalendar = await CalendarRepo.updateCalendar(calendarId, filteredData);
+    const updatedCalendar = await CalendarRepo.updateCalendar(userId, calendarId, filteredData);
     return updatedCalendar;
 };
 
@@ -73,7 +73,7 @@ const toggleCalendarVisibilityForUser = async (userId, calendarId) => {
         throw new NotFoundError("Calendar not found");
     }
 
-    const updatedCalendar = await CalendarRepo.updateCalendar(calendarId, { visible: !calendar.visible });
+    const updatedCalendar = await CalendarRepo.updateCalendar(userId, calendarId, { visible: !calendar.visible });
     return updatedCalendar;
 }
 

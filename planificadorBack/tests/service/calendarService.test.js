@@ -200,6 +200,7 @@ describe('calendarService', () => {
             await CalendarService.toggleCalendarVisibilityForUser(mockUserId, mockCalendarId);
 
             expect(CalendarRepo.updateCalendar).toHaveBeenCalledWith(
+                mockUserId,
                 mockCalendarId,
                 { visible: false }
             );
@@ -212,6 +213,7 @@ describe('calendarService', () => {
             await CalendarService.toggleCalendarVisibilityForUser(mockUserId, mockCalendarId);
 
             expect(CalendarRepo.updateCalendar).toHaveBeenCalledWith(
+                mockUserId,
                 mockCalendarId,
                 { visible: true }
             );

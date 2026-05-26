@@ -12,10 +12,14 @@ import EditTaskDialog from "./edit-task-dialog";
 import RecurrenceChoiceDialog from "@/app/components/shared/recurrenceChoiceDialog/recurrence-choice-dialog";
 import "./todoList.css";
 
-export default function TodoList() {
+interface TodoListProps {
+    refreshTrigger?: number;
+}
+
+export default function TodoList({ refreshTrigger = 0 }: TodoListProps) {
     const { pushAlert } = useApp();
     const { t, i18n } = useTranslation();
-    const { overdue, pending, completed, fetchTasks, deleteTask, addTasks } = useTasks({ pushAlert });
+    const { overdue, pending, completed, fetchTasks, deleteTask, addTasks } = useTasks({ pushAlert, refreshTrigger });
     const { recurrenceChoiceOpen, handleDeleteTask, confirmDelete, cancelDelete } = useDeleteTask({ deleteTask });
 
     const [addDialogOpen, setAddDialogOpen] = useState(false);

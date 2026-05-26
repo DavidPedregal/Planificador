@@ -130,6 +130,7 @@
     "minutesAriaLabel": "Minutos",
     "minutesUnit": "min",
     "dueDate": "Fecha de entrega",
+    "dueTime": "Hora de entrega",
     "givenDate": "Fecha de impartición",
     "givenDateTooltip": "Fecha en la que se adquirieron los conocimientos para realizar la tarea",
     "subject": "Asignatura (opcional)",
@@ -245,7 +246,21 @@
     "actualTimeAriaLabel": "Tiempo real dedicado",
     "markCompleted": "Marcar como completado",
     "completed": "Completado ✓",
-    "alreadyCompleted": "Este evento ya está completado"
+    "alreadyCompleted": "Este evento ya está completado",
+    "review": {
+      "ariaLabel": "Completar repaso",
+      "title": "Repaso planificado",
+      "ratingLabel": "¿Cómo te fue?",
+      "ratingRequired": "Selecciona una valoración para continuar",
+      "ratings": {
+        "0": "Blackout total — no recordé nada",
+        "1": "Incorrecto, pero al ver la respuesta era familiar",
+        "2": "Incorrecto, pero la respuesta era fácil de recordar",
+        "3": "Correcto, pero con mucho esfuerzo",
+        "4": "Correcto, con algo de duda",
+        "5": "Correcto, sin esfuerzo"
+      }
+    }
   },
   "fullcalendar": {
     "today":    "Hoy",

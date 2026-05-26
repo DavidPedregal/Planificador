@@ -154,6 +154,28 @@
   color: var(--accent, #7c6ff7);
 }
 
+/* ── Date + time row ── */
+.atd-date-time-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.atd-date-time-row .atd-input:first-child {
+  flex: 1;
+}
+
+.atd-time-input {
+  width: 110px;
+  flex-shrink: 0;
+  font-family: 'DM Mono', monospace;
+}
+
+.atd-time-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
 /* ── Footer ── */
 .atd-footer {
   padding: 16px 20px;

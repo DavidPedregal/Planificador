@@ -142,6 +142,8 @@ const updateTaskAfterPlanEventCompletion = async (userId, taskId, timeSpent, rat
         throw new NotFoundError("Task not found");
     }
 
+    if (task.completed) return;
+
     if (timeSpent >= task.estimatedTime) {
         await TaskRepo.markTaskAsCompleted(userId, taskId);
         if (task.includeReviews) {
@@ -160,6 +162,9 @@ const generateFirstReview = async (task, date) => {
 };
 
 const generateReviewForNextInterval = async (task, rating, estimatedTime, date) => {
+    const baseDate = new Date(date);
+    baseDate.setHours(0, 0, 0, 0);
+    date = baseDate;
     const ef = task.ef + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02));
     const n = task.iteration + 1;
     const reviewDuration = calculateReviewDuration(estimatedTime, n, ef);
@@ -168,10 +173,10 @@ const generateReviewForNextInterval = async (task, rating, estimatedTime, date) 
     const reviewTask = {
         userId: task.userId,
         subjectId: task.subjectId,
-        title: `Review for ${task.title}`,
+        title: task.isReview ? task.title : `Review: ${task.title}`,
         estimatedTime: reviewDuration,
         finishDate: new Date(date.getTime() + (interval + margin) * 24 * 60 * 60 * 1000),
-        givenDate: new Date(date.getTime() + (interval - margin) * 24 * 60 * 60 * 1000),
+        givenDate: new Date(date.getTime() + Math.max(1, interval - margin) * 24 * 60 * 60 * 1000),
         completed: false,
         plannable: true,
         includeReviews: true,
@@ -182,7 +187,10 @@ const generateReviewForNextInterval = async (task, rating, estimatedTime, date) 
         iteration: n
     };
 
-    await TaskRepo.createTasks([reviewTask]);
+    const originalTask = await TaskRepo.getTaskById(task.userId, reviewTask.reviewOf); // Ensure original task exists before creating review
+    if (originalTask && originalTask.finishDate < reviewTask.finishDate) {
+        await TaskRepo.createTasks([reviewTask]);
+    }
 };
 
 

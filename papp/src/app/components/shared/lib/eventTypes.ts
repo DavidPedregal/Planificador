@@ -19,6 +19,7 @@ export interface CalendarEvent {
     color: string;
     calendarId: string;
     isPlannedEvent: boolean;
+    isReview?: boolean;
     status?: string; // "pending", "completed", "uncompleted"
 }
 
@@ -44,6 +45,7 @@ export const mapToFullCalendarEvent = (event: any, color: string, isPlannedEvent
         color: color,
         calendarId: event.calendarId,
         isPlannedEvent: isPlannedEvent,
+        isReview: event.isReview ?? false,
         status: status,
     };
 

@@ -37,6 +37,10 @@ const PlanEventModel = new mongoose.Schema({
     userTime: {
         type: Number,
     },
+    isReview: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const PlanEvent = mongoose.model("PlanEvent", PlanEventModel);

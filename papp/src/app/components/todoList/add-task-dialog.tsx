@@ -24,6 +24,7 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
         description, setDescription,
         estimatedTime, setEstimatedTime,
         finishDate, setFinishDate,
+        finishTime, setFinishTime,
         givenDate, setGivenDate,
         subjectId, setSubjectId,
         plannable, setPlannable,
@@ -131,12 +132,21 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                     {/* Fecha de entrega */}
                     <div className="atd-field">
                         <label className="atd-label">{t("task.dueDate")}</label>
-                        <input
-                            className="atd-input"
-                            type="date"
-                            value={finishDate}
-                            onChange={(e) => setFinishDate(e.target.value)}
-                        />
+                        <div className="atd-date-time-row">
+                            <input
+                                className="atd-input"
+                                type="date"
+                                value={finishDate}
+                                onChange={(e) => setFinishDate(e.target.value)}
+                            />
+                            <input
+                                className="atd-input atd-time-input"
+                                type="time"
+                                value={finishTime}
+                                onChange={(e) => setFinishTime(e.target.value)}
+                                aria-label={t("task.dueTime")}
+                            />
+                        </div>
                     </div>
 
                     {/* Fecha de impartición */}

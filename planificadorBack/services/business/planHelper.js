@@ -12,7 +12,8 @@ function mapTasks(tasks) {
         estimatedTime: task.estimatedTime,
         finishDate: task.finishDate.toISOString(),
         givenDate: task.givenDate.toISOString(),
-        includeReviews: task.includeReviews ?? false
+        includeReviews: task.includeReviews ?? false,
+        isReview: task.isReview ?? false,
     }));
 }
 
@@ -26,7 +27,7 @@ function mapPreviousPlan(previousPlan) {
     }));
 }
 
-function mapPlanData(planData, calendarId, userId) {
+function mapPlanData(planData, calendarId, userId, taskIsReviewMap = {}) {
     return planData.map(block => ({
         userId: userId,
         title: block.title,
@@ -35,7 +36,8 @@ function mapPlanData(planData, calendarId, userId) {
         start: new Date(block.start),
         end: new Date(block.end),
         status: 'pending',
-        scheduledTime: block.scheduledTime
+        scheduledTime: block.scheduledTime,
+        isReview: taskIsReviewMap[block.taskId] ?? false,
     }));
 }
 

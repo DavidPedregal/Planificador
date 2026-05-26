@@ -12,11 +12,9 @@ def schedule(request: PlanRequest) -> PlanResponse:
 
     # 1. Calcular tiempo restante por tarea
     tasks_with_remaining = calcular_tiempo_restante(tasks, previous_plan)
-    print(f"Tareas con tiempo restante: {[t['taskId'] + ': ' + str(t['estimatedTime']) for t in tasks_with_remaining]}")
 
     # 2. Generar bloques disponibles de 15 minutos
     available_blocks = generar_bloques_disponibles(plannable_slots, previous_plan)
-    print(f"Bloques disponibles: {[b.isoformat() for b in available_blocks]}")
 
     if not available_blocks or not tasks_with_remaining:
         warnings = [

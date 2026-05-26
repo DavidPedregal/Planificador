@@ -188,3 +188,75 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ── Time row (input + delete side by side) ── */
+.eped-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eped-time-row .eped-input {
+  flex: 1;
+  width: auto;
+}
+
+/* ── Rating selector ── */
+.eped-rating-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.eped-rating-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.eped-rating-option:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.eped-rating-option.eped-rating-selected {
+  background: rgba(124,111,247,0.14);
+  border-color: rgba(124,111,247,0.45);
+}
+
+.eped-rating-option.eped-rating-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.eped-rating-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7c6ff7;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.eped-rating-option.eped-rating-selected .eped-rating-number {
+  color: #c4bcf9;
+}
+
+.eped-rating-desc {
+  font-size: 0.82rem;
+  color: #8888aa;
+  line-height: 1.35;
+}
+
+.eped-rating-option.eped-rating-selected .eped-rating-desc {
+  color: #d8d0f8;
+}

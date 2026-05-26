@@ -62,7 +62,7 @@ export function useEventForm({ open, propsStart, propsEnd, calendars, pushAlert 
 
     const handleSave = async (): Promise<boolean> => {
         const selectedCalendar = calendars.find((cal) => cal.id === calendarId);
-        const isPlannableCalendar = selectedCalendar?.name?.toLowerCase() === "plannable";
+        const isPlannableCalendar = selectedCalendar?.name?.toLowerCase() === "calendar.plannable";
         if (!eventTitle.trim() && !isPlannableCalendar) return false;
 
         const newEvent = {

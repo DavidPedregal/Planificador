@@ -25,9 +25,10 @@ export function mapTask(data: any): Task {
 
 interface UseTasksParams {
     pushAlert: (message: string, severity: AlertSeverity) => void;
+    refreshTrigger?: number;
 }
 
-export function useTasks({ pushAlert }: UseTasksParams) {
+export function useTasks({ pushAlert, refreshTrigger = 0 }: UseTasksParams) {
     const [tasks, setTasks] = useState<Task[]>([]);
 
     const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
@@ -45,7 +46,7 @@ export function useTasks({ pushAlert }: UseTasksParams) {
         setTasks(sortByDate(data.map(mapTask)));
     };
 
-    useEffect(() => { fetchTasks(); }, []);
+    useEffect(() => { fetchTasks(); }, [refreshTrigger]);
 
     // ── Delete ────────────────────────────────────────────────────────────────
 

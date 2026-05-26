@@ -29,7 +29,7 @@ const getDataToPlan = async (userId) => {
     return { mappedPreviousPlan, mappedPlannableSlots, mappedTasks };
 };
 
-const addPlan = async (planEvents, userId) => {
+const addPlan = async (planEvents, userId, taskIsReviewMap = {}) => {
     if (!planEvents) { return; }
     const systemCalendars = await CalendarService.getSystemCalendarsForUser(userId);
     const plannedCalendar = systemCalendars.find(cal => cal.name === "calendar.planned");
@@ -37,8 +37,8 @@ const addPlan = async (planEvents, userId) => {
     if (!plannedCalendar) {
         throw new NotFoundError('Planned calendar not found for user');
     }
-    
-    const mappedPlanData = mapPlanData(planEvents, plannedCalendar._id, userId);
+
+    const mappedPlanData = mapPlanData(planEvents, plannedCalendar._id, userId, taskIsReviewMap);
     return await PlanRepo.addPlan(mappedPlanData);
 };
 

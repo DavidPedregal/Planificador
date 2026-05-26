@@ -41,6 +41,7 @@ export function useTaskForm({ open, pushAlert }: UseTaskFormParams) {
     const [description, setDescription] = useState("");
     const [estimatedTime, setEstimatedTime] = useState(30);
     const [finishDate, setFinishDate] = useState(todayString());
+    const [finishTime, setFinishTime] = useState("00:00");
     const [givenDate, setGivenDate] = useState(todayString());
     const [subjectId, setSubjectId] = useState("");
     const [plannable, setPlannable] = useState(true);
@@ -55,6 +56,7 @@ export function useTaskForm({ open, pushAlert }: UseTaskFormParams) {
             setDescription("");
             setEstimatedTime(30);
             setFinishDate(today);
+            setFinishTime("00:00");
             setGivenDate(today);
             setSubjectId("");
             setPlannable(true);
@@ -80,7 +82,7 @@ export function useTaskForm({ open, pushAlert }: UseTaskFormParams) {
             title,
             description: description || undefined,
             estimatedTime,
-            finishDate,
+            finishDate: `${finishDate}T${finishTime}`,
             givenDate,
             subjectId: subjectId || undefined,
             plannable,
@@ -111,6 +113,7 @@ export function useTaskForm({ open, pushAlert }: UseTaskFormParams) {
         description, setDescription,
         estimatedTime, setEstimatedTime,
         finishDate, setFinishDate,
+        finishTime, setFinishTime,
         givenDate, setGivenDate,
         subjectId, setSubjectId,
         plannable, setPlannable,

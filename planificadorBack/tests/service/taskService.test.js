@@ -376,6 +376,53 @@ describe('taskService', () => {
             expect(new Date(review.givenDate) < new Date(review.finishDate)).toBe(true);
         });
 
+        it('should set givenDate at least 1 day after the completion date', async () => {
+            const reviewableTask = {
+                ...mockTask,
+                includeReviews: true,
+                isReview: false,
+                ef: 2.5,
+                interval: 0,
+                iteration: 0,
+            };
+            TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+            TaskRepo.createTasks.mockResolvedValue([{}]);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, completionDate);
+
+            const [reviewTasks] = TaskRepo.createTasks.mock.calls;
+            const review = reviewTasks[0][0];
+            const midnightNextDay = new Date(completionDate);
+            midnightNextDay.setHours(0, 0, 0, 0);
+            midnightNextDay.setDate(midnightNextDay.getDate() + 1);
+            expect(new Date(review.givenDate) >= midnightNextDay).toBe(true);
+        });
+
+        it('should calculate review dates from midnight regardless of the completion time', async () => {
+            const reviewableTask = {
+                ...mockTask,
+                includeReviews: true,
+                isReview: false,
+                ef: 2.5,
+                interval: 0,
+                iteration: 0,
+            };
+            TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
+            TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+            TaskRepo.createTasks.mockResolvedValue([{}]);
+
+            const lateEveningDate = new Date('2026-05-22T23:45:00Z');
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, lateEveningDate);
+
+            const [reviewTasks] = TaskRepo.createTasks.mock.calls;
+            const review = reviewTasks[0][0];
+            expect(new Date(review.givenDate).getHours()).toBe(0);
+            expect(new Date(review.givenDate).getMinutes()).toBe(0);
+            expect(new Date(review.finishDate).getHours()).toBe(0);
+            expect(new Date(review.finishDate).getMinutes()).toBe(0);
+        });
+
         it('should create next review using original task when completing a review', async () => {
             const originalTaskId = new mongoose.Types.ObjectId().toString();
             const reviewTask = {
@@ -409,6 +456,16 @@ describe('taskService', () => {
                     })
                 ])
             );
+        });
+
+        it('should do nothing if the task is already completed', async () => {
+            const alreadyCompleted = { ...mockTask, completed: true, includeReviews: true };
+            TaskRepo.getTaskById.mockResolvedValue(alreadyCompleted);
+
+            await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, mockTask.estimatedTime, null, completionDate);
+
+            expect(TaskRepo.markTaskAsCompleted).not.toHaveBeenCalled();
+            expect(TaskRepo.createTasks).not.toHaveBeenCalled();
         });
 
         it('should not create a review when timeSpent < estimatedTime even if includeReviews is true', async () => {

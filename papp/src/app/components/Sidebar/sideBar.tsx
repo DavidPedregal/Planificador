@@ -23,9 +23,10 @@ import "./sideBar.css";
 interface SidebarProps {
     onCalendarVisibilityChange?: (visibleIds: string[]) => void;
     onCalendarDeleted?: () => void;
+    onPlanSuccess?: () => void;
 }
 
-export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted }: SidebarProps) {
+export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted, onPlanSuccess }: SidebarProps) {
     const { user, pushAlert } = useApp();
     const { t } = useTranslation();
     const enabled = !!user;
@@ -83,6 +84,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted 
         setPlanLoading(false);
         if (ok) {
             setPlanWarnings(Array.isArray(data) ? data : []);
+            onPlanSuccess?.();
         } else {
             setPlanDialogOpen(false);
             pushAlert(message, "error");

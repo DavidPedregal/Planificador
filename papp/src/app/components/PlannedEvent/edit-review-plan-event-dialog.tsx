@@ -7,6 +7,8 @@ import { playCompletionSound } from "@/lib/sounds";
 import { config } from "@/app/config/config";
 import CloseIcon from "@mui/icons-material/Close";
 
+const RATING_VALUES = [0, 1, 2, 3, 4, 5] as const;
+
 interface Props {
     open: boolean;
     planEventId: string;
@@ -16,7 +18,7 @@ interface Props {
     onDelete: () => void;
 }
 
-const EditPlanEventDialog: React.FC<Props> = ({
+const EditReviewPlanEventDialog: React.FC<Props> = ({
     open,
     planEventId,
     status,
@@ -27,14 +29,16 @@ const EditPlanEventDialog: React.FC<Props> = ({
     const { pushAlert } = useApp();
     const { t } = useTranslation();
     const [actualTime, setActualTime] = useState("");
+    const [rating, setRating] = useState<number | null>(null);
 
     useEffect(() => {
-        if (open) setActualTime("");
+        if (open) { setActualTime(""); setRating(null); }
     }, [open]);
 
     if (!open) return null;
 
     const isCompleted = status === "completed";
+    const canSubmit = !isCompleted && !!actualTime && rating !== null;
 
     const handleMarkCompleted = async () => {
         const [hours, minutes] = actualTime.split(":").map(Number);
@@ -44,7 +48,7 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            body: JSON.stringify({ userTime: hours * 60 + minutes, status: "completed" }),
+            body: JSON.stringify({ userTime: hours * 60 + minutes, rating, status: "completed" }),
         });
         pushAlert(message, ok ? "success" : "error");
         if (ok) { playCompletionSound(); onSave("completed"); onClose(); }
@@ -65,7 +69,7 @@ const EditPlanEventDialog: React.FC<Props> = ({
             onClick={(e) => e.target === e.currentTarget && onClose()}
             role="dialog"
             aria-modal="true"
-            aria-label={t("planEvent.ariaLabel")}
+            aria-label={t("planEvent.review.ariaLabel")}
         >
             <div className="eped-dialog">
 
@@ -73,7 +77,7 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 <div className="eped-header">
                     <div className="eped-header-left">
                         <div className="eped-header-dot" />
-                        <h2 className="eped-title">{t("planEvent.title")}</h2>
+                        <h2 className="eped-title">{t("planEvent.review.title")}</h2>
                     </div>
                     <button className="eped-close" onClick={onClose} aria-label={t("common.close")}>
                         <CloseIcon fontSize="inherit" />
@@ -98,6 +102,29 @@ const EditPlanEventDialog: React.FC<Props> = ({
                             </button>
                         </div>
                     </div>
+
+                    <div className="eped-field">
+                        <label className="eped-label">{t("planEvent.review.ratingLabel")}</label>
+                        <div className="eped-rating-grid" role="radiogroup" aria-label={t("planEvent.review.ratingLabel")}>
+                            {RATING_VALUES.map((value) => (
+                                <div
+                                    key={value}
+                                    className={[
+                                        "eped-rating-option",
+                                        rating === value ? "eped-rating-selected" : "",
+                                        isCompleted ? "eped-rating-disabled" : "",
+                                    ].join(" ")}
+                                    onClick={() => !isCompleted && setRating(value)}
+                                    role="radio"
+                                    aria-checked={rating === value}
+                                    aria-label={`${value} — ${t(`planEvent.review.ratings.${value}`)}`}
+                                >
+                                    <span className="eped-rating-number">{value}</span>
+                                    <span className="eped-rating-desc">{t(`planEvent.review.ratings.${value}`)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Footer */}
@@ -108,8 +135,14 @@ const EditPlanEventDialog: React.FC<Props> = ({
                     <button
                         className="eped-btn eped-btn-primary"
                         onClick={handleMarkCompleted}
-                        disabled={isCompleted || !actualTime}
-                        title={isCompleted ? t("planEvent.alreadyCompleted") : undefined}
+                        disabled={!canSubmit}
+                        title={
+                            isCompleted
+                                ? t("planEvent.alreadyCompleted")
+                                : rating === null
+                                ? t("planEvent.review.ratingRequired")
+                                : undefined
+                        }
                     >
                         {isCompleted ? t("planEvent.completed") : t("planEvent.markCompleted")}
                     </button>
@@ -120,4 +153,4 @@ const EditPlanEventDialog: React.FC<Props> = ({
     );
 };
 
-export default EditPlanEventDialog;
+export default EditReviewPlanEventDialog;

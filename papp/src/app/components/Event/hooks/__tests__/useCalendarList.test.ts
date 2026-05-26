@@ -1,6 +1,5 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { useCalendarList } from "../useCalendarList";
-import { Calendar } from "../../../calendar/calendarHelper";
 
 const pushAlert = jest.fn();
 
@@ -10,8 +9,8 @@ const mockCustomCalendars = [
 ];
 
 const mockCommonCalendars = [
-    { _id: "com1", name: "Plannable", color: "#0000ff", visible: true },
-    { _id: "com2", name: "Planned", color: "#cccccc", visible: true }, // debe filtrarse
+    { _id: "com1", name: "calendar.plannable", color: "#0000ff", visible: true },
+    { _id: "com2", name: "calendar.planned", color: "#cccccc", visible: true }, // debe filtrarse
 ];
 
 beforeEach(() => {
@@ -70,8 +69,8 @@ describe("useCalendarList", () => {
         });
 
         const names = result.current.calendars.map((c) => c.name);
-        expect(names).not.toContain("Planned");
-        expect(names).toContain("Plannable");
+        expect(names).not.toContain("calendar.planned");
+        expect(names).toContain("calendar.plannable");
     });
 
     it("antepone los calendarios custom a los comunes", async () => {

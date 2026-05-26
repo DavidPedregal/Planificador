@@ -16,6 +16,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
     const [description, setDescription] = useState("");
     const [estimatedTime, setEstimatedTime] = useState(30);
     const [finishDate, setFinishDate] = useState("");
+    const [finishTime, setFinishTime] = useState("00:00");
     const [givenDate, setGivenDate] = useState("");
     const [subjectId, setSubjectId] = useState("");
     const [plannable, setPlannable] = useState(true);
@@ -39,10 +40,13 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
         setLoading(false);
         if (!ok) { pushAlert(message, "error"); return; }
 
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const fd = new Date(data.finishDate);
         setTitle(data.title);
         setDescription(data.description || "");
         setEstimatedTime(data.estimatedTime);
-        setFinishDate(data.finishDate.split("T")[0]);
+        setFinishDate(`${fd.getFullYear()}-${pad(fd.getMonth() + 1)}-${pad(fd.getDate())}`);
+        setFinishTime(`${pad(fd.getHours())}:${pad(fd.getMinutes())}`);
         setGivenDate(data.givenDate.split("T")[0]);
         setSubjectId(data.subjectId || "");
         setPlannable(data.plannable !== false);
@@ -67,7 +71,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
             title,
             description: description || undefined,
             estimatedTime,
-            finishDate,
+            finishDate: `${finishDate}T${finishTime}`,
             givenDate,
             subjectId: subjectId || undefined,
             plannable,
@@ -115,6 +119,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
         description, setDescription,
         estimatedTime, setEstimatedTime,
         finishDate, setFinishDate,
+        finishTime, setFinishTime,
         givenDate, setGivenDate,
         subjectId, setSubjectId,
         plannable, setPlannable,

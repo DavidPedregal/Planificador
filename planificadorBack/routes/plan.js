@@ -16,6 +16,7 @@ router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const { mappedPreviousPlan, mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
+        const taskIsReviewMap = Object.fromEntries(mappedTasks.map(t => [t.taskId, t.isReview ?? false]));
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -25,7 +26,7 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
             throw new Error('Planner service failed');
         }
         const planData = await response.json();
-        await PlanService.addPlan(planData.scheduled, req.userId);
+        await PlanService.addPlan(planData.scheduled, req.userId, taskIsReviewMap);
         res.status(201).json({ message: 'api.plan.created', data: planData.warnings });
     } catch (error){
         next(error);
@@ -36,6 +37,7 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
     try {
         await PlanService.deletePlan(req.userId);
         const { mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
+        const taskIsReviewMap = Object.fromEntries(mappedTasks.map(t => [t.taskId, t.isReview ?? false]));
 
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
@@ -47,7 +49,7 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
         }
         const planData = await response.json();
 
-        await PlanService.addPlan(planData.scheduled, req.userId);
+        await PlanService.addPlan(planData.scheduled, req.userId, taskIsReviewMap);
 
         res.status(201).json({ message: 'api.plan.created', data: planData.warnings });
     } catch (error){

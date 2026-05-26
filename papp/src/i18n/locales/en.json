@@ -130,6 +130,7 @@
     "minutesAriaLabel": "Minutes",
     "minutesUnit": "min",
     "dueDate": "Due date",
+    "dueTime": "Due time",
     "givenDate": "Teaching date",
     "givenDateTooltip": "Date on which the knowledge to complete the task was acquired",
     "subject": "Subject (optional)",
@@ -245,7 +246,21 @@
     "actualTimeAriaLabel": "Actual time dedicated",
     "markCompleted": "Mark as completed",
     "completed": "Completed ✓",
-    "alreadyCompleted": "This event is already completed"
+    "alreadyCompleted": "This event is already completed",
+    "review": {
+      "ariaLabel": "Complete review",
+      "title": "Planned review",
+      "ratingLabel": "How did it go?",
+      "ratingRequired": "Select a rating to continue",
+      "ratings": {
+        "0": "Complete blackout — I remembered nothing",
+        "1": "Incorrect, but the answer seemed familiar when revealed",
+        "2": "Incorrect, but the answer was easy to recall",
+        "3": "Correct, but with significant effort",
+        "4": "Correct, with some hesitation",
+        "5": "Correct, without effort"
+      }
+    }
   },
   "fullcalendar": {
     "today":    "Today",
