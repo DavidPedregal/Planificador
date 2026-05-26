@@ -76,15 +76,9 @@
     flex-direction: column;
   }
 
-  /* Fuerza FullCalendar a ocupar todo el alto disponible */
+  /* FullCalendar fills the inner container (height="100%" prop handles the rest) */
   .home-calendar-inner .fc {
-    flex: 1;
     min-height: 0;
-    height: 100% !important;
-  }
-  .home-calendar-inner .fc-view-harness {
-    flex: 1 !important;
-    height: auto !important;
   }
 
   /* ── Derecha: Todo-list ── */

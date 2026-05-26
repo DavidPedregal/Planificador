@@ -8,7 +8,11 @@ const findByEmail = (email) =>
 const create = (userData) =>
     new User(userData).save();
 
+const deleteById = (userId) =>
+    User.deleteOne({ _id: userId });
+
 module.exports = {
     findByEmail,
-    create
+    create,
+    deleteById
 };

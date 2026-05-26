@@ -101,6 +101,9 @@ const markTaskAsCompleted = async (userId, taskId) => {
     );
 };
 
+const deleteAllByUserId = (userId) =>
+    Task.deleteMany({ userId });
+
 module.exports = {
     getAllTasks,
     getTaskById,
@@ -113,6 +116,7 @@ module.exports = {
     deleteForwardTasks,
     deleteAllTasksInGroup,
     toggleTaskCompletion,
-    markTaskAsCompleted
+    markTaskAsCompleted,
+    deleteAllByUserId
 }
 

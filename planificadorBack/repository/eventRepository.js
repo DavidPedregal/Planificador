@@ -88,6 +88,9 @@ const deleteEventsByLabel = async (userId, label) => {
     return await CalendarEvent.deleteMany({ label, userId });
 }
 
+const deleteAllByUserId = (userId) =>
+    CalendarEvent.deleteMany({ userId });
+
 module.exports = {
     deleteEventsByCalendarId,
     getEventsByUserId,
@@ -100,5 +103,6 @@ module.exports = {
     deleteEvent,
     deleteForwardEvents,
     deleteAllEventsInGroup,
-    deleteEventsByLabel
+    deleteEventsByLabel,
+    deleteAllByUserId
 };

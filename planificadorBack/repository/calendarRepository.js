@@ -37,11 +37,15 @@ const updateCalendar = async (userId, calendarId, updateData) => {
     );
 };
 
+const deleteAllByUserId = (userId) =>
+    Calendar.deleteMany({ userId });
+
 module.exports = {
     findCalendarForUser,
     findCustomCalendarsForUser,
     findSystemCalendarsForUser,
     createCalendar,
     deleteCalendar,
-    updateCalendar
+    updateCalendar,
+    deleteAllByUserId
 };

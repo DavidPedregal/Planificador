@@ -50,6 +50,9 @@ const findPlanEventsByTaskId = (taskId) => {
     return PlanEvent.find({ taskId });
 }
 
+const deleteAllByUserId = (userId) =>
+    PlanEvent.deleteMany({ userId });
+
 module.exports = {
     findPlanEventForUser,
     findPlanForUser,
@@ -58,5 +61,6 @@ module.exports = {
     deletePlanEvent,
     updatePlanEvent,
     expirePendingPlanEvents,
-    findPlanEventsByTaskId
+    findPlanEventsByTaskId,
+    deleteAllByUserId
 }

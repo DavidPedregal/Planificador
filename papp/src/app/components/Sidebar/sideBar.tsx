@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { config } from "@/app/config/config";
 import { apiFetch } from "@/lib/api";
@@ -29,6 +30,7 @@ interface SidebarProps {
 export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted, onPlanSuccess }: SidebarProps) {
     const { user, pushAlert } = useApp();
     const { t } = useTranslation();
+    const router = useRouter();
     const enabled = !!user;
 
     const {
@@ -105,7 +107,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
 
                 {/* ── General ── */}
                 <span className="sidebar-label">{t("sidebar.general")}</span>
-                <button className="sidebar-nav-item">
+                <button className="sidebar-nav-item" onClick={() => router.push("/settings")}>
                     <SettingsIcon size="1.25rem" />
                     {t("sidebar.settings")}
                 </button>

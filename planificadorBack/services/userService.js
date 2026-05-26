@@ -1,9 +1,15 @@
 const UserRepo = require('../repository/userRepository');
 const CalendarRepo = require('../repository/calendarRepository');
+const EventRepo = require('../repository/eventRepository');
+const TaskRepo = require('../repository/taskRepository');
+const PlanRepo = require('../repository/planRepository');
+const SubjectRepo = require('../repository/subjectRepository');
+const SettingsRepo = require('../repository/settingsRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
 
 module.exports = {
-    login
+    login,
+    deleteAccount
 };
 
 async function login(userData) {
@@ -23,6 +29,18 @@ async function login(userData) {
         return newUser;
     }
     return user;
+};
+
+async function deleteAccount(userId) {
+    await Promise.all([
+        EventRepo.deleteAllByUserId(userId),
+        TaskRepo.deleteAllByUserId(userId),
+        PlanRepo.deleteAllByUserId(userId),
+        SubjectRepo.deleteAllByUserId(userId),
+        SettingsRepo.deleteSettings(userId),
+        CalendarRepo.deleteAllByUserId(userId),
+    ]);
+    await UserRepo.deleteById(userId);
 };
 
 async function createDefaultCalendarsForUser(userId) {

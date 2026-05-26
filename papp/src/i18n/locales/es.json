@@ -269,6 +269,31 @@
     "day":      "Día",
     "listWeek": "Agenda"
   },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "theme": "Tema",
+    "themeDark": "Oscuro",
+    "themeLight": "Claro",
+    "systemColor": "Color de acento",
+    "calendar": "Calendario",
+    "defaultView": "Vista por defecto",
+    "startHour": "Hora de inicio",
+    "endHour": "Hora de fin",
+    "hourError": "La hora de inicio debe ser menor que la hora de fin",
+    "back": "Volver",
+    "account": "Cuenta",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountBtn": "Eliminar cuenta",
+    "deleteAccountTitle": "Eliminar cuenta",
+    "deleteAccountMsg": "Esto eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer.",
+    "views": {
+      "dayGridMonth": "Mes",
+      "timeGridWeek": "Semana",
+      "timeGridDay": "Día",
+      "listWeek": "Agenda"
+    }
+  },
   "api": {
     "auth": {
       "failed": "Error de autenticación",
@@ -321,6 +346,13 @@
     "scheduler": {
       "noSlots": "No hay huecos disponibles para planificar esta tarea",
       "cannotFinish": "No es posible terminar esta tarea antes de su fecha de entrega"
+    },
+    "settings": {
+      "updated": "Ajustes actualizados",
+      "deleted": "Ajustes eliminados"
+    },
+    "user": {
+      "accountDeleted": "Cuenta eliminada"
     }
   }
 }

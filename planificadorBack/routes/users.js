@@ -4,7 +4,7 @@ const UserService = require('../services/userService');
 const PlanService = require('../services/planService');
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authmiddleware");
-const { authLimiter } = require('../middlewares/rateLimiterMiddleware');
+const { authLimiter, dbLimiter } = require('../middlewares/rateLimiterMiddleware');
 
 router.post('/login', authLimiter, async function(req, res, next) {
   const { token } = req.body;
@@ -47,6 +47,15 @@ router.post('/login', authLimiter, async function(req, res, next) {
 
 router.get('/verify', authMiddleware, (req, res) => {
   res.status(200).json({ ok: true });
+});
+
+router.delete('/account', dbLimiter, authMiddleware, async function(req, res, next) {
+    try {
+        await UserService.deleteAccount(req.userId);
+        res.status(200).json({ message: 'api.user.accountDeleted' });
+    } catch (error) {
+        next(error);
+    }
 });
 
 module.exports = router;

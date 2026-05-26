@@ -13,6 +13,7 @@ const eventRouter = require("./routes/events");
 const taskRouter = require("./routes/tasks");
 const subjectRouter = require("./routes/subjects");
 const planRouter = require("./routes/plan");
+const settingsRouter = require("./routes/settings");
 const { errorHandler } = require("./middlewares/errorHandler");
 
 connectDB();
@@ -41,7 +42,7 @@ app.use("/events", eventRouter);
 app.use("/tasks", taskRouter);
 app.use("/subjects", subjectRouter);
 app.use("/plan", planRouter);
-
+app.use("/settings", settingsRouter);
 // 404
 app.use((req, res, next) => {
   next(createError(404));

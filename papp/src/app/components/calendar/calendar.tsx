@@ -6,7 +6,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import esLocale from "@fullcalendar/core/locales/es";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
@@ -23,7 +23,7 @@ interface CalendarProps {
 
 export default function Calendar({ refreshTrigger = 0, onPlanEventCompleted }: CalendarProps) {
     const { i18n, t } = useTranslation();
-    const { pushAlert } = useApp();
+    const { pushAlert, userSettings } = useApp();
     const {
         visibleEvents,
         calendars,
@@ -32,6 +32,20 @@ export default function Calendar({ refreshTrigger = 0, onPlanEventCompleted }: C
         updatePlannedEventStatus,
         removePlannedEvent,
     } = useCalendarEvents({ refreshTrigger, pushAlert });
+
+    const calendarRef = useRef<FullCalendar>(null);
+    const [viewApplied, setViewApplied] = useState(false);
+
+    // Switch to the saved default view once settings arrive (only on first load)
+    useEffect(() => {
+        if (userSettings && !viewApplied && calendarRef.current) {
+            calendarRef.current.getApi().changeView(userSettings.defaultCalendarView);
+            setViewApplied(true);
+        }
+    }, [userSettings]);
+
+    const slotMinTime = userSettings ? `${String(userSettings.startHour).padStart(2, "0")}:00:00` : "08:00:00";
+    const slotMaxTime = userSettings ? `${String(userSettings.endHour).padStart(2, "0")}:00:00` : "22:00:00";
 
     // ── Add event ─────────────────────────────────────────────────────────────
     const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -91,8 +105,10 @@ export default function Calendar({ refreshTrigger = 0, onPlanEventCompleted }: C
         <>
             <div className="calendar-wrapper">
                 <FullCalendar
+                    ref={calendarRef}
+                    height="100%"
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                    initialView="timeGridWeek"
+                    initialView={userSettings?.defaultCalendarView ?? "timeGridWeek"}
                     locale={i18n.language === "es" ? esLocale : undefined}
                     buttonText={{
                         today:    t("fullcalendar.today"),
@@ -101,8 +117,8 @@ export default function Calendar({ refreshTrigger = 0, onPlanEventCompleted }: C
                         day:      t("fullcalendar.day"),
                         listWeek: t("fullcalendar.listWeek"),
                     }}
-                    slotMinTime="08:00:00"
-                    slotMaxTime="22:00:00"
+                    slotMinTime={slotMinTime}
+                    slotMaxTime={slotMaxTime}
                     headerToolbar={{
                         left: "prev next today",
                         center: "title",

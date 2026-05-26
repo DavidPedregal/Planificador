@@ -18,8 +18,8 @@
 .prd-spinner {
     width: 44px;
     height: 44px;
-    border: 3px solid rgba(124, 111, 247, 0.18);
-    border-top-color: #7c6ff7;
+    border: 3px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: prd-spin 0.75s linear infinite;
 }
@@ -30,7 +30,7 @@
 .prd-loading-text {
     margin: 0;
     font-size: 0.9rem;
-    color: #7a7a96;
+    color: var(--text-secondary);
 }
 
 /* ── Success row ── */
@@ -59,7 +59,7 @@
 .prd-success-text {
     margin: 0;
     font-size: 0.9rem;
-    color: #c8c8e0;
+    color: var(--text-primary);
     line-height: 1.5;
     padding-top: 4px;
 }
@@ -76,7 +76,7 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #55556a;
+    color: var(--text-muted);
 }
 
 .prd-warnings-list {
@@ -89,7 +89,7 @@
     max-height: 240px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(124, 111, 247, 0.2) transparent;
+    scrollbar-color: color-mix(in srgb, var(--accent) 20%, transparent) transparent;
 }
 
 .prd-warning-item {
@@ -105,11 +105,11 @@
 .prd-warning-title {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #e2e2ee;
+    color: var(--text-primary);
 }
 
 .prd-warning-msg {
     font-size: 0.77rem;
-    color: #7a7a96;
+    color: var(--text-secondary);
     line-height: 1.4;
 }

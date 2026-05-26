@@ -23,7 +23,7 @@
 .todo-header-icon {
   width: 32px; height: 32px; border-radius: 9px;
   background: var(--accent-muted, rgba(124,111,247,0.15));
-  border: 1px solid rgba(124,111,247,0.25);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
   display: flex; align-items: center; justify-content: center;
   color: var(--accent, #7c6ff7);
   flex-shrink: 0;
@@ -45,7 +45,7 @@
   font-size: 0.7rem;
   background: var(--accent-muted, rgba(124,111,247,0.12));
   color: var(--accent, #7c6ff7);
-  border: 1px solid rgba(124,111,247,0.2);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
   border-radius: 20px;
   padding: 2px 9px;
 }
@@ -95,13 +95,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(124,111,247,0.25);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 25%, transparent);
   white-space: nowrap;
 }
 .todo-add-btn:hover {
   background: var(--accent-hover, #9d97f9);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(124,111,247,0.35);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .todo-add-btn:active { transform: translateY(0); }
 

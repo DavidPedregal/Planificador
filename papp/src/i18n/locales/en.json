@@ -269,6 +269,31 @@
     "day":      "Day",
     "listWeek": "Agenda"
   },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "systemColor": "Accent color",
+    "calendar": "Calendar",
+    "defaultView": "Default view",
+    "startHour": "Start hour",
+    "endHour": "End hour",
+    "hourError": "Start hour must be less than end hour",
+    "back": "Back",
+    "account": "Account",
+    "deleteAccount": "Delete account",
+    "deleteAccountBtn": "Delete account",
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountMsg": "This will permanently delete your account and all your data. This action cannot be undone.",
+    "views": {
+      "dayGridMonth": "Month",
+      "timeGridWeek": "Week",
+      "timeGridDay": "Day",
+      "listWeek": "Agenda"
+    }
+  },
   "api": {
     "auth": {
       "failed": "Authentication failed",
@@ -321,6 +346,13 @@
     "scheduler": {
       "noSlots": "No available slots to schedule this task",
       "cannotFinish": "Cannot finish this task before its due date"
+    },
+    "settings": {
+      "updated": "Settings updated",
+      "deleted": "Settings deleted"
+    },
+    "user": {
+      "accountDeleted": "Account deleted"
     }
   }
 }
