@@ -111,6 +111,16 @@
     "deleteSubjectTitle": "Eliminar asignatura",
     "deleteSubjectMsg": "¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer."
   },
+  "export": {
+    "selectCalendars": "Selecciona calendarios",
+    "download": "Descargar CSV",
+    "colName": "Nombre",
+    "colCalendar": "Calendario",
+    "colStartDate": "Fecha inicio",
+    "colStartTime": "Hora inicio",
+    "colEndDate": "Fecha fin",
+    "colEndTime": "Hora fin"
+  },
   "todo": {
     "title": "Tareas",
     "add": "Añadir",

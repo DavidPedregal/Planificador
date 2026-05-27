@@ -111,6 +111,16 @@
     "deleteSubjectTitle": "Delete subject",
     "deleteSubjectMsg": "Are you sure you want to delete this subject? This action cannot be undone."
   },
+  "export": {
+    "selectCalendars": "Select calendars",
+    "download": "Download CSV",
+    "colName": "Name",
+    "colCalendar": "Calendar",
+    "colStartDate": "Start Date",
+    "colStartTime": "Start Time",
+    "colEndDate": "End Date",
+    "colEndTime": "End Time"
+  },
   "todo": {
     "title": "Tasks",
     "add": "Add",
