@@ -9,10 +9,11 @@ import { apiFetch } from "@/lib/api";
 import { EditIcon, SettingsIcon } from "lucide-react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AutoFixNormalIcon from "@mui/icons-material/AutoFixNormal";
-import ConstructionIcon from "@mui/icons-material/Construction";
 import { useSidebarCalendars } from "./hooks/useSidebarCalendars";
 import { useSubjects } from "@/app/components/shared/hooks/useSubjects";
 import { useConfirmDelete } from "@/app/components/shared/hooks/useConfirmDelete";
+import ToolsMenu from "./ToolsMenu";
+import DeleteByLabelDialog from "./delete-by-label-dialog";
 import AddCalendarDialog from "./add-calendar-dialog";
 import EditCalendarDialog from "./edit-calendar-dialog";
 import AddSubjectDialog from "./add-subject-dialog";
@@ -93,6 +94,38 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
         }
     };
 
+    const sendResetPlanRequest = async () => {
+        setPlanWarnings([]);
+        setPlanLoading(true);
+        setPlanDialogOpen(true);
+        const { ok, data, message } = await apiFetch(`${config.backendUrl}/plan/reset`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setPlanLoading(false);
+        if (ok) {
+            setPlanWarnings(Array.isArray(data) ? data : []);
+            onPlanSuccess?.();
+        } else {
+            setPlanDialogOpen(false);
+            pushAlert(message, "error");
+        }
+    };
+
+    const [deleteByLabelOpen, setDeleteByLabelOpen] = useState(false);
+
+    const handleDeleteByLabel = async (label: string) => {
+        const { ok, message } = await apiFetch(`${config.backendUrl}/events/label/${encodeURIComponent(label)}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (ok) {
+            onPlanSuccess?.();
+        } else {
+            pushAlert(message, "error");
+        }
+    };
+
     const allCalendars = [...defaultCalendars, ...customCalendars];
     const selectedCalendar = allCalendars.find(c => c.id === selectedCalendarId) ?? {
         id: "", name: "", color: "", visible: true,
@@ -115,10 +148,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                     <AutoFixNormalIcon />
                     {t("sidebar.plan")}
                 </button>
-                <button className="sidebar-nav-item">
-                    <ConstructionIcon />
-                    {t("sidebar.tools")}
-                </button>
+                <ToolsMenu onReplan={sendResetPlanRequest} onDeleteByLabel={() => setDeleteByLabelOpen(true)} />
 
                 <div className="sidebar-divider" />
 
@@ -180,6 +210,12 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
             </div>
 
             {/* ── Diálogos ── */}
+            <DeleteByLabelDialog
+                open={deleteByLabelOpen}
+                onConfirm={(label) => { setDeleteByLabelOpen(false); handleDeleteByLabel(label); }}
+                onCancel={() => setDeleteByLabelOpen(false)}
+            />
+
             <AddCalendarDialog
                 open={addCalendarOpen}
                 onClose={() => setAddCalendarOpen(false)}

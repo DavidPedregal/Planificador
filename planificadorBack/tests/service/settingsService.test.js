@@ -66,9 +66,9 @@ describe('settingsService', () => {
             ).rejects.toThrow(ValidationError);
         });
 
-        it('should throw ValidationError if startHour is above 23', async () => {
+        it('should throw ValidationError if startHour is above 24', async () => {
             await expect(
-                SettingsService.updateSettings(mockUserId, { startHour: 24 })
+                SettingsService.updateSettings(mockUserId, { startHour: 25 })
             ).rejects.toThrow(ValidationError);
         });
 
@@ -78,9 +78,9 @@ describe('settingsService', () => {
             ).rejects.toThrow(ValidationError);
         });
 
-        it('should throw ValidationError if endHour is above 23', async () => {
+        it('should throw ValidationError if endHour is above 24', async () => {
             await expect(
-                SettingsService.updateSettings(mockUserId, { endHour: 24 })
+                SettingsService.updateSettings(mockUserId, { endHour: 25 })
             ).rejects.toThrow(ValidationError);
         });
 

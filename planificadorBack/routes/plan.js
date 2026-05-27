@@ -36,13 +36,13 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
 router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await PlanService.deletePlan(req.userId);
-        const { mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
+        const { mappedPreviousPlan, mappedPlannableSlots, mappedTasks } = await PlanService.getDataToPlan(req.userId);
         const taskIsReviewMap = Object.fromEntries(mappedTasks.map(t => [t.taskId, t.isReview ?? false]));
 
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: {} })
+            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: mappedPreviousPlan })
         });
         if (!response.ok) {
             throw new Error('Planner service failed');

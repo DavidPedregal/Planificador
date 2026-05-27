@@ -246,6 +246,39 @@
     color: #ff6b6b;
   }
 
+  /* ── Tools menu ── */
+  .tools-menu-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .tools-menu-arrow {
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: transform 0.2s ease, opacity 0.15s;
+  }
+  .tools-menu-arrow.open {
+    transform: rotate(90deg);
+    opacity: 0.8;
+  }
+  .sidebar-nav-item:hover .tools-menu-arrow {
+    opacity: 0.8;
+  }
+
+  .tools-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    animation: sidebar-dropdown-in 0.12s ease;
+  }
+
   /* ── Add calendar button ── */
   .sidebar-add-btn {
     display: flex;

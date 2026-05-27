@@ -103,7 +103,6 @@ const toggleTaskCompletion = async (userId, taskId) => {
         throw new NotFoundError("Task not found");
     }
 
-    const newStatus = !existingTask.completed;
     const updatedTask = await TaskRepo.toggleTaskCompletion(userId, taskId);
     return updatedTask;
 };
