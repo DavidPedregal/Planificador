@@ -15,6 +15,7 @@ import { useConfirmDelete } from "@/app/components/shared/hooks/useConfirmDelete
 import ToolsMenu from "./ToolsMenu";
 import DeleteByLabelDialog from "./delete-by-label-dialog";
 import ExportDialog from "./export-dialog";
+import ImportDialog from "./import-dialog";
 import AddCalendarDialog from "./add-calendar-dialog";
 import EditCalendarDialog from "./edit-calendar-dialog";
 import AddSubjectDialog from "./add-subject-dialog";
@@ -115,6 +116,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
 
     const [deleteByLabelOpen, setDeleteByLabelOpen] = useState(false);
     const [exportOpen, setExportOpen] = useState(false);
+    const [importOpen, setImportOpen] = useState(false);
 
     const handleDeleteByLabel = async (label: string) => {
         const { ok, message } = await apiFetch(`${config.backendUrl}/events/label/${encodeURIComponent(label)}`, {
@@ -150,7 +152,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                     <AutoFixNormalIcon />
                     {t("sidebar.plan")}
                 </button>
-                <ToolsMenu onReplan={sendResetPlanRequest} onDeleteByLabel={() => setDeleteByLabelOpen(true)} onExport={() => setExportOpen(true)} />
+                <ToolsMenu onReplan={sendResetPlanRequest} onDeleteByLabel={() => setDeleteByLabelOpen(true)} onExport={() => setExportOpen(true)} onImport={() => setImportOpen(true)} />
 
                 <div className="sidebar-divider" />
 
@@ -222,6 +224,13 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                 open={exportOpen}
                 calendars={allCalendars}
                 onClose={() => setExportOpen(false)}
+            />
+
+            <ImportDialog
+                open={importOpen}
+                calendars={customCalendars}
+                onClose={() => setImportOpen(false)}
+                onImported={onPlanSuccess ?? (() => {})}
             />
 
             <AddCalendarDialog

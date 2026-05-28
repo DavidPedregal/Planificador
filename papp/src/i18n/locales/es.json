@@ -111,6 +111,15 @@
     "deleteSubjectTitle": "Eliminar asignatura",
     "deleteSubjectMsg": "¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer."
   },
+  "import": {
+    "file": "Archivo",
+    "filePlaceholder": "Haz clic para seleccionar un archivo .csv o .ics",
+    "calendar": "Importar al calendario",
+    "label": "Etiqueta (opcional)",
+    "labelPlaceholder": "Ej: Universidad 2026",
+    "submit": "Importar",
+    "success": "Se han importado {{count}} eventos correctamente"
+  },
   "export": {
     "selectCalendars": "Selecciona calendarios",
     "download": "Descargar CSV",

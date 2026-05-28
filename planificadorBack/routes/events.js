@@ -1,8 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const EventService = require('../services/eventService');
+const CalendarRepo = require('../repository/calendarRepository');
+const { parseUniversityCsv } = require('../services/importParsers/universityCsvParser');
+const { parseGoogleCalendar } = require('../services/importParsers/googleCalendarParser');
 const authMiddleware = require("../middlewares/authmiddleware");
 const { dbLimiter } = require('../middlewares/rateLimiterMiddleware');
+const { ValidationError } = require('../errors/AppError');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.get('/', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
@@ -17,6 +24,36 @@ router.get('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         const event = await EventService.getEventById(req.userId, req.params.id);
         res.status(200).json({ data: event });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post('/import', dbLimiter, authMiddleware, upload.single('file'), async function(req, res, next) {
+    try {
+        const { calendarId, label } = req.body;
+        if (!calendarId) throw new ValidationError('calendarId is required');
+        if (!req.file)   throw new ValidationError('No file uploaded');
+
+        const calendar = await CalendarRepo.findCalendarForUser(req.userId, calendarId);
+        if (!calendar) throw new ValidationError('Calendar not found');
+
+        const text = req.file.buffer.toString('utf-8');
+        const ext  = (req.file.originalname.split('.').pop() || '').toLowerCase();
+
+        let parsed;
+        if (ext === 'ics') {
+            parsed = parseGoogleCalendar(text);
+        } else if (ext === 'csv') {
+            parsed = parseUniversityCsv(text);
+        } else {
+            throw new ValidationError('Unsupported file format. Use .csv or .ics');
+        }
+
+        if (parsed.length === 0) throw new ValidationError('No valid events found in file');
+
+        const result = await EventService.bulkImportEvents(req.userId, parsed, calendarId, label || null);
+        res.status(201).json({ message: 'api.event.imported', data: { count: result.length } });
     } catch (error) {
         next(error);
     }

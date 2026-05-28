@@ -10,10 +10,11 @@ import LabelOffIcon from "@mui/icons-material/LabelOff";
 interface ToolsMenuProps {
     onReplan: () => void;
     onDeleteByLabel: () => void;
+    onImport: () => void;
     onExport: () => void;
 }
 
-export default function ToolsMenu({ onReplan, onDeleteByLabel, onExport }: ToolsMenuProps) {
+export default function ToolsMenu({ onReplan, onDeleteByLabel, onImport, onExport }: ToolsMenuProps) {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -58,7 +59,7 @@ export default function ToolsMenu({ onReplan, onDeleteByLabel, onExport }: Tools
                         <LabelOffIcon style={{ fontSize: "1rem" }} />
                         {t("sidebar.toolsDeleteByLabel")}
                     </button>
-                    <button className="sidebar-dropdown-item" onClick={() => setOpen(false)}>
+                    <button className="sidebar-dropdown-item" onClick={() => { setOpen(false); onImport(); }}>
                         <UploadIcon size="1rem" />
                         {t("sidebar.toolsImport")}
                     </button>

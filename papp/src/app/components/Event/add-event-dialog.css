@@ -187,6 +187,7 @@
     background: var(--bg-elevated);
     border: 1px solid var(--border-strong);
     color: var(--text-secondary);
+    display: inline-flex; align-items: center; gap: 6px;
 }
 .aed-button:hover { color: var(--accent-hover); }
 
@@ -194,6 +195,7 @@
     background: var(--accent); color: #fff;
     border-color: var(--accent);
     box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
+    padding: 10px 24px; font-size: 0.9rem;
 }
 .aed-button.primary:hover {
     background: var(--accent-hover); transform: translateY(-1px);

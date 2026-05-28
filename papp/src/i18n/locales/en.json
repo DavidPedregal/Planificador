@@ -111,6 +111,15 @@
     "deleteSubjectTitle": "Delete subject",
     "deleteSubjectMsg": "Are you sure you want to delete this subject? This action cannot be undone."
   },
+  "import": {
+    "file": "File",
+    "filePlaceholder": "Click to select a .csv or .ics file",
+    "calendar": "Import into calendar",
+    "label": "Label (optional)",
+    "labelPlaceholder": "e.g. University 2026",
+    "submit": "Import",
+    "success": "Imported {{count}} events successfully"
+  },
   "export": {
     "selectCalendars": "Select calendars",
     "download": "Download CSV",

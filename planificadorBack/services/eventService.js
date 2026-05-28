@@ -130,6 +130,19 @@ const deleteAllEventsInGroup = async (userId, eventId) => {
     return { message: "Event(s) deleted successfully", modifiedCount: result.deletedCount };
 };
 
+const bulkImportEvents = async (userId, parsedEvents, calendarId, label) => {
+    const docs = parsedEvents.map(e => ({
+        userId,
+        calendarId,
+        title: e.title,
+        start: e.start,
+        end: e.end,
+        useCalendarColor: true,
+        ...(label ? { label } : {}),
+    }));
+    return EventRepo.createEvent(docs);
+};
+
 const deleteEventsByLabel = async (userId, label) => {
     if (!label || typeof label !== 'string') {
         throw new ValidationError("Invalid label");
@@ -143,6 +156,7 @@ module.exports = {
     getEventById,
     getPlannableEventsForUser,
     createEvent,
+    bulkImportEvents,
     updateEvent,
     updateforwardEvent,
     updateAllEventsInGroup,
