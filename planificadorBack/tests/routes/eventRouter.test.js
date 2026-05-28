@@ -2,12 +2,18 @@
 const request = require('supertest');
 const app = require('../../app');
 const EventService = require('../../services/eventService');
+const CalendarRepo = require('../../repository/calendarRepository');
+const { parseUniversityCsv } = require('../../services/importParsers/universityCsvParser');
+const { parseGoogleCalendar } = require('../../services/importParsers/googleCalendarParser');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
 
 jest.mock('../../config/db', () => jest.fn());
 jest.mock('../../services/eventService');
+jest.mock('../../repository/calendarRepository');
+jest.mock('../../services/importParsers/universityCsvParser');
+jest.mock('../../services/importParsers/googleCalendarParser');
 jest.mock('../../middlewares/rateLimiterMiddleware', () => ({
     authLimiter: (req, res, next) => next(),
     dbLimiter: (req, res, next) => next()
@@ -357,6 +363,142 @@ describe('eventRouter', () => {
         it('should return 401 without token', async () => {
             const res = await request(app).delete('/events/label/examen');
             expect(res.status).toBe(401);
+        });
+    });
+
+    describe('POST /events/import', () => {
+        const mockCalendarId = '507f1f77bcf86cd799439013';
+        const mockCalendar = { _id: mockCalendarId, name: 'Test', userId: mockUserId };
+        const mockParsedEvents = [
+            { title: 'DLP.T.I-1 - A-S-03', start: new Date('2026-01-27T09:00:00'), end: new Date('2026-01-27T11:00:00') },
+        ];
+        const csvBuffer = Buffer.from('Subject,Start Date\nDLP.T.I-1,27/01/2026');
+        const icsBuffer = Buffer.from('BEGIN:VCALENDAR\nEND:VCALENDAR');
+
+        it('should return 201 with count on successful CSV import', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            parseUniversityCsv.mockReturnValue(mockParsedEvents);
+            EventService.bulkImportEvents.mockResolvedValue([{}]);
+
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', csvBuffer, { filename: 'schedule.csv', contentType: 'text/csv' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(201);
+            expect(res.body.data.count).toBe(1);
+            expect(parseUniversityCsv).toHaveBeenCalled();
+        });
+
+        it('should return 201 with count on successful ICS import', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            parseGoogleCalendar.mockReturnValue(mockParsedEvents);
+            EventService.bulkImportEvents.mockResolvedValue([{}]);
+
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', icsBuffer, { filename: 'calendar.ics', contentType: 'text/calendar' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(201);
+            expect(parseGoogleCalendar).toHaveBeenCalled();
+        });
+
+        it('should forward label to service when provided', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            parseUniversityCsv.mockReturnValue(mockParsedEvents);
+            EventService.bulkImportEvents.mockResolvedValue([{}]);
+
+            await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', csvBuffer, { filename: 'schedule.csv', contentType: 'text/csv' })
+                .field('calendarId', mockCalendarId)
+                .field('label', 'DLP');
+
+            expect(EventService.bulkImportEvents).toHaveBeenCalledWith(
+                expect.anything(), expect.anything(), mockCalendarId, 'DLP'
+            );
+        });
+
+        it('should return 400 if calendarId is missing', async () => {
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', csvBuffer, { filename: 'schedule.csv' });
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 400 if no file is provided', async () => {
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 400 if calendar not found for user', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(null);
+
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', csvBuffer, { filename: 'schedule.csv' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 400 if file format is unsupported', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', Buffer.from('data'), { filename: 'file.txt' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 400 if no valid events found in file', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            parseUniversityCsv.mockReturnValue([]);
+
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', csvBuffer, { filename: 'empty.csv' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 401 without token', async () => {
+            const res = await request(app)
+                .post('/events/import')
+                .attach('file', csvBuffer, { filename: 'schedule.csv' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(401);
+        });
+
+        it('should return 500 if service throws unexpected error', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            parseUniversityCsv.mockReturnValue(mockParsedEvents);
+            EventService.bulkImportEvents.mockRejectedValue(new Error('Unexpected'));
+
+            const res = await request(app)
+                .post('/events/import')
+                .set('Authorization', `Bearer ${validToken}`)
+                .attach('file', csvBuffer, { filename: 'schedule.csv' })
+                .field('calendarId', mockCalendarId);
+
+            expect(res.status).toBe(500);
         });
     });
 });

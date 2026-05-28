@@ -337,6 +337,54 @@ describe('eventService', () => {
         });
     });
 
+    describe('bulkImportEvents', () => {
+        const parsedEvents = [
+            { title: 'DLP.T.I-1 - A-S-03', start: new Date('2026-01-27T09:00:00'), end: new Date('2026-01-27T11:00:00') },
+            { title: 'DLP.T.I-1 - A-S-03', start: new Date('2026-02-03T09:00:00'), end: new Date('2026-02-03T11:00:00') },
+        ];
+
+        it('should insert all parsed events with userId, calendarId and useCalendarColor', async () => {
+            EventRepo.createEvent.mockResolvedValue(parsedEvents.map((e, i) => ({ ...e, _id: String(i) })));
+
+            const result = await EventService.bulkImportEvents(mockUserId, parsedEvents, mockCalendarId, null);
+
+            const callArg = EventRepo.createEvent.mock.calls[0][0];
+            expect(callArg).toHaveLength(2);
+            expect(callArg[0]).toMatchObject({
+                userId: mockUserId,
+                calendarId: mockCalendarId,
+                useCalendarColor: true,
+                title: parsedEvents[0].title,
+            });
+            expect(result).toHaveLength(2);
+        });
+
+        it('should include label on each doc when provided', async () => {
+            EventRepo.createEvent.mockResolvedValue([]);
+
+            await EventService.bulkImportEvents(mockUserId, parsedEvents, mockCalendarId, 'DLP');
+
+            const callArg = EventRepo.createEvent.mock.calls[0][0];
+            expect(callArg.every(doc => doc.label === 'DLP')).toBe(true);
+        });
+
+        it('should not include label field when label is null', async () => {
+            EventRepo.createEvent.mockResolvedValue([]);
+
+            await EventService.bulkImportEvents(mockUserId, parsedEvents, mockCalendarId, null);
+
+            const callArg = EventRepo.createEvent.mock.calls[0][0];
+            expect(callArg[0].label).toBeUndefined();
+        });
+
+        it('should return an empty array when given no events', async () => {
+            EventRepo.createEvent.mockResolvedValue([]);
+
+            const result = await EventService.bulkImportEvents(mockUserId, [], mockCalendarId, null);
+            expect(result).toEqual([]);
+        });
+    });
+
     describe('deleteEventsByLabel', () => {
         it('should delete events by label and return modifiedCount', async () => {
             EventRepo.deleteEventsByLabel.mockResolvedValue({ deletedCount: 2 });
