@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../Event/add-event-dialog.css";
+import "../event/add-event-dialog.css";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { apiFetch } from "@/lib/api";

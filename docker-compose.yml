@@ -1,25 +1,45 @@
-version: "3.9"
-
 services:
+
+  # ── MongoDB ────────────────────────────────────────────────────────────────
   mongo:
     image: mongo:7
     volumes:
       - mongo_data:/data/db
 
-  app:
-    build: ./PlanificadorApp
+  # ── Python planning microservice ───────────────────────────────────────────
+  algoritmo:
+    build: ./planificadorAlgoritmo
     ports:
-      - "3000:3000"
+      - "8001:8001"
+
+  # ── Express backend ────────────────────────────────────────────────────────
+  back:
+    build: ./planificadorBack
+    ports:
+      - "8000:8000"
     depends_on:
       - mongo
       - algoritmo
     environment:
-      ALGORITMO_URL: http://algoritmo:8000
+      PORT: 8000
+      MONGO_URI: mongodb://mongo:27017/planificador
+      PLANNER_URL: http://algoritmo:8001
+      CORS_ORIGIN: http://51.170.47.171:3000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
 
-  algoritmo:
-    build: ./PlanificadorAlgoritmo
+  # ── Next.js frontend ───────────────────────────────────────────────────────
+  front:
+    build:
+      context: ./papp
+      args:
+        NEXT_PUBLIC_URL_BACK: http://51.170.47.171:8000
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     ports:
-      - "8000:8000"
+      - "3000:3000"
+    depends_on:
+      - back
 
 volumes:
   mongo_data:
