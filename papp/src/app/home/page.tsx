@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import Calendar from "@/app/components/calendar/calendar";
 import TodoList from "@/app/components/todoList/todoList";
 import "./home.css";
-import Sidebar from "../components/sidebar/sideBar";
+import Sidebar from "@/app/components/sidebar/sideBar";
 
 
 export default function Home() {
