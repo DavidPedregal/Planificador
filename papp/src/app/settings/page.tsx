@@ -177,7 +177,7 @@ export default function SettingsPage() {
 
                     {/* Account */}
                     <section className="settings-section">
-                        <h2 className="settings-section-title">{t("settings.account")}</h2>
+                        {/* <h2 className="settings-section-title"></h2> */}
 
                         <div className="settings-row">
                             <span className="settings-label">{t("settings.deleteAccount")}</span>
