@@ -46,20 +46,18 @@ export default function Home() {
             </div>
 
             {/* ── FABs móvil ────────────────────────────────────────────────────── */}
-            <div className="mobile-fab-group" role="group" aria-label={t("home.panelsAriaLabel")}>
-                <button
-                    className={`mobile-fab${drawerOpen === "sidebar" ? " active" : ""}`}
-                    onClick={() => setDrawerOpen(d => d === "sidebar" ? null : "sidebar")}
-                    aria-label={t("home.openSettingsAriaLabel")}
-                    title={t("home.settingsTitle")}
-                >⚙️</button>
-                <button
-                    className={`mobile-fab${drawerOpen === "todo" ? " active" : ""}`}
-                    onClick={() => setDrawerOpen(d => d === "todo" ? null : "todo")}
-                    aria-label={t("home.openTaskListAriaLabel")}
-                    title={t("home.tasksTitle")}
-                >✅</button>
-            </div>
+            <button
+                className={`mobile-fab mobile-fab--left${drawerOpen === "sidebar" ? " active" : ""}`}
+                onClick={() => setDrawerOpen(d => d === "sidebar" ? null : "sidebar")}
+                aria-label={t("home.openSettingsAriaLabel")}
+                title={t("home.settingsTitle")}
+            >⚙️</button>
+            <button
+                className={`mobile-fab mobile-fab--right${drawerOpen === "todo" ? " active" : ""}`}
+                onClick={() => setDrawerOpen(d => d === "todo" ? null : "todo")}
+                aria-label={t("home.openTaskListAriaLabel")}
+                title={t("home.tasksTitle")}
+            >✅</button>
 
             {/* ── Drawer overlay ─────────────────────────────────────────────────── */}
             {drawerOpen && (

@@ -109,7 +109,8 @@
     "deleteCalendarTitle": "Delete calendar",
     "deleteCalendarMsg": "Are you sure you want to delete this calendar? This action cannot be undone.",
     "deleteSubjectTitle": "Delete subject",
-    "deleteSubjectMsg": "Are you sure you want to delete this subject? This action cannot be undone."
+    "deleteSubjectMsg": "Are you sure you want to delete this subject? This action cannot be undone.",
+    "statistics": "Statistics"
   },
   "import": {
     "file": "File",
@@ -122,6 +123,9 @@
   },
   "export": {
     "selectCalendars": "Select calendars",
+    "labelFilter": "Label (optional)",
+    "labelFilterPlaceholder": "Only export events with this label",
+    "format": "Format",
     "download": "Download CSV",
     "colName": "Name",
     "colCalendar": "Calendar",

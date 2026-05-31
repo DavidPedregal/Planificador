@@ -22,6 +22,7 @@ import AddSubjectDialog from "./add-subject-dialog";
 import EditSubjectDialog from "./edit-subject-dialog";
 import ConfirmDialog from "./confirm-dialog";
 import PlanResultDialog from "./plan-result-dialog";
+import BarChartIcon from '@mui/icons-material/BarChart';
 import "./sideBar.css";
 
 interface SidebarProps {
@@ -152,7 +153,16 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                     <AutoFixNormalIcon />
                     {t("sidebar.plan")}
                 </button>
-                <ToolsMenu onReplan={sendResetPlanRequest} onDeleteByLabel={() => setDeleteByLabelOpen(true)} onExport={() => setExportOpen(true)} onImport={() => setImportOpen(true)} />
+                <ToolsMenu 
+                    onReplan={sendResetPlanRequest} 
+                    onDeleteByLabel={() => setDeleteByLabelOpen(true)} 
+                    onExport={() => setExportOpen(true)} 
+                    onImport={() => setImportOpen(true)} 
+                />
+                <button className="sidebar-nav-item" onClick={() => router.push("/statistics")}>
+                    <BarChartIcon />
+                    {t("sidebar.statistics")}
+                </button>
 
                 <div className="sidebar-divider" />
 

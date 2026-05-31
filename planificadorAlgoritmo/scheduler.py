@@ -115,7 +115,6 @@ def resolver(tasks, available_blocks):
         given_dates.append(datetime.fromisoformat(task["givenDate"].replace("Z", "+00:00")))
 
     # Penalización por distancia a givenDate (normalizada)
-    max_distance = 1000
     costs = []
     # Restricción dura: no planificar antes de givenDate
     for i, task in enumerate(tasks):
@@ -124,16 +123,23 @@ def resolver(tasks, available_blocks):
             if block_time < given:
                 model.Add(x[i, j] == 0)
 
+    # Calcular max_distance basado en el rango real de bloques
+    if available_blocks and given_dates:
+        max_block = available_blocks[-1]  # ya están ordenados
+        min_given = min(given_dates)
+        distance_cap = max(1, int((max_block - min_given).total_seconds() // (BLOCK_SIZE * 60))) + 1
+    else:
+        distance_cap = 1
     # Coste: minimizar distancia a givenDate
     for i in range(n_tasks):
         for j, block_time in enumerate(available_blocks):
             distance = int((block_time - given_dates[i]).total_seconds() // (BLOCK_SIZE * 60))
-            distance = min(distance, max_distance)
+            distance = min(distance, distance_cap)
             costs.append(distance * x[i, j])
 
     # Prioridad 1: maximizar tareas completadas (peso alto)
     # Prioridad 2: minimizar distancia a givenDate (peso bajo)
-    peso = n_tasks * n_blocks * max_distance + 1
+    peso = n_tasks * n_blocks * distance_cap + 1
     model.Minimize(
         sum(-peso * completada[i] for i in range(n_tasks)) +
         sum(costs)

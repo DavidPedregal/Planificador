@@ -109,7 +109,8 @@
     "deleteCalendarTitle": "Eliminar calendario",
     "deleteCalendarMsg": "¿Estás seguro de que deseas eliminar este calendario? Esta acción no se puede deshacer.",
     "deleteSubjectTitle": "Eliminar asignatura",
-    "deleteSubjectMsg": "¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer."
+    "deleteSubjectMsg": "¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer.",
+    "statistics": "Estadísticas"
   },
   "import": {
     "file": "Archivo",
@@ -122,6 +123,9 @@
   },
   "export": {
     "selectCalendars": "Selecciona calendarios",
+    "labelFilter": "Etiqueta (opcional)",
+    "labelFilterPlaceholder": "Exportar solo eventos con esta etiqueta",
+    "format": "Formato",
     "download": "Descargar CSV",
     "colName": "Nombre",
     "colCalendar": "Calendario",

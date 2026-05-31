@@ -16,18 +16,38 @@ interface ExportDialogProps {
     onClose: () => void;
 }
 
-function pad(n: number) { return String(n).padStart(2, "0"); }
-function formatDate(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
-function formatTime(d: Date) { return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function pad2(n: number) { return String(n).padStart(2, "0"); }
+function formatDate(d: Date) { return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`; }
+function formatTime(d: Date) { return `${d.getHours()}.${pad2(d.getMinutes())}`; }
+function formatIcsDate(d: Date) {
+    return `${d.getUTCFullYear()}${pad2(d.getUTCMonth()+1)}${pad2(d.getUTCDate())}T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}00Z`;
+}
+function buildIcs(events: any[]) {
+    const vevents = events.map((e, i) => [
+        "BEGIN:VEVENT",
+        `UID:mentiplan-${i}-${Date.now()}@mentiplan`,
+        `DTSTART:${formatIcsDate(new Date(e.start))}`,
+        `DTEND:${formatIcsDate(new Date(e.end))}`,
+        `SUMMARY:${String(e.title).replace(/[\\;,]/g, c => `\\${c}`)}`,
+        "END:VEVENT",
+    ].join("\r\n")).join("\r\n");
+    return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Mentiplan//EN\r\n${vevents}\r\nEND:VCALENDAR`;
+}
 
 const ExportDialog: React.FC<ExportDialogProps> = ({ open, calendars, onClose }) => {
     const { t } = useTranslation();
     const { pushAlert } = useApp();
     const [selected, setSelected] = useState<Set<string>>(new Set());
+    const [label, setLabel] = useState("");
+    const [format, setFormat] = useState<"csv" | "ical">("csv");
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (open) setSelected(new Set(calendars.map(c => c.id)));
+        if (open) {
+            setSelected(new Set(calendars.map(c => c.id)));
+            setLabel("");
+            setFormat("csv");
+        }
     }, [open, calendars]);
 
     if (!open) return null;
@@ -49,34 +69,44 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ open, calendars, onClose })
         setLoading(false);
         if (!ok) { pushAlert(message, "error"); return; }
 
-        const calendarMap = new Map(calendars.map(c => [c.id, c.name]));
-        const events = (data as any[]).filter(e => selected.has(e.calendarId));
+        const trimmedLabel = label.trim();
+        const events = (data as any[]).filter(e =>
+            selected.has(e.calendarId) &&
+            (!trimmedLabel || e.label === trimmedLabel)
+        );
 
-        const rows = [
-            [t("export.colName"), t("export.colCalendar"), t("export.colStartDate"), t("export.colStartTime"), t("export.colEndDate"), t("export.colEndTime")],
-            ...events.map(e => {
-                const start = new Date(e.start);
-                const end = new Date(e.end);
-                return [
-                    e.title,
-                    calendarMap.get(e.calendarId) ?? e.calendarId,
-                    formatDate(start),
-                    formatTime(start),
-                    formatDate(end),
-                    formatTime(end),
-                ];
-            }),
-        ];
+        const today = new Date();
+        const dateSuffix = `${today.getFullYear()}${pad2(today.getMonth()+1)}${pad2(today.getDate())}`;
 
-        const csv = rows
-            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-            .join("\n");
+        let content: string;
+        let mimeType: string;
+        let filename: string;
 
-        const blob = new Blob(["" + csv], { type: "text/csv;charset=utf-8;" });
+        if (format === "ical") {
+            content = buildIcs(events);
+            mimeType = "text/calendar;charset=utf-8;";
+            filename = `calendar-export-${dateSuffix}.ics`;
+        } else {
+            const rows = [
+                ["Subject", "Start Date", "Start Time", "End Date", "End Time", "Description", "Location"],
+                ...events.map(e => {
+                    const start = new Date(e.start);
+                    const end = new Date(e.end);
+                    return [e.title, formatDate(start), formatTime(start), formatDate(end), formatTime(end), "", ""];
+                }),
+            ];
+            content = "" + rows
+                .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+                .join("\n");
+            mimeType = "text/csv;charset=utf-8;";
+            filename = `calendar-export-${dateSuffix}.csv`;
+        }
+
+        const blob = new Blob([content], { type: mimeType });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `calendar-export-${formatDate(new Date())}.csv`;
+        a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
         onClose();
@@ -121,6 +151,27 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ open, calendars, onClose })
                                 </button>
                             ))}
                         </div>
+                    </div>
+                    <div className="aed-field">
+                        <label className="aed-label">{t("export.labelFilter")}</label>
+                        <input
+                            className="aed-input"
+                            type="text"
+                            value={label}
+                            onChange={e => setLabel(e.target.value)}
+                            placeholder={t("export.labelFilterPlaceholder")}
+                        />
+                    </div>
+                    <div className="aed-field">
+                        <label className="aed-label">{t("export.format")}</label>
+                        <select
+                            className="aed-input"
+                            value={format}
+                            onChange={e => setFormat(e.target.value as "csv" | "ical")}
+                        >
+                            <option value="csv">CSV</option>
+                            <option value="ical">iCal (.ics)</option>
+                        </select>
                     </div>
                 </div>
 

@@ -30,8 +30,8 @@ app.use(express.json());
 
 var RateLimit = require('express-rate-limit');
 var limiter = RateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, 
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
 });
 
 app.use(limiter);

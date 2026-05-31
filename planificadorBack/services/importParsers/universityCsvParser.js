@@ -13,6 +13,12 @@ function parseDateTime(dateStr, timeStr) {
     return new Date(year, month - 1, day, hours, minutes, 0);
 }
 
+function unquote(s) {
+    s = s.trim();
+    if (s.startsWith('"') && s.endsWith('"')) return s.slice(1, -1).replace(/""/g, '"');
+    return s;
+}
+
 function parseUniversityCsv(csvText) {
     const lines = csvText.split('\n').map(l => l.trimEnd());
     const events = [];
@@ -26,13 +32,13 @@ function parseUniversityCsv(csvText) {
         const parts = line.split(',');
         if (parts.length < 7) continue;
 
-        const subject  = parts[0].trim();
-        const startDate = parts[1].trim();
-        const startTime = parts[2].trim();
-        const endDate  = parts[3].trim();
-        const endTime  = parts[4].trim();
+        const subject   = unquote(parts[0]);
+        const startDate = unquote(parts[1]);
+        const startTime = unquote(parts[2]);
+        const endDate   = unquote(parts[3]);
+        const endTime   = unquote(parts[4]);
         // parts[5] = description (ignored)
-        const location = parts.slice(6).join(',').trim();
+        const location  = unquote(parts.slice(6).join(','));
 
         if (!subject || !startDate || !startTime || !endDate || !endTime) continue;
 
