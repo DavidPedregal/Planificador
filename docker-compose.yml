@@ -24,7 +24,7 @@ services:
       PORT: 8000
       MONGO_URI: mongodb://mongo:27017/planificador
       PLANNER_URL: http://algoritmo:8001
-      CORS_ORIGIN: http://mentiplan.com
+      CORS_ORIGIN: https://mentiplan.com
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
@@ -34,7 +34,7 @@ services:
     build:
       context: ./papp
       args:
-        NEXT_PUBLIC_URL_BACK: http://mentiplan.com/api
+        NEXT_PUBLIC_URL_BACK: https://mentiplan.com/api
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     ports:
       - "3000:3000"
