@@ -97,8 +97,9 @@
     padding-right: 10px;
 }
 
-.fc .fc-timegrid-slot { height: 40px !important; }
+.fc .fc-timegrid-slot { height: var(--slot-height, 20px) !important; }
 .fc .fc-timegrid-slot:hover { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+.calendar-wrapper .fc-scroller { overflow-y: hidden !important; }
 
 .fc-event {
     padding: 0 !important;

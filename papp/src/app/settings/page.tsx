@@ -145,7 +145,7 @@ export default function SettingsPage() {
                                 type="number"
                                 className="settings-number-input"
                                 min={0}
-                                max={23}
+                                max={endHour-1}
                                 value={startHour}
                                 onChange={e => setStartHour(Number(e.target.value))}
                             />
@@ -156,8 +156,8 @@ export default function SettingsPage() {
                             <input
                                 type="number"
                                 className="settings-number-input"
-                                min={0}
-                                max={23}
+                                min={startHour+1}
+                                max={24}
                                 value={endHour}
                                 onChange={e => setEndHour(Number(e.target.value))}
                             />
