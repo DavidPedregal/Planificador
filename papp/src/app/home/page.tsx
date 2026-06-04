@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import Calendar from "@/app/components/calendar/calendar";
 import TodoList from "@/app/components/todoList/todoList";
 import "./home.css";
@@ -9,6 +10,7 @@ import Sidebar from "@/app/components/sidebar/sideBar";
 
 
 export default function Home() {
+    useAuthGuard();
     const [drawerOpen, setDrawerOpen] = useState<"sidebar" | "todo" | null>(null);
     const [refreshEvents, setRefreshEvents] = useState(0);
     const [refreshTasks, setRefreshTasks] = useState(0);

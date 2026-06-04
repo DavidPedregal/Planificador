@@ -323,6 +323,25 @@
       "listWeek": "Agenda"
     }
   },
+  "statistics": {
+    "title": "Statistics",
+    "data": "Data",
+    "chartType": "Chart type",
+    "dateRange": "Date range",
+    "generate": "Generate",
+    "noData": "No data for the selected period.",
+    "time": "Time",
+    "planned": "Planned",
+    "actual": "Actual",
+    "dataTypes": {
+      "subjectTime": "Time per subject",
+      "comparisonTime": "Planned vs actual time"
+    },
+    "chartTypes": {
+      "pie": "Pie chart",
+      "bar": "Bar chart"
+    }
+  },
   "api": {
     "auth": {
       "failed": "Authentication failed",

@@ -2,6 +2,7 @@
 
 import "./page.css";
 import { useEffect, useRef, useState } from "react";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "lucide-react";
@@ -12,6 +13,7 @@ import { apiFetch } from "@/lib/api";
 import ConfirmDialog from "@/app/components/sidebar/confirm-dialog";
 
 export default function SettingsPage() {
+    useAuthGuard();
     const { t } = useTranslation();
     const router = useRouter();
     const { user, theme, logout, pushAlert } = useApp();
@@ -23,10 +25,6 @@ export default function SettingsPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     const colorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        if (!user) router.push("/");
-    }, [user]);
 
     useEffect(() => {
         if (settings) {

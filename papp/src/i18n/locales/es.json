@@ -323,6 +323,25 @@
       "listWeek": "Agenda"
     }
   },
+  "statistics": {
+    "title": "Estadísticas",
+    "data": "Datos",
+    "chartType": "Tipo de gráfico",
+    "dateRange": "Rango de fechas",
+    "generate": "Generar",
+    "noData": "No hay datos para el período seleccionado.",
+    "time": "Tiempo",
+    "planned": "Planificado",
+    "actual": "Real",
+    "dataTypes": {
+      "subjectTime": "Tiempo por asignatura",
+      "comparisonTime": "Tiempo planificado vs real"
+    },
+    "chartTypes": {
+      "pie": "Gráfico circular",
+      "bar": "Gráfico de barras"
+    }
+  },
   "api": {
     "auth": {
       "failed": "Error de autenticación",
