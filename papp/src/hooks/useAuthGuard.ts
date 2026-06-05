@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { config } from "@/app/config/config";
 
-export function useAuthGuard() {
-    const { user, logout } = useApp();
+export function useAuthGuard(): { authReady: boolean } {
+    const { logout } = useApp();
     const router = useRouter();
+    const [authReady, setAuthReady] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
 
-        if (!token || !user) {
+        if (!token) {
             logout();
             router.replace("/");
             return;
@@ -21,7 +22,9 @@ export function useAuthGuard() {
         fetch(`${config.backendUrl}/users/verify`, {
             headers: { Authorization: `Bearer ${token}` },
         }).then(res => {
-            if (!res.ok) {
+            if (res.ok) {
+                setAuthReady(true);
+            } else {
                 logout();
                 router.replace("/");
             }
@@ -30,4 +33,6 @@ export function useAuthGuard() {
             router.replace("/");
         });
     }, []);
+
+    return { authReady };
 }

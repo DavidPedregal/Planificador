@@ -76,7 +76,7 @@
     "error": "Error al iniciar sesión con Google"
   },
   "navbar": {
-    "logo": "Menti",
+    "logo": "MentiPlan",
     "changeLanguage": "Cambiar idioma",
     "logout": "Cerrar sesión"
   },
@@ -253,6 +253,8 @@
   "recurrenceChoice": {
     "single": "{{action}} solo este evento",
     "fromThis": "{{action}} a partir de este evento",
+    "singleTask": "{{action}} solo esta tarea",
+    "fromThisTask": "{{action}} a partir de esta tarea",
     "all": "{{action}} toda la serie",
     "actionDelete": "Eliminar",
     "actionUpdate": "Actualizar"
@@ -330,6 +332,7 @@
     "dateRange": "Rango de fechas",
     "generate": "Generar",
     "noData": "No hay datos para el período seleccionado.",
+    "noSubject": "Sin asignatura",
     "time": "Tiempo",
     "planned": "Planificado",
     "actual": "Real",

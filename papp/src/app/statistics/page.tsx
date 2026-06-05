@@ -59,7 +59,8 @@ export default function StatisticsPage() {
     useAuthGuard();
     const { t } = useTranslation();
     const router = useRouter();
-    const { user, pushAlert } = useApp();
+    const { authReady } = useAuthGuard();
+    const { pushAlert } = useApp();
 
     const [dataType, setDataType] = useState<DataType>("subjectTime");
     const [chartType, setChartType] = useState<ChartType>("pie");
@@ -68,7 +69,7 @@ export default function StatisticsPage() {
     const [loading, setLoading] = useState(false);
     const [chartState, setChartState] = useState<ChartState | null>(null);
 
-    if (!user) return null;
+    if (!authReady) return null;
 
     const handleDataTypeChange = (value: DataType) => {
         setDataType(value);
@@ -91,15 +92,20 @@ export default function StatisticsPage() {
         if (!ok) { pushAlert(message, "error"); return; }
 
         if (dataType === "subjectTime") {
-            const raw = data as Array<{ name: string; minutes: number }>;
+            const raw = data as Array<{ name: string | null; minutes: number }>;
             setChartState({
                 kind: "subjectTime",
-                entries: raw.map((d, i) => ({ ...d, fill: CHART_COLORS[i % CHART_COLORS.length] })),
+                entries: raw.map((d, i) => ({
+                    ...d,
+                    name: d.name ?? t("statistics.noSubject"),
+                    fill: CHART_COLORS[i % CHART_COLORS.length],
+                })),
             });
         } else {
+            const raw = data as Array<{ name: string | null; planned: number; actual: number }>;
             setChartState({
                 kind: "comparisonTime",
-                entries: data as ComparisonDatum[],
+                entries: raw.map(d => ({ ...d, name: d.name ?? t("statistics.noSubject") })),
             });
         }
     };

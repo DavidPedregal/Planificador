@@ -10,11 +10,13 @@ import Sidebar from "@/app/components/sidebar/sideBar";
 
 
 export default function Home() {
-    useAuthGuard();
+    const { authReady } = useAuthGuard();
     const [drawerOpen, setDrawerOpen] = useState<"sidebar" | "todo" | null>(null);
     const [refreshEvents, setRefreshEvents] = useState(0);
     const [refreshTasks, setRefreshTasks] = useState(0);
     const { t } = useTranslation();
+
+    if (!authReady) return null;
 
     const closeDrawer = () => setDrawerOpen(null);
     const bumpEvents = () => setRefreshEvents(prev => prev + 1);

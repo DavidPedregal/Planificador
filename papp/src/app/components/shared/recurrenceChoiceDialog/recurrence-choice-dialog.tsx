@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 interface Props {
     open: boolean;
     action: "update" | "delete";
+    kind?: "event" | "task";
     title: string;
     message: string;
     onChooseSingle: () => void;
@@ -16,6 +17,7 @@ interface Props {
 const RecurrenceChoiceDialog: React.FC<Props> = ({
     open,
     action,
+    kind = "event",
     title,
     message,
     onChooseSingle,
@@ -27,6 +29,8 @@ const RecurrenceChoiceDialog: React.FC<Props> = ({
     if (!open) return null;
 
     const actionLabel = action === "delete" ? t("recurrenceChoice.actionDelete") : t("recurrenceChoice.actionUpdate");
+    const singleKey   = kind === "task" ? "recurrenceChoice.singleTask"   : "recurrenceChoice.single";
+    const fromThisKey = kind === "task" ? "recurrenceChoice.fromThisTask" : "recurrenceChoice.fromThis";
 
     return (
         <div
@@ -64,10 +68,10 @@ const RecurrenceChoiceDialog: React.FC<Props> = ({
                         {t("common.cancel")}
                     </button>
                     <button className="rcd-btn rcd-btn-save" onClick={onChooseSingle}>
-                        {t("recurrenceChoice.single", { action: actionLabel })}
+                        {t(singleKey, { action: actionLabel })}
                     </button>
                     <button className="rcd-btn rcd-btn-save" onClick={onChooseFromThis}>
-                        {t("recurrenceChoice.fromThis", { action: actionLabel })}
+                        {t(fromThisKey, { action: actionLabel })}
                     </button>
                     <button className="rcd-btn rcd-btn-save" onClick={onChooseAll}>
                         {t("recurrenceChoice.all", { action: actionLabel })}

@@ -76,7 +76,7 @@
     "error": "Error signing in with Google"
   },
   "navbar": {
-    "logo": "Menti",
+    "logo": "MentiPlan",
     "changeLanguage": "Change language",
     "logout": "Log out"
   },
@@ -253,6 +253,8 @@
   "recurrenceChoice": {
     "single": "{{action}} only this event",
     "fromThis": "{{action}} from this event onwards",
+    "singleTask": "{{action}} only this task",
+    "fromThisTask": "{{action}} from this task onwards",
     "all": "{{action}} the entire series",
     "actionDelete": "Delete",
     "actionUpdate": "Update"
@@ -330,6 +332,7 @@
     "dateRange": "Date range",
     "generate": "Generate",
     "noData": "No data for the selected period.",
+    "noSubject": "No subject",
     "time": "Time",
     "planned": "Planned",
     "actual": "Actual",

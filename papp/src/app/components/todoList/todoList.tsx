@@ -146,6 +146,7 @@ export default function TodoList({ refreshTrigger = 0 }: TodoListProps) {
             <RecurrenceChoiceDialog
                 open={recurrenceChoiceOpen}
                 action="delete"
+                kind="task"
                 title={t("todo.deleteRecurringTitle")}
                 message={t("todo.deleteRecurringMsg")}
                 onChooseSingle={() => confirmDelete("single")}

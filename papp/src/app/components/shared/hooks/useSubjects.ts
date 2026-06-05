@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { config } from "@/app/config/config";
 import { apiFetch } from "@/lib/api";
 import { Subject } from "@/app/components/shared/lib/subject";
@@ -18,13 +18,13 @@ export function useSubjects({ enabled, pushAlert }: UseSubjectsParams) {
         if (enabled) fetchSubjects();
     }, [enabled]);
 
-    const fetchSubjects = async () => {
+    const fetchSubjects = useCallback(async () => {
         const { ok, data, message } = await apiFetch(`${config.backendUrl}/subjects`, {
             headers: authHeader(),
         });
         if (!ok) { pushAlert(message, "error"); return; }
         setSubjects(data.map((s: any) => ({ id: s._id, name: s.name })));
-    };
+    }, [pushAlert]);
 
     const deleteSubject = async (id: string): Promise<boolean> => {
         const { ok, message } = await apiFetch(`${config.backendUrl}/subjects/${id}`, {

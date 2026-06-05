@@ -13,7 +13,7 @@ import { apiFetch } from "@/lib/api";
 import ConfirmDialog from "@/app/components/sidebar/confirm-dialog";
 
 export default function SettingsPage() {
-    useAuthGuard();
+    const { authReady } = useAuthGuard();
     const { t } = useTranslation();
     const router = useRouter();
     const { user, theme, logout, pushAlert } = useApp();
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         router.push("/");
     };
 
-    if (!user) return null;
+    if (!authReady) return null;
 
     return (
         <div className="settings-page">

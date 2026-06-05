@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./add-task-dialog.css";
 import InfoIcon from "@mui/icons-material/Info";
 import Tooltip from "@mui/material/Tooltip";
@@ -19,7 +19,9 @@ const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
     const { user, pushAlert } = useApp();
     const { t } = useTranslation();
     const enabled = !!user;
-    const { subjects } = useSubjects({ enabled, pushAlert });
+    const { subjects, fetchSubjects } = useSubjects({ enabled, pushAlert });
+
+    useEffect(() => { if (open) fetchSubjects(); }, [open, fetchSubjects]);
     const {
         title, setTitle,
         description, setDescription,
@@ -235,6 +237,7 @@ const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
             <RecurrenceChoiceDialog
                 open={recurrenceChoiceOpen}
                 action="update"
+                kind="task"
                 title={t("task.updateRecurringTitle")}
                 message={t("task.updateRecurringMsg")}
                 onChooseSingle={() => onChooseSingle(handleSuccess)}

@@ -246,7 +246,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
             <AddCalendarDialog
                 open={addCalendarOpen}
                 onClose={() => setAddCalendarOpen(false)}
-                onSave={fetchCustomCalendars}
+                onSave={() => { fetchCustomCalendars(); onCalendarDeleted?.(); }}
             />
 
             <EditCalendarDialog
