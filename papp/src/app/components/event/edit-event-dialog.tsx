@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./add-event-dialog.css";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
@@ -7,6 +7,7 @@ import { useEditEventForm } from "./hooks/useEditEventForm";
 import { EventDateStrip } from "./components/EventDateStrip";
 import { EventColorPicker } from "./components/EventColorPicker";
 import RecurrenceChoiceDialog from "@/app/components/shared/recurrenceChoiceDialog/recurrence-choice-dialog";
+import ConfirmDialog from "@/app/components/sidebar/confirm-dialog";
 
 interface Props {
     open: boolean;
@@ -31,6 +32,7 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
         recurrenceChoiceOpen,
         pendingAction,
         loading,
+        recurring,
         handleSaveClicked,
         handleDeleteClicked,
         onChooseSingle,
@@ -39,6 +41,8 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
         onCancel,
     } = useEditEventForm({ open, eventId, calendars, pushAlert });
 
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+
     if (!open) return null;
 
     const handleSuccess = (action: "save" | "delete") => {
@@ -46,6 +50,9 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
         else onDelete();
         onClose();
     };
+
+    const handleSave   = recurring ? handleSaveClicked : () => onChooseSingle(() => handleSuccess("save"));
+    const handleDelete = recurring ? handleDeleteClicked : () => setConfirmDeleteOpen(true);
 
     return (
         <>
@@ -86,7 +93,7 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                                 value={eventTitle}
                                 onChange={(e) => setEventTitle(e.target.value)}
                                 autoFocus
-                                onKeyDown={(e) => e.key === "Enter" && handleSaveClicked()}
+                                onKeyDown={(e) => e.key === "Enter" && handleSave()}
                             />
                         </div>
 
@@ -134,12 +141,12 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                         <button className="aed-btn aed-btn-cancel" onClick={onClose}>
                             {t("common.cancel")}
                         </button>
-                        <button className="aed-btn aed-btn-delete" onClick={handleDeleteClicked}>
+                        <button className="aed-btn aed-btn-delete" onClick={handleDelete}>
                             {t("event.delete")}
                         </button>
                         <button
                             className="aed-btn aed-btn-save"
-                            onClick={handleSaveClicked}
+                            onClick={handleSave}
                             disabled={!eventTitle.trim() || loading}
                             style={(!eventTitle.trim() || loading) ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >
@@ -163,6 +170,16 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                 onChooseFromThis={() => onChooseFromThis(() => handleSuccess(pendingAction === "delete" ? "delete" : "save"))}
                 onChooseAll={() => onChooseAll(() => handleSuccess(pendingAction === "delete" ? "delete" : "save"))}
                 onCancel={onCancel}
+            />
+
+            <ConfirmDialog
+                open={confirmDeleteOpen}
+                title={t("event.deleteConfirmTitle")}
+                message={t("event.deleteConfirmMsg")}
+                confirmText={t("common.delete")}
+                isDangerous
+                onConfirm={() => { setConfirmDeleteOpen(false); onChooseSingle(() => handleSuccess("delete")); }}
+                onCancel={() => setConfirmDeleteOpen(false)}
             />
         </>
     );

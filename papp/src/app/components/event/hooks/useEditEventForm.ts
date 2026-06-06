@@ -23,6 +23,8 @@ export function useEditEventForm({ open, eventId, calendars, pushAlert }: UseEdi
     const [start, setStart] = useState<Date>(new Date());
     const [end, setEnd] = useState<Date>(new Date());
 
+    const [recurring, setRecurring] = useState(false);
+
     // Flujo de confirmación de recurrencia
     const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
     const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -55,6 +57,7 @@ export function useEditEventForm({ open, eventId, calendars, pushAlert }: UseEdi
         setEnd(new Date(data.end));
         setColor(data.color);
         setUseCustomColor(!data.useCalendarColor);
+        setRecurring(!!data.groupId);
     };
 
     const resolveColor = (): string => {
@@ -158,6 +161,7 @@ export function useEditEventForm({ open, eventId, calendars, pushAlert }: UseEdi
         start, setStart,
         end, setEnd,
         loading,
+        recurring,
         // Estado del diálogo de recurrencia
         recurrenceChoiceOpen,
         pendingAction,

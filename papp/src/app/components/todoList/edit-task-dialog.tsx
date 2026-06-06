@@ -23,6 +23,7 @@ const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
 
     useEffect(() => { if (open) fetchSubjects(); }, [open, fetchSubjects]);
     const {
+        recurring,
         title, setTitle,
         description, setDescription,
         estimatedTime, setEstimatedTime,
@@ -47,6 +48,8 @@ const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
         onSave();
         onClose();
     };
+
+    const handleSave = recurring ? handleSaveClicked : () => onChooseSingle(handleSuccess);
 
     return (
         <>
@@ -83,7 +86,7 @@ const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 autoFocus
-                                onKeyDown={(e) => e.key === "Enter" && handleSaveClicked()}
+                                onKeyDown={(e) => e.key === "Enter" && handleSave()}
                             />
                         </div>
 
@@ -223,7 +226,7 @@ const EditTaskDialog: React.FC<Props> = ({ open, taskId, onClose, onSave }) => {
                         </button>
                         <button
                             className="atd-btn atd-btn-save"
-                            onClick={handleSaveClicked}
+                            onClick={handleSave}
                             disabled={!title.trim() || loading}
                             style={!title.trim() || loading ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                         >

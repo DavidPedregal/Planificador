@@ -7,6 +7,7 @@ const SettingsModel = new mongoose.Schema({
     defaultCalendarView: { type: String, default: "timeGridWeek", enum: ["dayGridMonth", "timeGridWeek", "timeGridDay", "listWeek"] },
     startHour: { type: Number, default: 8 },
     endHour: { type: Number, default: 20 },
+    slotDuration: { type: String, default: "00:30:00" }, // e.g. "00:30:00"
 });
 
 const Settings = mongoose.model("Settings", SettingsModel);

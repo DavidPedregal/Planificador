@@ -22,6 +22,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
     const [plannable, setPlannable] = useState(true);
     const [includeReviews, setIncludeReviews] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [recurring, setRecurring] = useState(false);
 
     // Flujo de confirmación de recurrencia
     const [recurrenceChoiceOpen, setRecurrenceChoiceOpen] = useState(false);
@@ -51,6 +52,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
         setSubjectId(data.subjectId || "");
         setPlannable(data.plannable !== false);
         setIncludeReviews(data.includeReviews || false);
+        setRecurring(!!data.groupId);
     };
 
     // ── Guardar ───────────────────────────────────────────────────────────────
@@ -115,6 +117,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
 
     return {
         // Estado del formulario
+        recurring,
         title, setTitle,
         description, setDescription,
         estimatedTime, setEstimatedTime,

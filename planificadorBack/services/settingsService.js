@@ -10,7 +10,7 @@ const getSettingsForUser = async (userId) => {
 };
 
 const updateSettings = async (userId, updateData) => {
-    const allowedFields = ['systemColor', 'theme', 'defaultCalendarView', 'startHour', 'endHour'];
+    const allowedFields = ['systemColor', 'theme', 'defaultCalendarView', 'startHour', 'endHour', 'slotDuration'];
     const updateFields = Object.keys(updateData);
     const isValidUpdate = updateFields.every(field => allowedFields.includes(field));
 
@@ -28,6 +28,11 @@ const updateSettings = async (userId, updateData) => {
 
     if (updateData.startHour !== undefined && updateData.endHour !== undefined && updateData.startHour >= updateData.endHour) {
         throw new ValidationError('startHour must be less than endHour');
+    }
+
+    const validSlotDurations = ['00:15:00', '00:30:00', '01:00:00'];
+    if (updateData.slotDuration !== undefined && !validSlotDurations.includes(updateData.slotDuration)) {
+        throw new ValidationError('slotDuration must be one of 00:15:00, 00:30:00, 01:00:00');
     }
 
     return settingsRepo.updateSettings(userId, updateData);

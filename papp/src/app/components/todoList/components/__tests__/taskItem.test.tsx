@@ -10,6 +10,7 @@ const mockTask: Task = {
     estimatedTime: 90,
     finishDate: new Date("2026-06-01T00:00:00"),
     completed: false,
+    recurring: false,
 };
 
 const baseProps = {
@@ -35,7 +36,7 @@ describe("TaskItem - renderizado", () => {
 
     it("muestra la fecha de entrega localizada", () => {
         render(<TaskItem {...baseProps} />);
-        const expectedDate = mockTask.finishDate.toLocaleDateString("es-ES");
+        const expectedDate = mockTask.finishDate.toLocaleDateString("en-US");
         expect(screen.getByText(new RegExp(expectedDate))).toBeInTheDocument();
     });
 
@@ -50,6 +51,17 @@ describe("TaskItem - renderizado", () => {
         );
         expect(container.firstChild).toHaveClass("completed");
     });
+
+    it("no muestra el icono de recurrencia en tareas no recurrentes", () => {
+        const { container } = render(<TaskItem {...baseProps} />);
+        expect(container.querySelector(".lucide-repeat-2")).toBeNull();
+    });
+
+    it("muestra el icono de recurrencia en tareas recurrentes", () => {
+        render(<TaskItem {...baseProps} task={{ ...mockTask, recurring: true }} />);
+        const title = screen.getByText("Estudiar Matemáticas");
+        expect(title.querySelector("svg")).toBeInTheDocument();
+    });
 });
 
 // ── Callbacks ─────────────────────────────────────────────────────────────────
@@ -58,16 +70,16 @@ describe("TaskItem - callbacks", () => {
     it("llama a onEdit con el id correcto al pulsar editar", async () => {
         const onEdit = jest.fn();
         render(<TaskItem {...baseProps} onEdit={onEdit} />);
-        await userEvent.click(screen.getByLabelText("Editar tarea"));
+        await userEvent.click(screen.getByLabelText("Edit task"));
         expect(onEdit).toHaveBeenCalledWith(42);
         expect(onEdit).toHaveBeenCalledTimes(1);
     });
 
-    it("llama a onDelete con el id correcto al pulsar eliminar", async () => {
+    it("llama a onDelete con el id y recurring correcto al pulsar eliminar", async () => {
         const onDelete = jest.fn();
         render(<TaskItem {...baseProps} onDelete={onDelete} />);
-        await userEvent.click(screen.getByLabelText("Eliminar tarea"));
-        expect(onDelete).toHaveBeenCalledWith(42);
+        await userEvent.click(screen.getByLabelText("Delete task"));
+        expect(onDelete).toHaveBeenCalledWith(42, false);
         expect(onDelete).toHaveBeenCalledTimes(1);
     });
 
@@ -76,10 +88,10 @@ describe("TaskItem - callbacks", () => {
         const onDelete = jest.fn();
         render(<TaskItem {...baseProps} onEdit={onEdit} onDelete={onDelete} />);
 
-        await userEvent.click(screen.getByLabelText("Editar tarea"));
+        await userEvent.click(screen.getByLabelText("Edit task"));
         expect(onDelete).not.toHaveBeenCalled();
 
-        await userEvent.click(screen.getByLabelText("Eliminar tarea"));
+        await userEvent.click(screen.getByLabelText("Delete task"));
         expect(onEdit).toHaveBeenCalledTimes(1);
     });
 });

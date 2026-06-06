@@ -138,6 +138,19 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="settings-row">
+                            <span className="settings-label">{t("settings.slotDuration")}</span>
+                            <select
+                                className="settings-select"
+                                value={settings.slotDuration}
+                                onChange={e => updateField("slotDuration", e.target.value)}
+                            >
+                                <option value="00:15:00">{t("settings.slotDurations.15min")}</option>
+                                <option value="00:30:00">{t("settings.slotDurations.30min")}</option>
+                                <option value="01:00:00">{t("settings.slotDurations.1hour")}</option>
+                            </select>
+                        </div>
+
+                        <div className="settings-row">
                             <span className="settings-label">{t("settings.startHour")}</span>
                             <input
                                 type="number"

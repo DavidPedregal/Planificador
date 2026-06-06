@@ -142,7 +142,9 @@
     "overdue": "Retrasadas ({{count}})",
     "completed": "Completadas ({{count}})",
     "deleteRecurringTitle": "Eliminar tarea recurrente",
-    "deleteRecurringMsg": "¿Quieres eliminar solo esta tarea o todas las tareas de la serie?"
+    "deleteRecurringMsg": "¿Quieres eliminar solo esta tarea o todas las tareas de la serie?",
+    "deleteConfirmTitle": "Eliminar tarea",
+    "deleteConfirmMsg": "¿Seguro que quieres eliminar esta tarea? Esta acción no se puede deshacer."
   },
   "task": {
     "newTitle": "Nueva tarea",
@@ -192,6 +194,8 @@
     "endTimeAriaLabel": "Hora de fin",
     "deleteRecurringTitle": "Eliminar evento recurrente",
     "deleteRecurringMsg": "¿Quieres eliminar solo este evento o todos los eventos de la serie?",
+    "deleteConfirmTitle": "Eliminar evento",
+    "deleteConfirmMsg": "¿Seguro que quieres eliminar este evento? Esta acción no se puede deshacer.",
     "updateRecurringTitle": "Actualizar evento recurrente",
     "updateRecurringMsg": "¿Quieres actualizar solo este evento o todos los eventos de la serie?",
     "createAriaLabel": "Crear evento",
@@ -318,6 +322,12 @@
     "deleteAccountBtn": "Eliminar cuenta",
     "deleteAccountTitle": "Eliminar cuenta",
     "deleteAccountMsg": "Esto eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer.",
+    "slotDuration": "Duración de ranura",
+    "slotDurations": {
+      "15min": "15 minutos",
+      "30min": "30 minutos",
+      "1hour": "1 hora"
+    },
     "views": {
       "dayGridMonth": "Mes",
       "timeGridWeek": "Semana",

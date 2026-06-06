@@ -17,7 +17,8 @@ const mockSettings = {
     theme: 'dark',
     defaultCalendarView: 'timeGridWeek',
     startHour: 8,
-    endHour: 20
+    endHour: 20,
+    slotDuration: '00:30:00'
 };
 
 describe('settingsService', () => {
@@ -110,7 +111,8 @@ describe('settingsService', () => {
                 theme: 'light',
                 defaultCalendarView: 'dayGridMonth',
                 startHour: 7,
-                endHour: 19
+                endHour: 19,
+                slotDuration: '00:15:00'
             };
             SettingsRepo.updateSettings.mockResolvedValue({ ...mockSettings, ...updateData });
 
@@ -119,6 +121,21 @@ describe('settingsService', () => {
             ).resolves.not.toThrow();
 
             expect(SettingsRepo.updateSettings).toHaveBeenCalledWith(mockUserId, updateData);
+        });
+
+        it('should throw ValidationError for invalid slotDuration', async () => {
+            await expect(
+                SettingsService.updateSettings(mockUserId, { slotDuration: '00:20:00' })
+            ).rejects.toThrow(ValidationError);
+        });
+
+        it('should accept valid slotDuration values', async () => {
+            for (const value of ['00:15:00', '00:30:00', '01:00:00']) {
+                SettingsRepo.updateSettings.mockResolvedValue({ ...mockSettings, slotDuration: value });
+                await expect(
+                    SettingsService.updateSettings(mockUserId, { slotDuration: value })
+                ).resolves.not.toThrow();
+            }
         });
     });
 

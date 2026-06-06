@@ -9,6 +9,7 @@ export interface Task {
     completed: boolean;
     estimatedTime: number;
     finishDate: Date;
+    recurring: boolean;
 }
 
 export type DeleteMode = "single" | "fromThis" | "all";
@@ -20,6 +21,7 @@ export function mapTask(data: any): Task {
         completed: data.completed,
         finishDate: new Date(data.finishDate),
         estimatedTime: data.estimatedTime,
+        recurring: !!data.groupId,
     };
 }
 

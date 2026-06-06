@@ -21,6 +21,7 @@ export interface CalendarEvent {
     isPlannedEvent: boolean;
     isReview?: boolean;
     status?: string; // "pending", "completed", "uncompleted"
+    recurring: boolean;
 }
 
 export interface Calendar { 
@@ -47,6 +48,7 @@ export const mapToFullCalendarEvent = (event: any, color: string, isPlannedEvent
         isPlannedEvent: isPlannedEvent,
         isReview: event.isReview ?? false,
         status: status,
+        recurring: !!event.groupId,
     };
 
     return base;

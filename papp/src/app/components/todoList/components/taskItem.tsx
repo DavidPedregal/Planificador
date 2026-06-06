@@ -1,13 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { EditIcon } from "lucide-react";
+import { EditIcon, Repeat2 } from "lucide-react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Task } from "../hooks/useTasks";
 
 interface Props {
     task: Task;
     onEdit:   (id: string) => void;
-    onDelete: (id: string) => void;
+    onDelete: (id: string, recurring: boolean) => void;
 }
 
 export const TaskItem: React.FC<Props> = ({ task, onEdit, onDelete }) => {
@@ -17,7 +17,10 @@ export const TaskItem: React.FC<Props> = ({ task, onEdit, onDelete }) => {
     return (
         <div className={`todo-item${task.completed ? " completed" : ""}`}>
             <div className="todo-content">
-                <span className="todo-text">{task.title}</span>
+                <span className="todo-text">
+                        {task.title}
+                        {task.recurring && <Repeat2 size="0.8rem" style={{ marginLeft: "6px", opacity: 0.55, verticalAlign: "middle" }} />}
+                    </span>
                 <div className="todo-meta">
                     <span className="todo-time">⏱ {task.estimatedTime}m</span>
                     <span className="todo-date">📅 {task.finishDate.toLocaleDateString(locale)}</span>
@@ -32,7 +35,7 @@ export const TaskItem: React.FC<Props> = ({ task, onEdit, onDelete }) => {
             </button>
             <button
                 className="todo-delete"
-                onClick={() => onDelete(task.id)}
+                onClick={() => onDelete(task.id, task.recurring)}
                 aria-label={t("task.deleteAriaLabel")}
             >
                 <DeleteForeverIcon fontSize="small" />

@@ -10,6 +10,7 @@ import { TaskItem } from "./components/taskItem";
 import AddTaskDialog from "./add-task-dialog";
 import EditTaskDialog from "./edit-task-dialog";
 import RecurrenceChoiceDialog from "@/app/components/shared/recurrenceChoiceDialog/recurrence-choice-dialog";
+import ConfirmDialog from "@/app/components/sidebar/confirm-dialog";
 import "./todoList.css";
 
 interface TodoListProps {
@@ -20,7 +21,7 @@ export default function TodoList({ refreshTrigger = 0 }: TodoListProps) {
     const { pushAlert } = useApp();
     const { t, i18n } = useTranslation();
     const { overdue, pending, completed, fetchTasks, deleteTask, addTasks } = useTasks({ pushAlert, refreshTrigger });
-    const { recurrenceChoiceOpen, handleDeleteTask, confirmDelete, cancelDelete } = useDeleteTask({ deleteTask });
+    const { recurrenceChoiceOpen, confirmOpen, handleDeleteTask, confirmDelete, cancelDelete, confirmDeleteSingle, cancelConfirmDelete } = useDeleteTask({ deleteTask });
 
     const [addDialogOpen, setAddDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -153,6 +154,16 @@ export default function TodoList({ refreshTrigger = 0 }: TodoListProps) {
                 onChooseFromThis={() => confirmDelete("fromThis")}
                 onChooseAll={() => confirmDelete("all")}
                 onCancel={cancelDelete}
+            />
+
+            <ConfirmDialog
+                open={confirmOpen}
+                title={t("todo.deleteConfirmTitle")}
+                message={t("todo.deleteConfirmMsg")}
+                confirmText={t("common.delete")}
+                isDangerous
+                onConfirm={confirmDeleteSingle}
+                onCancel={cancelConfirmDelete}
             />
         </div>
     );

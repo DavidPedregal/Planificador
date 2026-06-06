@@ -18,6 +18,7 @@ export interface UserSettings {
     defaultCalendarView: "dayGridMonth" | "timeGridWeek" | "timeGridDay" | "listWeek";
     startHour: number;
     endHour: number;
+    slotDuration: string; // e.g. "00:30:00"
 }
 
 interface AppContextType {

@@ -43,7 +43,8 @@ const mockSettings = {
     theme: 'dark',
     defaultCalendarView: 'timeGridWeek',
     startHour: 8,
-    endHour: 20
+    endHour: 20,
+    slotDuration: '00:30:00'
 };
 
 describe('settingsRouter', () => {
