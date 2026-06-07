@@ -190,6 +190,36 @@ describe('planRouter', () => {
         });
     });
 
+    describe('GET /plan/:id', () => {
+        it('should return 200 with the plan event', async () => {
+            PlanService.getPlanEventForUser.mockResolvedValue(mockPlanEvent);
+
+            const res = await request(app)
+                .get(`/plan/${mockPlanEventId}`)
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(200);
+            expect(res.body.data).toMatchObject({ _id: mockPlanEventId });
+        });
+
+        it('should return 404 if plan event does not exist', async () => {
+            PlanService.getPlanEventForUser.mockRejectedValue(
+                new NotFoundError('Plan event not found')
+            );
+
+            const res = await request(app)
+                .get(`/plan/${mockPlanEventId}`)
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(404);
+        });
+
+        it('should return 401 without token', async () => {
+            const res = await request(app).get(`/plan/${mockPlanEventId}`);
+            expect(res.status).toBe(401);
+        });
+    });
+
     describe('put /plan/:id', () => {
         it('should return 200 when plan event is updated', async () => {
             PlanService.updatePlanEvent.mockResolvedValue({ ...mockPlanEvent, status: 'completed' });

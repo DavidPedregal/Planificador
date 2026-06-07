@@ -257,6 +257,40 @@ describe('eventService', () => {
                 EventService.updateforwardEvent(mockUserId, mockEventId, {})
             ).rejects.toThrow(ValidationError);
         });
+
+        it('should use getGroupEvents and bulkUpdateEvents when time changes', async () => {
+            const e1 = { ...mockEvent, _id: 'id1', start: new Date('2026-05-01T10:00:00Z'), end: new Date('2026-05-01T11:00:00Z') };
+            const e2 = { ...mockEvent, _id: 'id2', start: new Date('2026-05-02T10:00:00Z'), end: new Date('2026-05-02T11:00:00Z') };
+            EventRepo.getEventById.mockResolvedValue(mockEvent);
+            EventRepo.getGroupEvents.mockResolvedValue([e1, e2]);
+            EventRepo.bulkUpdateEvents.mockResolvedValue({ modifiedCount: 2 });
+
+            const result = await EventService.updateforwardEvent(mockUserId, mockEventId, {
+                start: '2026-05-01T12:00:00Z',
+                end: '2026-05-01T13:00:00Z'
+            });
+
+            expect(EventRepo.getGroupEvents).toHaveBeenCalledWith(mockUserId, mockGroupId, mockEvent.start);
+            expect(EventRepo.bulkUpdateEvents).toHaveBeenCalled();
+            expect(result.modifiedCount).toBe(2);
+        });
+
+        it('should preserve each event date and only change the time when forwarding', async () => {
+            const e1 = { ...mockEvent, _id: 'id1', start: new Date('2026-05-01T10:00:00Z'), end: new Date('2026-05-01T11:00:00Z') };
+            const e2 = { ...mockEvent, _id: 'id2', start: new Date('2026-05-03T10:00:00Z'), end: new Date('2026-05-03T11:00:00Z') };
+            EventRepo.getEventById.mockResolvedValue(mockEvent);
+            EventRepo.getGroupEvents.mockResolvedValue([e1, e2]);
+            EventRepo.bulkUpdateEvents.mockResolvedValue({ modifiedCount: 2 });
+
+            await EventService.updateforwardEvent(mockUserId, mockEventId, {
+                start: '2026-05-01T09:00:00Z',
+                end: '2026-05-01T10:30:00Z'
+            });
+
+            const updates = EventRepo.bulkUpdateEvents.mock.calls[0][0];
+            expect(updates[0].fields.start.toISOString()).toBe('2026-05-01T09:00:00.000Z');
+            expect(updates[1].fields.start.toISOString()).toBe('2026-05-03T09:00:00.000Z');
+        });
     });
 
     describe('updateAllEventsInGroup', () => {
@@ -282,6 +316,43 @@ describe('eventService', () => {
             await expect(
                 EventService.updateAllEventsInGroup(mockUserId, mockEventId, { title: 'Updated' })
             ).rejects.toThrow(NotFoundError);
+        });
+
+        it('should use getGroupEvents and bulkUpdateEvents when time changes', async () => {
+            const e1 = { ...mockEvent, _id: 'id1', start: new Date('2026-05-01T10:00:00Z'), end: new Date('2026-05-01T11:00:00Z') };
+            const e2 = { ...mockEvent, _id: 'id2', start: new Date('2026-05-02T10:00:00Z'), end: new Date('2026-05-02T11:00:00Z') };
+            const e3 = { ...mockEvent, _id: 'id3', start: new Date('2026-05-03T10:00:00Z'), end: new Date('2026-05-03T11:00:00Z') };
+            EventRepo.getEventById.mockResolvedValue(mockEvent);
+            EventRepo.getGroupEvents.mockResolvedValue([e1, e2, e3]);
+            EventRepo.bulkUpdateEvents.mockResolvedValue({ modifiedCount: 3 });
+
+            const result = await EventService.updateAllEventsInGroup(mockUserId, mockEventId, {
+                start: '2026-05-01T08:00:00Z',
+                end: '2026-05-01T09:00:00Z'
+            });
+
+            expect(EventRepo.getGroupEvents).toHaveBeenCalledWith(mockUserId, mockGroupId, null);
+            expect(EventRepo.bulkUpdateEvents).toHaveBeenCalled();
+            expect(result.modifiedCount).toBe(3);
+        });
+
+        it('should preserve each event date and only change the time when updating all', async () => {
+            const e1 = { ...mockEvent, _id: 'id1', start: new Date('2026-05-01T10:00:00Z'), end: new Date('2026-05-01T11:00:00Z') };
+            const e2 = { ...mockEvent, _id: 'id2', start: new Date('2026-05-04T10:00:00Z'), end: new Date('2026-05-04T11:00:00Z') };
+            EventRepo.getEventById.mockResolvedValue(mockEvent);
+            EventRepo.getGroupEvents.mockResolvedValue([e1, e2]);
+            EventRepo.bulkUpdateEvents.mockResolvedValue({ modifiedCount: 2 });
+
+            await EventService.updateAllEventsInGroup(mockUserId, mockEventId, {
+                start: '2026-05-01T08:00:00Z',
+                end: '2026-05-01T09:30:00Z'
+            });
+
+            const updates = EventRepo.bulkUpdateEvents.mock.calls[0][0];
+            expect(updates[0].fields.start.toISOString()).toBe('2026-05-01T08:00:00.000Z');
+            expect(updates[1].fields.start.toISOString()).toBe('2026-05-04T08:00:00.000Z');
+            expect(updates[0].fields.end.toISOString()).toBe('2026-05-01T09:30:00.000Z');
+            expect(updates[1].fields.end.toISOString()).toBe('2026-05-04T09:30:00.000Z');
         });
     });
 

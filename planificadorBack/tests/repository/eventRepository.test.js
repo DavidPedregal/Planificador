@@ -232,6 +232,76 @@ describe('eventRepository', () => {
         });
     });
 
+    describe('getGroupEvents', () => {
+        it('should return all events in a group', async () => {
+            const groupId = 'group-abc';
+            await EventRepo.createEvent([
+                { ...mockEventData, groupId, start: new Date('2030-01-01T10:00:00Z'), end: new Date('2030-01-01T11:00:00Z') },
+                { ...mockEventData, groupId, start: new Date('2030-01-02T10:00:00Z'), end: new Date('2030-01-02T11:00:00Z') },
+                { ...mockEventData }
+            ]);
+
+            const events = await EventRepo.getGroupEvents(mockUserId, groupId);
+            expect(events).toHaveLength(2);
+        });
+
+        it('should return only events on or after fromDate', async () => {
+            const groupId = 'group-abc';
+            const date1 = new Date('2030-01-01T10:00:00Z');
+            const date2 = new Date('2030-01-02T10:00:00Z');
+            const date3 = new Date('2030-01-03T10:00:00Z');
+            await EventRepo.createEvent([
+                { ...mockEventData, groupId, start: date1, end: new Date('2030-01-01T11:00:00Z') },
+                { ...mockEventData, groupId, start: date2, end: new Date('2030-01-02T11:00:00Z') },
+                { ...mockEventData, groupId, start: date3, end: new Date('2030-01-03T11:00:00Z') },
+            ]);
+
+            const events = await EventRepo.getGroupEvents(mockUserId, groupId, date2);
+            expect(events).toHaveLength(2);
+            expect(events.map(e => e.start.toISOString()).sort()).toEqual([
+                date2.toISOString(),
+                date3.toISOString()
+            ]);
+        });
+
+        it('should not return events from other users', async () => {
+            const groupId = 'group-abc';
+            const otherUserId = new mongoose.Types.ObjectId();
+            await EventRepo.createEvent([
+                { ...mockEventData, userId: otherUserId, groupId }
+            ]);
+
+            const events = await EventRepo.getGroupEvents(mockUserId, groupId);
+            expect(events).toHaveLength(0);
+        });
+    });
+
+    describe('bulkUpdateEvents', () => {
+        it('should update each event with its own fields', async () => {
+            const [e1, e2] = await EventRepo.createEvent([mockEventData, mockEventData]);
+
+            await EventRepo.bulkUpdateEvents([
+                { id: e1._id, fields: { title: 'Event One' } },
+                { id: e2._id, fields: { title: 'Event Two' } },
+            ]);
+
+            const updated1 = await EventRepo.getEventById(mockUserId, e1._id.toString());
+            const updated2 = await EventRepo.getEventById(mockUserId, e2._id.toString());
+            expect(updated1.title).toBe('Event One');
+            expect(updated2.title).toBe('Event Two');
+        });
+
+        it('should return a result with modifiedCount', async () => {
+            const [e1] = await EventRepo.createEvent([mockEventData]);
+
+            const result = await EventRepo.bulkUpdateEvents([
+                { id: e1._id, fields: { title: 'Updated' } }
+            ]);
+
+            expect(result.modifiedCount).toBe(1);
+        });
+    });
+
     describe('updateForwardEvent', () => {
         it('should update all events from a group from a date onwards', async () => {
             const groupId = 'group-1';

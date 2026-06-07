@@ -124,6 +124,36 @@ describe('calendarRouter', () => {
         });
     });
 
+    describe('DELETE /calendars/clean/:id', () => {
+        it('should return 200 when calendar is cleaned', async () => {
+            CalendarService.cleanCalendarForUser.mockResolvedValue();
+
+            const res = await request(app)
+                .delete(`/calendars/clean/${mockCalendarId}`)
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(200);
+            expect(res.body.message).toBe('api.calendar.cleaned');
+        });
+
+        it('should return 404 if calendar does not exist', async () => {
+            CalendarService.cleanCalendarForUser.mockRejectedValue(
+                new NotFoundError('Calendar not found')
+            );
+
+            const res = await request(app)
+                .delete(`/calendars/clean/${mockCalendarId}`)
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(res.status).toBe(404);
+        });
+
+        it('should return 401 without token', async () => {
+            const res = await request(app).delete(`/calendars/clean/${mockCalendarId}`);
+            expect(res.status).toBe(401);
+        });
+    });
+
     describe('DELETE /calendars/:id', () => {
         it('should return 200 when calendar is deleted', async () => {
             CalendarService.deleteCalendarForUser.mockResolvedValue();

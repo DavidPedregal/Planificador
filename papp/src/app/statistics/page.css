@@ -165,6 +165,37 @@
     overflow: hidden;
 }
 
+.stats-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.1rem;
+}
+
+.stats-chart-header .stats-section-title {
+    margin-bottom: 0;
+}
+
+.stats-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+}
+
+.stats-download-btn:hover {
+    background: var(--accent-muted);
+    color: var(--text-primary);
+}
+
 .stats-chart-container {
     margin-top: 0.5rem;
 }

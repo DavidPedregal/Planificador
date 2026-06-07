@@ -108,6 +108,8 @@
     "newSubject": "+ New subject",
     "deleteCalendarTitle": "Delete calendar",
     "deleteCalendarMsg": "Are you sure you want to delete this calendar? This action cannot be undone.",
+    "cleanCalendarTitle": "Clean calendar",
+    "cleanCalendarMsg": "Are you sure you want to delete all events in this calendar? The calendar itself will remain.",
     "deleteSubjectTitle": "Delete subject",
     "deleteSubjectMsg": "Are you sure you want to delete this subject? This action cannot be undone.",
     "statistics": "Statistics"
@@ -343,9 +345,11 @@
     "generate": "Generate",
     "noData": "No data for the selected period.",
     "noSubject": "No subject",
+    "subject": "Subject",
     "time": "Time",
     "planned": "Planned",
     "actual": "Actual",
+    "download": "Download",
     "dataTypes": {
       "subjectTime": "Time per subject",
       "comparisonTime": "Planned vs actual time"
@@ -370,6 +374,7 @@
     "calendar": {
       "created": "Calendar created",
       "deleted": "Calendar deleted",
+      "cleaned": "Calendar cleaned",
       "updated": "Calendar updated",
       "visibilityChanged": "Calendar visibility updated"
     },

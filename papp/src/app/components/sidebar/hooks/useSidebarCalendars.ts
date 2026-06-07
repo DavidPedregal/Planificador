@@ -94,6 +94,20 @@ export function useSidebarCalendars({
         return ok;
     };
 
+    // ── Clean ─────────────────────────────────────────────────────────────────
+
+    const cleanCalendar = async (id: string): Promise<boolean> => {
+        const { ok, message } = await apiFetch(`${config.backendUrl}/calendars/clean/${id}`, {
+            method: "DELETE",
+            headers: authHeader(),
+        });
+        pushAlert(message, ok ? "success" : "error");
+        if (ok) {
+            onCalendarDeleted?.();
+        }
+        return ok;
+    };
+
     return {
         customCalendars,
         defaultCalendars,
@@ -101,5 +115,6 @@ export function useSidebarCalendars({
         refetchAll,
         toggleVisibility,
         deleteCalendar,
+        cleanCalendar,
     };
 }

@@ -1,10 +1,12 @@
 const CalendarRepo = require('../../repository/calendarRepository');
 const EventRepo = require('../../repository/eventRepository');
+const PlanRepo = require('../../repository/planRepository');
 const CalendarService = require('../../services/calendarService');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
 
 jest.mock('../../repository/calendarRepository');
 jest.mock('../../repository/eventRepository');
+jest.mock('../../repository/planRepository');
 
 afterEach(() => {
     jest.clearAllMocks();
@@ -136,6 +138,49 @@ describe('calendarService', () => {
 
             expect(CalendarRepo.deleteCalendar).not.toHaveBeenCalled();
             expect(EventRepo.deleteEventsByCalendarId).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('cleanCalendarForUser', () => {
+        it('should delete all events in the calendar but not the calendar itself', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            EventRepo.deleteEventsByCalendarId.mockResolvedValue({ deletedCount: 3 });
+
+            await CalendarService.cleanCalendarForUser(mockUserId, mockCalendarId);
+
+            expect(EventRepo.deleteEventsByCalendarId).toHaveBeenCalledWith(mockCalendar._id);
+            expect(CalendarRepo.deleteCalendar).not.toHaveBeenCalled();
+        });
+
+        it('should throw NotFoundError if calendar does not exist', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(null);
+
+            await expect(
+                CalendarService.cleanCalendarForUser(mockUserId, mockCalendarId)
+            ).rejects.toThrow(NotFoundError);
+
+            expect(EventRepo.deleteEventsByCalendarId).not.toHaveBeenCalled();
+            expect(PlanRepo.deletePlan).not.toHaveBeenCalled();
+        });
+
+        it('should call PlanRepo.deletePlan for the planned calendar', async () => {
+            const plannedCalendar = { ...mockCalendar, name: 'calendar.planned', isSystem: true };
+            CalendarRepo.findCalendarForUser.mockResolvedValue(plannedCalendar);
+            PlanRepo.deletePlan.mockResolvedValue({});
+
+            await CalendarService.cleanCalendarForUser(mockUserId, mockCalendarId);
+
+            expect(PlanRepo.deletePlan).toHaveBeenCalledWith(mockUserId);
+            expect(EventRepo.deleteEventsByCalendarId).not.toHaveBeenCalled();
+        });
+
+        it('should not call PlanRepo.deletePlan for a regular calendar', async () => {
+            CalendarRepo.findCalendarForUser.mockResolvedValue(mockCalendar);
+            EventRepo.deleteEventsByCalendarId.mockResolvedValue({});
+
+            await CalendarService.cleanCalendarForUser(mockUserId, mockCalendarId);
+
+            expect(PlanRepo.deletePlan).not.toHaveBeenCalled();
         });
     });
 

@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api";
 import { EditIcon, SettingsIcon } from "lucide-react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AutoFixNormalIcon from "@mui/icons-material/AutoFixNormal";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import { useSidebarCalendars } from "./hooks/useSidebarCalendars";
 import { useSubjects } from "@/app/components/shared/hooks/useSubjects";
 import { useConfirmDelete } from "@/app/components/shared/hooks/useConfirmDelete";
@@ -44,6 +45,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
         refetchAll,
         toggleVisibility,
         deleteCalendar,
+        cleanCalendar,
     } = useSidebarCalendars({
         enabled,
         pushAlert,
@@ -54,6 +56,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
     const { subjects, fetchSubjects, deleteSubject } = useSubjects({ enabled, pushAlert });
 
     const calendarConfirm = useConfirmDelete<string>({ onConfirm: deleteCalendar });
+    const calendarCleanConfirm = useConfirmDelete<string>({ onConfirm: cleanCalendar });
     const subjectConfirm = useConfirmDelete<string>({ onConfirm: deleteSubject });
 
     const [editCalendarOpen, setEditCalendarOpen] = useState(false);
@@ -176,6 +179,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                             color={cal.color}
                             visible={cal.visible}
                             onToggle={() => toggleVisibility(cal.id)}
+                            onClean={() => calendarCleanConfirm.handleDelete(cal.id)}
                         />
                     ))}
                 </div>
@@ -191,6 +195,7 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                             visible={cal.visible}
                             onToggle={() => toggleVisibility(cal.id)}
                             onEdit={() => handleEditCalendar(cal.id)}
+                            onClean={() => calendarCleanConfirm.handleDelete(cal.id)}
                             onDelete={customCalendars.length > 1 ? () => calendarConfirm.handleDelete(cal.id) : undefined}
                         />
                     ))}
@@ -267,6 +272,17 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
                 onCancel={calendarConfirm.cancel}
             />
 
+            <ConfirmDialog
+                open={calendarCleanConfirm.open}
+                title={t("sidebar.cleanCalendarTitle")}
+                message={t("sidebar.cleanCalendarMsg")}
+                confirmText={t("common.confirm")}
+                cancelText={t("common.cancel")}
+                isDangerous={true}
+                onConfirm={calendarCleanConfirm.confirm}
+                onCancel={calendarCleanConfirm.cancel}
+            />
+
             <AddSubjectDialog
                 open={addSubjectOpen}
                 onClose={() => setAddSubjectOpen(false)}
@@ -309,10 +325,12 @@ interface CalendarItemProps {
     visible: boolean;
     onToggle: () => void;
     onEdit?: () => void;
+    onClean?: () => void;
     onDelete?: () => void;
 }
 
-function CalendarItem({ name, color, visible, onToggle, onEdit, onDelete }: CalendarItemProps) {
+function CalendarItem({ name, color, visible, onToggle, onEdit, onClean, onDelete }: CalendarItemProps) {
+    const { t } = useTranslation();
     return (
         <div className="sidebar-cal-item">
             <div
@@ -328,6 +346,11 @@ function CalendarItem({ name, color, visible, onToggle, onEdit, onDelete }: Cale
             {onEdit && (
                 <button className="sidebar-cal-menu-btn" onClick={onEdit}>
                     <EditIcon size="1rem" />
+                </button>
+            )}
+            {onClean && (
+                <button className="sidebar-cal-menu-btn danger" onClick={onClean} title={t("sidebar.cleanCalendarTitle")}>
+                    <CleaningServicesIcon fontSize="small" />
                 </button>
             )}
             {onDelete && (

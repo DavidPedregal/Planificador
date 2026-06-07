@@ -45,6 +45,19 @@ const updateEvent = async (userId, eventId, updateData) => {
     );
 };
 
+const getGroupEvents = async (userId, groupId, fromDate = null) => {
+    const query = { groupId, userId };
+    if (fromDate) query.start = { $gte: fromDate };
+    return CalendarEvent.find(query);
+};
+
+const bulkUpdateEvents = async (updates) => {
+    const ops = updates.map(({ id, fields }) => ({
+        updateOne: { filter: { _id: id }, update: { $set: fields } },
+    }));
+    return CalendarEvent.bulkWrite(ops);
+};
+
 const updateForwardEvent = async (userId, eventId, groupId, updateData, originalStart) => {
     const updateQuery = groupId
         ? { groupId: groupId, userId, start: { $gte: originalStart } }
@@ -98,6 +111,8 @@ module.exports = {
     getPlannableEventsForUser,
     createEvent,
     updateEvent,
+    getGroupEvents,
+    bulkUpdateEvents,
     updateForwardEvent,
     updateAllEventsInGroup,
     deleteEvent,

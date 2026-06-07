@@ -77,7 +77,7 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
                     </div>
 
                     {/* Fechas y horas */}
-                    <EventDateStrip mode="date" start={start} end={end} onStartChange={setStart} onEndChange={setEnd} />
+                    <EventDateStrip mode="date" start={start} end={end} onStartChange={setStart} onEndChange={setEnd} disabled={recurring} />
                     <EventDateStrip mode="time" start={start} end={end} onStartChange={setStart} onEndChange={setEnd} />
 
                     {/* Body */}

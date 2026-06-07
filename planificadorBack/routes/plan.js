@@ -57,6 +57,15 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
     }
 });
 
+router.get('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
+    try {
+        const planEvent = await PlanService.getPlanEventForUser(req.userId, req.params.id);
+        res.status(200).json({ data: planEvent });
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.put('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await PlanService.updatePlanEvent(req.userId, req.params.id, req.body)

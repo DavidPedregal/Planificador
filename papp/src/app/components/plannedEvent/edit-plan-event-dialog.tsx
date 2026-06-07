@@ -16,6 +16,12 @@ interface Props {
     onDelete: () => void;
 }
 
+function minutesToTimeString(minutes: number): string {
+    const h = Math.floor(minutes / 60).toString().padStart(2, "0");
+    const m = (minutes % 60).toString().padStart(2, "0");
+    return `${h}:${m}`;
+}
+
 const EditPlanEventDialog: React.FC<Props> = ({
     open,
     planEventId,
@@ -27,10 +33,33 @@ const EditPlanEventDialog: React.FC<Props> = ({
     const { pushAlert } = useApp();
     const { t } = useTranslation();
     const [actualTime, setActualTime] = useState("");
+    const [taskTitle, setTaskTitle] = useState("");
+    const [scheduledTimeStr, setScheduledTimeStr] = useState("");
 
     useEffect(() => {
-        if (open) setActualTime("");
-    }, [open]);
+        if (!open || !planEventId) return;
+
+        const fetchEvent = async () => {
+            const { ok, data } = await apiFetch(`${config.backendUrl}/plan/${planEventId}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            if (ok && data) {
+                setTaskTitle(data.title ?? "");
+                const planned = minutesToTimeString(data.scheduledTime ?? 0);
+                setScheduledTimeStr(planned);
+                const defaultTime = data.userTime != null
+                    ? minutesToTimeString(data.userTime)
+                    : planned;
+                setActualTime(defaultTime);
+            } else {
+                setActualTime("");
+                setTaskTitle("");
+                setScheduledTimeStr("");
+            }
+        };
+
+        fetchEvent();
+    }, [open, planEventId]);
 
     if (!open) return null;
 
@@ -59,6 +88,10 @@ const EditPlanEventDialog: React.FC<Props> = ({
         if (ok) { onDelete(); onClose(); }
     };
 
+    const timeLabel = taskTitle
+        ? `${taskTitle}${scheduledTimeStr ? ` (${scheduledTimeStr})` : ""}`
+        : t("planEvent.actualTime");
+
     return (
         <div
             className="eped-overlay"
@@ -73,7 +106,9 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 <div className="eped-header">
                     <div className="eped-header-left">
                         <div className="eped-header-dot" />
-                        <h2 className="eped-title">{t("planEvent.title")}</h2>
+                        <h2 className="eped-title">
+                            {taskTitle || t("planEvent.title")}
+                        </h2>
                     </div>
                     <button className="eped-close" onClick={onClose} aria-label={t("common.close")}>
                         <CloseIcon fontSize="inherit" />
@@ -83,7 +118,7 @@ const EditPlanEventDialog: React.FC<Props> = ({
                 {/* Body */}
                 <div className="eped-body">
                     <div className="eped-field">
-                        <label className="eped-label">{t("planEvent.actualTime")}</label>
+                        <label className="eped-label">{timeLabel}</label>
                         <div className="eped-time-row">
                             <input
                                 type="time"

@@ -1,7 +1,7 @@
 const EventRepo = require('../repository/eventRepository');
 const CalendarRepo = require('../repository/calendarRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
-const { generateRecurringEvents, getChangedFields, validateEventData } = require('./business/eventHelper');
+const { generateRecurringEvents, getChangedFields, validateEventData, replaceTimeOnly } = require('./business/eventHelper');
 const { randomUUID } = require('crypto');
 
 const getAllEvents = async (userId) => 
@@ -78,8 +78,11 @@ const updateforwardEvent = async (userId, eventId, newData) => {
         return { message: "No changes detected", modifiedCount: 0 };
     }
 
-    const result = await EventRepo.updateForwardEvent(userId, eventId, originalEvent.groupId, changedFields, originalEvent.start);
-    return { message: "Event(s) forwarded successfully", modifiedCount: result.modifiedCount };
+    const result = await applyMultiEventUpdate(
+        userId, originalEvent.groupId, changedFields,
+        { fromDate: originalEvent.start, fallbackId: eventId }
+    );
+    return { message: "Event(s) forwarded successfully", modifiedCount: result.modifiedCount ?? result.nModified ?? 0 };
 };
 
 const updateAllEventsInGroup = async (userId, eventId, newData) => {
@@ -98,8 +101,36 @@ const updateAllEventsInGroup = async (userId, eventId, newData) => {
         return { message: "No changes detected", modifiedCount: 0 };
     }
 
-    const result = await EventRepo.updateAllEventsInGroup(userId, eventId, originalEvent.groupId, changedFields);
-    return { message: "Event(s) updated successfully", modifiedCount: result.modifiedCount };
+    const result = await applyMultiEventUpdate(userId, originalEvent.groupId, changedFields, { fallbackId: eventId });
+    return { message: "Event(s) updated successfully", modifiedCount: result.modifiedCount ?? result.nModified ?? 0 };
+};
+
+// Apply updates to multiple events in a group.
+// When start/end change, preserve each event's date and only replace the time-of-day.
+const applyMultiEventUpdate = async (userId, groupId, changedFields, { fromDate = null, fallbackId } = {}) => {
+    const { start, end, ...otherFields } = changedFields;
+
+    if (!start && !end) {
+        // No date/time change — existing updateMany is safe
+        if (fromDate) {
+            return EventRepo.updateForwardEvent(userId, fallbackId, groupId, otherFields, fromDate);
+        }
+        return EventRepo.updateAllEventsInGroup(userId, fallbackId, groupId, otherFields);
+    }
+
+    // Fetch affected events so we can compute per-event datetimes
+    const events = await EventRepo.getGroupEvents(userId, groupId, fromDate);
+    const newStartTime = start ? new Date(start) : null;
+    const newEndTime   = end   ? new Date(end)   : null;
+
+    const updates = events.map(event => {
+        const fields = { ...otherFields };
+        if (newStartTime) fields.start = replaceTimeOnly(event.start, newStartTime);
+        if (newEndTime)   fields.end   = replaceTimeOnly(event.end,   newEndTime);
+        return { id: event._id, fields };
+    });
+
+    return EventRepo.bulkUpdateEvents(updates);
 };
 
 const deleteEvent = async (userId, eventId) => {

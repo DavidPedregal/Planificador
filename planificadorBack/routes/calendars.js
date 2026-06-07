@@ -31,6 +31,15 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
     }
 });
 
+router.delete('/clean/:id', dbLimiter, authMiddleware, async function(req, res, next) {
+    try {        
+        await CalendarService.cleanCalendarForUser(req.userId, req.params.id);
+        res.status(200).json({ message: "api.calendar.cleaned" });
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.delete('/:id', dbLimiter, authMiddleware, async function(req, res, next) {
     try {
         await CalendarService.deleteCalendarForUser(req.userId, req.params.id);

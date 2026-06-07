@@ -9,6 +9,7 @@ import { ChevronLeftIcon } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { apiFetch } from "@/lib/api";
 import { config } from "@/app/config/config";
+import { DownloadIcon } from "lucide-react";
 import {
     PieChart, Pie, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -39,6 +40,39 @@ const CHART_COLORS = [
 ];
 const COLOR_PLANNED = "#6366f1";
 const COLOR_ACTUAL  = "#10b981";
+
+function csvCell(value: string): string {
+    if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+        return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+}
+
+function downloadCsv(state: ChartState, labels: { subject: string; time: string; planned: string; actual: string }) {
+    const BOM = "\uFEFF"; // Byte Order Mark for UTF-8
+    let rows: string[][];
+
+    if (state.kind === "subjectTime") {
+        rows = [
+            [labels.subject, `${labels.time} (min)`],
+            ...state.entries.map(e => [e.name, String(e.minutes)]),
+        ];
+    } else {
+        rows = [
+            [labels.subject, `${labels.planned} (min)`, `${labels.actual} (min)`],
+            ...state.entries.map(e => [e.name, String(e.planned), String(e.actual)]),
+        ];
+    }
+
+    const csv = BOM + rows.map(row => row.map(csvCell).join(";")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mentiplan-statistics-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
 
 function formatMinutes(minutes: number): string {
     const h = Math.floor(minutes / 60);
@@ -187,9 +221,23 @@ export default function StatisticsPage() {
                         <p className="stats-empty">{t("statistics.noData")}</p>
                     ) : (
                         <>
-                            <h2 className="stats-section-title">
-                                {t(`statistics.dataTypes.${dataType}`)}
-                            </h2>
+                            <div className="stats-chart-header">
+                                <h2 className="stats-section-title">
+                                    {t(`statistics.dataTypes.${dataType}`)}
+                                </h2>
+                                <button
+                                    className="stats-download-btn"
+                                    onClick={() => downloadCsv(chartState, {
+                                        subject: t("statistics.subject"),
+                                        time:    t("statistics.time"),
+                                        planned: t("statistics.planned"),
+                                        actual:  t("statistics.actual"),
+                                    })}
+                                >
+                                    <DownloadIcon size="0.9rem" />
+                                    {t("statistics.download")}
+                                </button>
+                            </div>
                             <div className="stats-chart-container">
                                 {chartState.kind === "subjectTime" && chartType === "pie" && (
                                     <ResponsiveContainer width="100%" height={320}>

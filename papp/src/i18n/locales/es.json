@@ -108,6 +108,8 @@
     "newSubject": "+ Nueva asignatura",
     "deleteCalendarTitle": "Eliminar calendario",
     "deleteCalendarMsg": "¿Estás seguro de que deseas eliminar este calendario? Esta acción no se puede deshacer.",
+    "cleanCalendarTitle": "Limpiar calendario",
+    "cleanCalendarMsg": "¿Estás seguro de que deseas eliminar todos los eventos de este calendario? El calendario en sí permanecerá.",
     "deleteSubjectTitle": "Eliminar asignatura",
     "deleteSubjectMsg": "¿Estás seguro de que deseas eliminar esta asignatura? Esta acción no se puede deshacer.",
     "statistics": "Estadísticas"
@@ -343,9 +345,11 @@
     "generate": "Generar",
     "noData": "No hay datos para el período seleccionado.",
     "noSubject": "Sin asignatura",
+    "subject": "Asignatura",
     "time": "Tiempo",
     "planned": "Planificado",
     "actual": "Real",
+    "download": "Descargar",
     "dataTypes": {
       "subjectTime": "Tiempo por asignatura",
       "comparisonTime": "Tiempo planificado vs real"
@@ -370,6 +374,7 @@
     "calendar": {
       "created": "Calendario creado",
       "deleted": "Calendario eliminado",
+      "cleaned": "Calendario limpiado",
       "updated": "Calendario actualizado",
       "visibilityChanged": "Visibilidad del calendario actualizada"
     },

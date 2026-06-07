@@ -225,8 +225,24 @@ function generateRecurringEvents(baseEvent) {
     return events;
 }
 
+/**
+ * Replace the time-of-day on existingDatetime with the time from newTimeDatetime,
+ * preserving year/month/day. Both dates are treated as UTC.
+ */
+function replaceTimeOnly(existingDatetime, newTimeDatetime) {
+    const d = new Date(existingDatetime);
+    d.setUTCHours(
+        newTimeDatetime.getUTCHours(),
+        newTimeDatetime.getUTCMinutes(),
+        newTimeDatetime.getUTCSeconds(),
+        0
+    );
+    return d;
+}
+
 module.exports = {
     generateRecurringEvents,
     getChangedFields,
-    validateEventData
+    validateEventData,
+    replaceTimeOnly,
 }

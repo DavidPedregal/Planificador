@@ -1,5 +1,6 @@
 const CalendarRepo = require('../repository/calendarRepository');
 const EventRepo = require('../repository/eventRepository');
+const PlanRepo = require('../repository/planRepository');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
 
 const getCustomCalendarsForUser = async (userId) => {
@@ -44,6 +45,19 @@ const deleteCalendarForUser = async (userId, calendarId) => {
     await EventRepo.deleteEventsByCalendarId(calendar._id);
 };
 
+const cleanCalendarForUser = async (userId, calendarId) => {
+    const calendar = await CalendarRepo.findCalendarForUser(userId, calendarId);
+    if (!calendar) {
+        throw new NotFoundError("Calendar not found");
+    }
+
+    if (calendar.name === "calendar.planned") {
+        await PlanRepo.deletePlan(userId);
+    } else {
+        await EventRepo.deleteEventsByCalendarId(calendar._id);
+    }
+};
+
 const updateCalendarForUser = async (userId, calendarId, updateData) => {
     const existingCalendar = await CalendarRepo.findCalendarForUser(userId, calendarId);
     if (!existingCalendar) {
@@ -82,6 +96,7 @@ module.exports = {
     getSystemCalendarsForUser,
     createCalendarForUser,
     deleteCalendarForUser,
+    cleanCalendarForUser,
     updateCalendarForUser,
     toggleCalendarVisibilityForUser
 };

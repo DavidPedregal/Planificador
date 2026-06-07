@@ -8,6 +8,7 @@ interface Props {
     onStartChange: (date: Date) => void;
     onEndChange: (date: Date) => void;
     mode: "date" | "time";
+    disabled?: boolean;
 }
 
 function getDateString(date: Date): string {
@@ -28,7 +29,7 @@ function createDateFromParts(dateStr: string, timeStr: string): Date {
     return new Date(`${dateStr}T${timeStr}`);
 }
 
-export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onEndChange, mode }) => {
+export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onEndChange, mode, disabled = false }) => {
     const { t } = useTranslation();
     const isDate = mode === "date";
 
@@ -59,6 +60,7 @@ export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onE
                     value={isDate ? getDateString(start) : getTimeString(start)}
                     aria-label={isDate ? t("event.startDateAriaLabel") : t("event.startTimeAriaLabel")}
                     onChange={(e) => handleStartChange(e.target.value)}
+                    disabled={disabled}
                 />
             </div>
             <span className="aed-date-arrow">
@@ -72,6 +74,7 @@ export const EventDateStrip: React.FC<Props> = ({ start, end, onStartChange, onE
                     min={isDate ? getDateString(start) : undefined}
                     aria-label={isDate ? t("event.endDateAriaLabel") : t("event.endTimeAriaLabel")}
                     onChange={(e) => handleEndChange(e.target.value)}
+                    disabled={disabled}
                 />
             </div>
         </div>
