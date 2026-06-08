@@ -135,15 +135,32 @@ def resolver(tasks, available_blocks):
             distance = min(distance, distance_cap)
             costs.append(distance * x[i, j])
 
+    # Bonus de continuidad: recompensa pares de bloques consecutivos asignados a la misma tarea
+    # Desalienta la fragmentación sin impedir la asignación de bloques sueltos
+    continuity_weight = distance_cap
+    cont = {}
+    continuity_terms = []
+    for i in range(n_tasks):
+        for j in range(n_blocks - 1):
+            if available_blocks[j + 1] - available_blocks[j] == timedelta(minutes=BLOCK_SIZE):
+                c = model.NewBoolVar(f"cont_{i}_{j}") # type: ignore
+                cont[i, j] = c
+                model.Add(c <= x[i, j]) # type: ignore
+                model.Add(c <= x[i, j + 1]) # type: ignore
+                model.Add(c >= x[i, j] + x[i, j + 1] - 1) # type: ignore
+                continuity_terms.append(-continuity_weight * c)
+
     # Prioridad 1: maximizar tareas completadas
     # Prioridad 2: maximizar bloques asignados (incluso en tareas parciales)
-    # Prioridad 3: minimizar distancia a givenDate
+    # Prioridad 3: minimizar fragmentación (bloques consecutivos juntos)
+    # Prioridad 4: minimizar distancia a givenDate
     peso = n_tasks * n_blocks * distance_cap + 1
     partial_fill_weight = distance_cap + 1  # mayor que cualquier coste de distancia individual
     model.Minimize(
         sum(-peso * completada[i] for i in range(n_tasks)) +
         sum(-partial_fill_weight * x[i, j] for i in range(n_tasks) for j in range(n_blocks)) + # type: ignore
-        sum(costs)
+        sum(costs) +
+        sum(continuity_terms)
     )
 
     solver = cp_model.CpSolver()

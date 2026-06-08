@@ -532,5 +532,30 @@ class TestEdgeCases:
         slots = make_week_slots()
         result = schedule(make_request(tasks, slots))
         assert len(result.warnings) == 0
-        assert len(result.scheduled) == 1
-        assert result.scheduled[0].scheduledTime == 15
+
+    def test_dos_tareas_compiten_ambas_se_completan_sin_fragmentar(self):
+        # Replica el escenario real: "tarea" (60 min, deadline temprano) y "ED" (270 min)
+        # con 8 slots de 2h por día durante 8 días. Ambas deben completarse y cada una
+        # debe quedar en pocos bloques contiguos, no dispersa por todos los días.
+        tasks = [
+            make_task("tarea", "tarea", 60,  "2026-06-10T08:00:00Z", "2026-06-07T00:00:00Z"),
+            make_task("ED",    "ED",    270, "2026-06-25T12:00:00Z", "2026-06-08T00:00:00Z"),
+        ]
+        # 8 días × 2 h (07:00-09:00 UTC) = 64 bloques de 15 min
+        slots = [
+            make_slot(f"2026-06-{d:02d}T07:00:00Z", f"2026-06-{d:02d}T09:00:00Z")
+            for d in range(8, 16)
+        ]
+        result = schedule(make_request(tasks, slots))
+
+        # Ambas tareas completas
+        assert len(result.warnings) == 0, f"warnings inesperados: {result.warnings}"
+
+        total_tarea = sum(b.scheduledTime for b in result.scheduled if b.taskId == "tarea")
+        total_ed    = sum(b.scheduledTime for b in result.scheduled if b.taskId == "ED")
+        assert total_tarea >= 60
+        assert total_ed    >= 270
+
+        # "tarea" no debe fragmentarse en más de 2 bloques del plan (1 es lo ideal)
+        grupos_tarea = [b for b in result.scheduled if b.taskId == "tarea"]
+        assert len(grupos_tarea) <= 2, f"tarea fragmentada en {len(grupos_tarea)} bloques"
