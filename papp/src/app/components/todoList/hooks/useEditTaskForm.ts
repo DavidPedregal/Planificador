@@ -73,7 +73,7 @@ export function useEditTaskForm({ open, taskId, pushAlert }: UseEditTaskFormPara
             title,
             description: description || undefined,
             estimatedTime,
-            finishDate: `${finishDate}T${finishTime}`,
+            finishDate: new Date(`${finishDate}T${finishTime}`).toISOString(),
             givenDate,
             subjectId: subjectId || undefined,
             plannable,

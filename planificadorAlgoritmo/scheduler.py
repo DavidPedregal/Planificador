@@ -81,7 +81,6 @@ def resolver(tasks, available_blocks):
         for j in range(n_blocks):
             x[i, j] = model.NewBoolVar(f"x_{i}_{j}") # type: ignore
 
-    # Variable que indica si la tarea i está completamente planificada
     completada = {}
     for i in range(n_tasks):
         completada[i] = model.NewBoolVar(f"completada_{i}") # type: ignore
@@ -96,11 +95,13 @@ def resolver(tasks, available_blocks):
         model.Add(sum(x[i, j] for i in range(n_tasks)) <= 1) # type: ignore
 
     # Restricción: bloques asignados >= necesarios SI la tarea está completada
+    # Cap en needed para evitar sobreasignación
     for i, task in enumerate(tasks):
         needed = bloques_necesarios[i]
         total_asignados = sum(x[i, j] for j in range(n_blocks))
         model.Add(total_asignados >= needed).OnlyEnforceIf(completada[i]) # type: ignore
         model.Add(total_asignados < needed).OnlyEnforceIf(completada[i].Not()) # type: ignore
+        model.Add(total_asignados <= needed) # type: ignore
 
     # Restricción: bloques después de finishDate no se pueden asignar
     for i, task in enumerate(tasks):
@@ -109,39 +110,39 @@ def resolver(tasks, available_blocks):
             if block_time + timedelta(minutes=BLOCK_SIZE) > finish:
                 model.Add(x[i, j] == 0) # type: ignore
 
-    # Objetivo: maximizar tareas completadas, luego minimizar distancia a givenDate
     given_dates = []
     for task in tasks:
         given_dates.append(datetime.fromisoformat(task["givenDate"].replace("Z", "+00:00")))
 
-    # Penalización por distancia a givenDate (normalizada)
-    costs = []
     # Restricción dura: no planificar antes de givenDate
+    costs = []
     for i, task in enumerate(tasks):
         given = datetime.fromisoformat(task["givenDate"].replace("Z", "+00:00"))
         for j, block_time in enumerate(available_blocks):
             if block_time < given:
                 model.Add(x[i, j] == 0)
 
-    # Calcular max_distance basado en el rango real de bloques
     if available_blocks and given_dates:
-        max_block = available_blocks[-1]  # ya están ordenados
+        max_block = available_blocks[-1]
         min_given = min(given_dates)
         distance_cap = max(1, int((max_block - min_given).total_seconds() // (BLOCK_SIZE * 60))) + 1
     else:
         distance_cap = 1
-    # Coste: minimizar distancia a givenDate
+
     for i in range(n_tasks):
         for j, block_time in enumerate(available_blocks):
             distance = int((block_time - given_dates[i]).total_seconds() // (BLOCK_SIZE * 60))
             distance = min(distance, distance_cap)
             costs.append(distance * x[i, j])
 
-    # Prioridad 1: maximizar tareas completadas (peso alto)
-    # Prioridad 2: minimizar distancia a givenDate (peso bajo)
+    # Prioridad 1: maximizar tareas completadas
+    # Prioridad 2: maximizar bloques asignados (incluso en tareas parciales)
+    # Prioridad 3: minimizar distancia a givenDate
     peso = n_tasks * n_blocks * distance_cap + 1
+    partial_fill_weight = distance_cap + 1  # mayor que cualquier coste de distancia individual
     model.Minimize(
         sum(-peso * completada[i] for i in range(n_tasks)) +
+        sum(-partial_fill_weight * x[i, j] for i in range(n_tasks) for j in range(n_blocks)) + # type: ignore
         sum(costs)
     )
 
@@ -154,13 +155,14 @@ def resolver(tasks, available_blocks):
 
     if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         for i, task in enumerate(tasks):
-            if solver.Value(completada[i]) == 0:
+            is_complete = solver.Value(completada[i]) == 1
+
+            if not is_complete:
                 warnings.append(Warning(
                     taskId=task["taskId"],
                     title=task["title"],
                     message="api.scheduler.cannotFinish"
                 ))
-                continue
 
             bloques_asignados = [
                 available_blocks[j]
@@ -168,18 +170,24 @@ def resolver(tasks, available_blocks):
                 if solver.Value(x[i, j]) == 1
             ]
 
+            if not bloques_asignados:
+                continue
+
             bloques_asignados.sort()
             grupos = agrupar_bloques_consecutivos(bloques_asignados)
+            total_remaining = task["estimatedTime"]
 
             for grupo in grupos:
                 start = grupo[0]
                 end = grupo[-1] + timedelta(minutes=BLOCK_SIZE)
+                grupo_minutos = len(grupo) * BLOCK_SIZE
+                percentage = round(grupo_minutos / total_remaining * 100)
                 scheduled.append(ScheduledBlock(
                     taskId=task["taskId"],
-                    title=task["title"],
+                    title=f"{task['title']} ({percentage}%)",
                     start=start.isoformat(),
                     end=end.isoformat(),
-                    scheduledTime=len(grupo) * BLOCK_SIZE
+                    scheduledTime=grupo_minutos
                 ))
     else:
         for task in tasks:

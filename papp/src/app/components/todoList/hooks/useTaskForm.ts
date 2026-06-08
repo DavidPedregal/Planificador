@@ -82,7 +82,7 @@ export function useTaskForm({ open, pushAlert }: UseTaskFormParams) {
             title,
             description: description || undefined,
             estimatedTime,
-            finishDate: `${finishDate}T${finishTime}`,
+            finishDate: new Date(`${finishDate}T${finishTime}`).toISOString(),
             givenDate,
             subjectId: subjectId || undefined,
             plannable,

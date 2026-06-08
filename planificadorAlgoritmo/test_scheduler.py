@@ -156,7 +156,8 @@ class TestSchedule:
             start_actual = datetime.fromisoformat(bloques[i].start)
             assert end_anterior <= start_actual
 
-    def test_tarea_imposible_va_a_warnings(self):
+    def test_tarea_imposible_va_a_warnings_y_planifica_parcial(self):
+        # Tarea de 9999 min con solo 3 h disponibles → warning + bloques parciales planificados
         request = make_request(
             tasks=[make_task("t1", "Mates", 9999, "2026-05-10T23:59:00Z", "2026-05-01T00:00:00Z")],
             slots=[make_slot("2026-05-05T09:00:00Z", "2026-05-05T12:00:00Z")]
@@ -164,7 +165,7 @@ class TestSchedule:
         result = schedule(request)
         assert len(result.warnings) == 1
         assert result.warnings[0].taskId == "t1"
-        assert len(result.scheduled) == 0
+        assert len(result.scheduled) > 0  # planifica lo que puede
 
     def test_tarea_imposible_no_impide_planificar_otras(self):
         request = make_request(
@@ -201,13 +202,16 @@ class TestSchedule:
         assert len(result.scheduled) == 0
         assert len(result.warnings) == 1
 
-    def test_titulo_heredado_de_la_tarea(self):
+    def test_titulo_contiene_nombre_y_porcentaje(self):
         request = make_request(
             tasks=[make_task("t1", "Matemáticas", 60, "2026-05-10T23:59:00Z", "2026-05-01T00:00:00Z")],
             slots=[make_slot("2026-05-05T09:00:00Z", "2026-05-05T12:00:00Z")]
         )
         result = schedule(request)
-        assert all(b.title == "Matemáticas" for b in result.scheduled)
+        assert all(b.title.startswith("Matemáticas") for b in result.scheduled)
+        assert all("%" in b.title for b in result.scheduled)
+        # tarea completa en un único bloque → 100%
+        assert result.scheduled[0].title == "Matemáticas (100%)"
 
     def test_tarea_fragmentada_cubre_tiempo_total(self):
         request = make_request(
