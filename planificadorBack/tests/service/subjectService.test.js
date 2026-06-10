@@ -30,9 +30,11 @@ describe('subjectService', () => {
 
     describe('createSubject', () => {
         it('should create a subject with valid data', async () => {
+            SubjectRepo.findSubjectByNameForUser.mockResolvedValue(null);
             SubjectRepo.createSubject.mockResolvedValue(mockSubject);
             const result = await SubjectService.createSubject(mockUserId, { name: 'Matemáticas' });
             expect(result).toEqual(mockSubject);
+            expect(SubjectRepo.findSubjectByNameForUser).toHaveBeenCalledWith(mockUserId, 'Matemáticas');
             expect(SubjectRepo.createSubject).toHaveBeenCalledWith(
                 expect.objectContaining({ name: 'Matemáticas', userId: mockUserId })
             );
@@ -48,6 +50,14 @@ describe('subjectService', () => {
 
         it('should throw ValidationError if name is only whitespace', async () => {
             await expect(SubjectService.createSubject(mockUserId, { name: '   ' })).rejects.toThrow(ValidationError);
+        });
+
+        it('should throw ValidationError if a subject with the same name already exists', async () => {
+            SubjectRepo.findSubjectByNameForUser.mockResolvedValue(mockSubject);
+            await expect(
+                SubjectService.createSubject(mockUserId, { name: 'Matemáticas' })
+            ).rejects.toThrow(ValidationError);
+            expect(SubjectRepo.createSubject).not.toHaveBeenCalled();
         });
     });
 

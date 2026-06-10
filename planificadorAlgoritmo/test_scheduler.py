@@ -559,3 +559,33 @@ class TestEdgeCases:
         # "tarea" no debe fragmentarse en más de 2 bloques del plan (1 es lo ideal)
         grupos_tarea = [b for b in result.scheduled if b.taskId == "tarea"]
         assert len(grupos_tarea) <= 2, f"tarea fragmentada en {len(grupos_tarea)} bloques"
+
+    def test_no_intercala_tarea1_con_tarea2_cuando_no_caben_en_un_solo_slot(self):
+        # Reproduce el escenario del bug: t1(60min) + t2(150min) = 210min > slot1(180min).
+        # Resultado malo:  t1[30] → t2[150] → t1[30]  (intercalado)
+        # Resultado bueno: t2[150] → t1[60]  o  t1[60] → t2[150min en slot1+slot2]
+        tasks = [
+            make_task("t1", "T1", 60,  "2026-06-20T23:59:00Z", "2026-06-07T00:00:00Z"),
+            make_task("t2", "T2", 150, "2026-06-20T23:59:00Z", "2026-06-07T00:00:00Z"),
+        ]
+        slots = [
+            make_slot("2026-06-10T09:00:00Z", "2026-06-10T12:00:00Z"),  # 180 min = 12 bloques
+            make_slot("2026-06-10T14:00:00Z", "2026-06-10T14:30:00Z"),  # 30 min = 2 bloques
+        ]
+        result = schedule(make_request(tasks, slots))
+        assert len(result.warnings) == 0
+
+        # Ordenar todos los plan-events por inicio
+        all_events = sorted(result.scheduled, key=lambda b: b.start)
+        task_seq = [b.taskId for b in all_events]
+
+        # El patrón prohibido es t1 → t2 → t1
+        seen_t1 = False
+        seen_t2_after_t1 = False
+        for tid in task_seq:
+            if tid == "t1":
+                assert not seen_t2_after_t1, \
+                    f"patrón t1→t2→t1 detectado: {task_seq}"
+                seen_t1 = True
+            elif tid == "t2" and seen_t1:
+                seen_t2_after_t1 = True

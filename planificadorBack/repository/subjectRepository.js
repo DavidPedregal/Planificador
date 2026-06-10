@@ -34,6 +34,9 @@ const updateSubject = async (userId, subjectId, updateData) => {
     );
 };
 
+const findSubjectByNameForUser = async (userId, name) =>
+    Subject.findOne({ name, userId });
+
 const deleteAllByUserId = (userId) =>
     Subject.deleteMany({ userId });
 
@@ -43,5 +46,6 @@ module.exports = {
     createSubject,
     deleteSubject,
     updateSubject,
-    deleteAllByUserId
+    deleteAllByUserId,
+    findSubjectByNameForUser
 }

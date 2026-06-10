@@ -52,7 +52,7 @@ const cleanCalendarForUser = async (userId, calendarId) => {
     }
 
     if (calendar.name === "calendar.planned") {
-        await PlanRepo.deletePlan(userId);
+        await PlanRepo.deleteAllByUserId(userId);
     } else {
         await EventRepo.deleteEventsByCalendarId(calendar._id);
     }

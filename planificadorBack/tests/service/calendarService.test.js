@@ -160,17 +160,17 @@ describe('calendarService', () => {
             ).rejects.toThrow(NotFoundError);
 
             expect(EventRepo.deleteEventsByCalendarId).not.toHaveBeenCalled();
-            expect(PlanRepo.deletePlan).not.toHaveBeenCalled();
+            expect(PlanRepo.deleteAllByUserId).not.toHaveBeenCalled();
         });
 
-        it('should call PlanRepo.deletePlan for the planned calendar', async () => {
+        it('should call PlanRepo.deleteAllByUserId for the planned calendar', async () => {
             const plannedCalendar = { ...mockCalendar, name: 'calendar.planned', isSystem: true };
             CalendarRepo.findCalendarForUser.mockResolvedValue(plannedCalendar);
-            PlanRepo.deletePlan.mockResolvedValue({});
+            PlanRepo.deleteAllByUserId.mockResolvedValue({});
 
             await CalendarService.cleanCalendarForUser(mockUserId, mockCalendarId);
 
-            expect(PlanRepo.deletePlan).toHaveBeenCalledWith(mockUserId);
+            expect(PlanRepo.deleteAllByUserId).toHaveBeenCalledWith(mockUserId);
             expect(EventRepo.deleteEventsByCalendarId).not.toHaveBeenCalled();
         });
 

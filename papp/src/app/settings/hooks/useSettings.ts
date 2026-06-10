@@ -44,6 +44,7 @@ export function useSettings() {
             body: JSON.stringify({ [field]: value }),
         });
         if (!ok) pushAlert(message, "error");
+        else pushAlert(message, "success");
     };
 
     const patchLocal = (field: keyof Omit<Settings, "_id">, value: any) => {

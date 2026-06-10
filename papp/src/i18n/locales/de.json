@@ -1,0 +1,424 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "name": "Name",
+    "color": "Farbe",
+    "none": "Keine",
+    "loading": "Laden…",
+    "saveChanges": "Änderungen speichern",
+    "title": "Titel"
+  },
+  "landing": {
+    "hero": {
+      "line1": "Alles an seinem",
+      "line2": "Platz und zur richtigen Zeit",
+      "subtitle": "Kalender, Aufgaben und Erinnerungen an einem Ort. Für alle, die Klarheit brauchen, nicht Chaos.",
+      "note": "kein Passwort · keine Registrierung · kostenlos"
+    },
+    "preview": {
+      "general": "Allgemein",
+      "navCalendar": "📅 Kalender",
+      "navTasks": "✅ Aufgaben",
+      "navSettings": "⚙️ Einstellungen",
+      "calendarsLabel": "Kalender",
+      "personal": "🟣 Persönlich",
+      "work": "🟢 Arbeit",
+      "family": "🟠 Familie",
+      "month": "März 2025",
+      "weekdays": ["M", "D", "M", "D", "F", "S", "S"],
+      "events": {
+        "meeting": "Besprechung",
+        "gym": "Gym",
+        "dentist": "Zahnarzt",
+        "sprint": "Sprint",
+        "review": "Review",
+        "dinner": "Abendessen"
+      },
+      "tasksTitle": "Aufgaben",
+      "task1": "PR überprüfen",
+      "task2": "Demo vorbereiten",
+      "task3": "Docs aktualisieren",
+      "task4": "Standup",
+      "task5": "Staging deployen"
+    },
+    "features": {
+      "tag": "Funktionen",
+      "titleLine1": "Entwickelt für",
+      "titleLine2": "deine Arbeitsweise",
+      "calendarTitle": "Intelligenter Kalender",
+      "calendarDesc": "Tag-, Wochen- oder Monatsansicht. Wiederkehrende Ereignisse, Farben pro Kalender und Drag & Drop zum Neuanordnen.",
+      "tasksTitle": "Aufgabenliste",
+      "tasksDesc": "Verwalte deine Aufgaben neben dem Kalender. Kein Tab-Wechsel, kein verlorener Kontext.",
+      "multiCalTitle": "Mehrere Kalender",
+      "multiCalDesc": "Persönlich, Arbeit, Familie… jeder mit seiner eigenen Farbe. Aktiviere oder blende sie nach Bedarf aus.",
+      "recurringTitle": "Wiederkehrende Ereignisse",
+      "recurringDesc": "Täglich, wöchentlich, monatlich oder jährlich. Lege fest, wann die Wiederholung endet oder mit wie vielen Vorkommen.",
+      "googleTitle": "Sicherer Google-Zugang",
+      "googleDesc": "Keine Passwörter mehr merken. Melde dich mit deinem Google-Konto sicher mit einem Klick an.",
+      "mobileTitle": "Mobil-optimiert",
+      "mobileDesc": "Seitenleiste und Aufgabenliste als verschiebbare Panels. Dieselbe Erfahrung auf jedem Gerät."
+    },
+    "cta": {
+      "line1": "Fange heute an,",
+      "line2": "dich zu organisieren",
+      "subtitle": "Ein Klick mit deinem Google-Konto. Nichts weiter."
+    },
+    "footer": {
+      "logo": "Menti",
+      "made": "Gemacht mit ☕ — David Pedregal Ribas"
+    }
+  },
+  "login": {
+    "signIn": "Mit Google anmelden",
+    "error": "Fehler bei der Google-Anmeldung"
+  },
+  "navbar": {
+    "logo": "MentiPlan",
+    "changeLanguage": "Sprache ändern",
+    "logout": "Abmelden"
+  },
+  "home": {
+    "sidebarAriaLabel": "Seitenleiste",
+    "calendarAriaLabel": "Kalender",
+    "taskListAriaLabel": "Aufgabenliste",
+    "panelsAriaLabel": "Panels",
+    "openSettingsAriaLabel": "Einstellungen öffnen",
+    "settingsTitle": "Einstellungen",
+    "openTaskListAriaLabel": "Aufgabenliste öffnen",
+    "tasksTitle": "Aufgaben"
+  },
+  "sidebar": {
+    "general": "Allgemein",
+    "settings": "Einstellungen",
+    "plan": "Planen",
+    "tools": "Werkzeuge",
+    "toolsReplan": "Neu planen",
+    "toolsDeleteByLabel": "Nach Beschriftung löschen",
+    "deleteByLabelInputLabel": "Beschriftung",
+    "deleteByLabelPlaceholder": "Beschriftungsname eingeben…",
+    "toolsImport": "Importieren",
+    "toolsExport": "Exportieren",
+    "defaultCalendars": "Standardkalender",
+    "myCalendars": "Meine Kalender",
+    "newCalendar": "+ Neuer Kalender",
+    "mySubjects": "Meine Fächer",
+    "newSubject": "+ Neues Fach",
+    "deleteCalendarTitle": "Kalender löschen",
+    "deleteCalendarMsg": "Bist du sicher, dass du diesen Kalender löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "cleanCalendarTitle": "Kalender leeren",
+    "cleanCalendarMsg": "Bist du sicher, dass du alle Ereignisse in diesem Kalender löschen möchtest? Der Kalender selbst bleibt erhalten.",
+    "deleteSubjectTitle": "Fach löschen",
+    "deleteSubjectMsg": "Bist du sicher, dass du dieses Fach löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "statistics": "Statistiken"
+  },
+  "import": {
+    "file": "Datei",
+    "filePlaceholder": "Klicke, um eine .csv- oder .ics-Datei auszuwählen",
+    "calendar": "In Kalender importieren",
+    "label": "Beschriftung (optional)",
+    "labelPlaceholder": "z. B. Universität 2026",
+    "submit": "Importieren",
+    "success": "{{count}} Ereignisse erfolgreich importiert"
+  },
+  "export": {
+    "selectCalendars": "Kalender auswählen",
+    "labelFilter": "Beschriftung (optional)",
+    "labelFilterPlaceholder": "Nur Ereignisse mit dieser Beschriftung exportieren",
+    "format": "Format",
+    "download": "CSV herunterladen",
+    "colName": "Name",
+    "colCalendar": "Kalender",
+    "colStartDate": "Startdatum",
+    "colStartTime": "Startzeit",
+    "colEndDate": "Enddatum",
+    "colEndTime": "Endzeit"
+  },
+  "todo": {
+    "title": "Aufgaben",
+    "add": "Hinzufügen",
+    "noTasks": "Keine ausstehenden Aufgaben",
+    "enjoyDay": "Genieße deinen Tag!",
+    "overdue": "Überfällig ({{count}})",
+    "completed": "Abgeschlossen ({{count}})",
+    "deleteRecurringTitle": "Wiederkehrende Aufgabe löschen",
+    "deleteRecurringMsg": "Möchtest du nur diese Aufgabe oder alle Aufgaben der Serie löschen?",
+    "deleteConfirmTitle": "Aufgabe löschen",
+    "deleteConfirmMsg": "Bist du sicher, dass du diese Aufgabe löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "task": {
+    "newTitle": "Neue Aufgabe",
+    "editTitle": "Aufgabe bearbeiten",
+    "save": "Aufgabe speichern",
+    "update": "Aufgabe aktualisieren",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Titel hinzufügen…",
+    "description": "Beschreibung (optional)",
+    "descriptionPlaceholder": "Beschreibung hinzufügen…",
+    "estimatedTime": "Geschätzte Zeit",
+    "hoursAriaLabel": "Stunden",
+    "hoursUnit": "Std.",
+    "minutesAriaLabel": "Minuten",
+    "minutesUnit": "Min.",
+    "dueDate": "Fälligkeitsdatum",
+    "dueTime": "Fälligkeitszeit",
+    "givenDate": "Unterrichtsdatum",
+    "givenDateTooltip": "Datum, an dem die Kenntnisse zur Bearbeitung dieser Aufgabe erworben wurden",
+    "subject": "Fach (optional)",
+    "includePlanning": "In Planung einbeziehen",
+    "addReviews": "Wiederholungen hinzufügen",
+    "updateRecurringTitle": "Wiederkehrende Aufgabe aktualisieren",
+    "updateRecurringMsg": "Möchtest du nur diese Aufgabe oder alle Aufgaben der Serie aktualisieren?",
+    "editAriaLabel": "Aufgabe bearbeiten",
+    "deleteAriaLabel": "Aufgabe löschen",
+    "createAriaLabel": "Aufgabe erstellen",
+    "editDialogAriaLabel": "Aufgabe bearbeiten"
+  },
+  "event": {
+    "newTitle": "Neues Ereignis",
+    "editTitle": "Ereignis bearbeiten",
+    "loadingTitle": "Laden…",
+    "save": "Ereignis speichern",
+    "update": "Ereignis aktualisieren",
+    "delete": "Ereignis löschen",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Titel hinzufügen…",
+    "calendarLabel": "Kalender",
+    "selectCalendarAriaLabel": "Kalender auswählen",
+    "labelField": "Beschriftung",
+    "labelPlaceholder": "Beschriftung hinzufügen (optional)…",
+    "customColor": "Benutzerdefinierte Farbe verwenden",
+    "startDateAriaLabel": "Startdatum",
+    "startTimeAriaLabel": "Startzeit",
+    "endDateAriaLabel": "Enddatum",
+    "endTimeAriaLabel": "Endzeit",
+    "deleteRecurringTitle": "Wiederkehrendes Ereignis löschen",
+    "deleteRecurringMsg": "Möchtest du nur dieses Ereignis oder alle Ereignisse der Serie löschen?",
+    "deleteConfirmTitle": "Ereignis löschen",
+    "deleteConfirmMsg": "Bist du sicher, dass du dieses Ereignis löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "updateRecurringTitle": "Wiederkehrendes Ereignis aktualisieren",
+    "updateRecurringMsg": "Möchtest du nur dieses Ereignis oder alle Ereignisse der Serie aktualisieren?",
+    "createAriaLabel": "Ereignis erstellen",
+    "editAriaLabel": "Ereignis bearbeiten"
+  },
+  "calendar": {
+    "newTitle": "Neuer Kalender",
+    "editTitle": "Kalender bearbeiten",
+    "createAriaLabel": "Kalender erstellen",
+    "editAriaLabel": "Kalender bearbeiten",
+    "save": "Kalender speichern",
+    "nameLabel": "Name",
+    "namePlaceholder": "Kalendername…",
+    "colorLabel": "Farbe",
+    "plannable": "Planbar",
+    "planned": "Geplant"
+  },
+  "subject": {
+    "newTitle": "Neues Fach",
+    "editTitle": "Fach bearbeiten",
+    "createAriaLabel": "Fach erstellen",
+    "editAriaLabel": "Fach bearbeiten",
+    "save": "Fach speichern",
+    "nameLabel": "Name",
+    "namePlaceholder": "Fachname…"
+  },
+  "recurrence": {
+    "periodicity": "Periodizität",
+    "typeAriaLabel": "Art der Periodizität",
+    "every": "Alle",
+    "intervalAriaLabel": "Wiederholungsintervall",
+    "weekdays": "Wochentage",
+    "ends": "Endet",
+    "onDay": "Am",
+    "endDateAriaLabel": "Enddatum der Wiederholung",
+    "afterOccurrences": "Nach Vorkommen",
+    "occurrencesAriaLabel": "Anzahl der Vorkommen",
+    "times": "Mal",
+    "freq": {
+      "none": "Keine Wiederholung",
+      "day": "Täglich",
+      "week": "Wöchentlich",
+      "month": "Monatlich",
+      "year": "Jährlich"
+    },
+    "interval": {
+      "day": "Tag(e)",
+      "week": "Woche(n)",
+      "month": "Monat(e)",
+      "year": "Jahr(e)",
+      "daily": "Tag(e)",
+      "weekly": "Woche(n)",
+      "monthly": "Monat(e)",
+      "yearly": "Jahr(e)"
+    },
+    "weekdaysShort": ["S", "M", "D", "M", "D", "F", "S"],
+    "weekdaysLong": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
+  },
+  "recurrenceChoice": {
+    "single": "{{action}} nur dieses Ereignis",
+    "fromThis": "{{action}} ab diesem Ereignis",
+    "singleTask": "{{action}} nur diese Aufgabe",
+    "fromThisTask": "{{action}} ab dieser Aufgabe",
+    "all": "{{action}} die gesamte Serie",
+    "actionDelete": "Löschen",
+    "actionUpdate": "Aktualisieren"
+  },
+  "planResult": {
+    "ariaLabel": "Planungsergebnis",
+    "planning": "Planung…",
+    "resultTitle": "Planergebnis",
+    "generating": "Dein Plan wird erstellt…",
+    "success": "Plan erfolgreich erstellt! Alle Aufgaben wurden geplant.",
+    "partial_one": "Plan erstellt. 1 Aufgabe konnte nicht geplant werden.",
+    "partial_other": "Plan erstellt. {{count}} Aufgaben konnten nicht geplant werden.",
+    "unplanned": "Ungeplante Aufgaben",
+    "close": "Schließen"
+  },
+  "planEvent": {
+    "ariaLabel": "Geplantes Ereignis bearbeiten",
+    "title": "Geplantes Ereignis",
+    "actualTime": "Tatsächlich aufgewendete Zeit",
+    "actualTimeAriaLabel": "Tatsächlich aufgewendete Zeit",
+    "markCompleted": "Als erledigt markieren",
+    "completed": "Erledigt ✓",
+    "alreadyCompleted": "Dieses Ereignis ist bereits erledigt",
+    "review": {
+      "ariaLabel": "Wiederholung abschließen",
+      "title": "Geplante Wiederholung",
+      "ratingLabel": "Wie lief es?",
+      "ratingRequired": "Wähle eine Bewertung aus, um fortzufahren",
+      "ratings": {
+        "0": "Totaler Blackout — ich erinnerte mich an nichts",
+        "1": "Falsch, aber die Antwort war vertraut, als sie enthüllt wurde",
+        "2": "Falsch, aber die Antwort war leicht zu erinnern",
+        "3": "Richtig, aber mit erheblichem Aufwand",
+        "4": "Richtig, aber mit etwas Zögern",
+        "5": "Richtig, ohne Aufwand"
+      }
+    }
+  },
+  "fullcalendar": {
+    "today":    "Heute",
+    "month":    "Monat",
+    "week":     "Woche",
+    "day":      "Tag",
+    "listWeek": "Agenda"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "appearance": "Erscheinungsbild",
+    "theme": "Thema",
+    "themeDark": "Dunkel",
+    "themeLight": "Hell",
+    "systemColor": "Akzentfarbe",
+    "calendar": "Kalender",
+    "defaultView": "Standardansicht",
+    "startHour": "Startzeit",
+    "endHour": "Endzeit",
+    "hourError": "Die Startzeit muss kleiner als die Endzeit sein",
+    "back": "Zurück",
+    "account": "Konto",
+    "deleteAccount": "Konto löschen",
+    "deleteAccountBtn": "Konto löschen",
+    "deleteAccountTitle": "Konto löschen",
+    "deleteAccountMsg": "Dies wird dein Konto und alle deine Daten dauerhaft löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "slotDuration": "Zeitfensterdauer",
+    "slotDurations": {
+      "15min": "15 Minuten",
+      "30min": "30 Minuten",
+      "1hour": "1 Stunde"
+    },
+    "views": {
+      "dayGridMonth": "Monat",
+      "timeGridWeek": "Woche",
+      "timeGridDay": "Tag",
+      "listWeek": "Agenda"
+    }
+  },
+  "statistics": {
+    "title": "Statistiken",
+    "data": "Daten",
+    "chartType": "Diagrammtyp",
+    "dateRange": "Datumsbereich",
+    "generate": "Generieren",
+    "noData": "Keine Daten für den ausgewählten Zeitraum.",
+    "noSubject": "Kein Fach",
+    "subject": "Fach",
+    "time": "Zeit",
+    "planned": "Geplant",
+    "actual": "Tatsächlich",
+    "download": "Herunterladen",
+    "dataTypes": {
+      "subjectTime": "Zeit pro Fach",
+      "comparisonTime": "Geplante vs. tatsächliche Zeit"
+    },
+    "chartTypes": {
+      "pie": "Kreisdiagramm",
+      "bar": "Balkendiagramm"
+    }
+  },
+  "api": {
+    "auth": {
+      "failed": "Authentifizierung fehlgeschlagen",
+      "notGoogle": "Nicht mit Google authentifiziert",
+      "unauthorized": "Nicht autorisiert",
+      "userNotFound": "Benutzer nicht gefunden",
+      "invalidToken": "Ungültiges Token"
+    },
+    "error": {
+      "internal": "Interner Serverfehler",
+      "connectionFailed": "Verbindung zum Server konnte nicht hergestellt werden"
+    },
+    "calendar": {
+      "created": "Kalender erstellt",
+      "deleted": "Kalender gelöscht",
+      "cleaned": "Kalender geleert",
+      "updated": "Kalender aktualisiert",
+      "visibilityChanged": "Kalendersichtbarkeit aktualisiert"
+    },
+    "task": {
+      "created": "Aufgabe erstellt",
+      "updated": "Aufgabe aktualisiert",
+      "forwarded": "Aufgabe ab diesem Punkt aktualisiert",
+      "allUpdated": "Alle Aufgaben der Serie aktualisiert",
+      "toggled": "Aufgabenstatus aktualisiert",
+      "deleted": "Aufgabe gelöscht",
+      "forwardDeleted": "Aufgaben ab diesem Punkt gelöscht",
+      "allDeleted": "Alle Aufgaben der Serie gelöscht"
+    },
+    "event": {
+      "created": "Ereignis erstellt",
+      "updated": "Ereignis aktualisiert",
+      "forwardUpdated": "Ereignis ab diesem Punkt aktualisiert",
+      "allUpdated": "Alle Ereignisse der Serie aktualisiert",
+      "labelDeleted": "Ereignisse mit dieser Beschriftung gelöscht",
+      "deleted": "Ereignis gelöscht",
+      "forwardDeleted": "Ereignisse ab diesem Punkt gelöscht",
+      "allDeleted": "Alle Ereignisse der Serie gelöscht"
+    },
+    "subject": {
+      "created": "Fach erstellt",
+      "deleted": "Fach gelöscht",
+      "updated": "Fach aktualisiert"
+    },
+    "plan": {
+      "created": "Plan erstellt",
+      "eventUpdated": "Geplantes Ereignis aktualisiert",
+      "eventDeleted": "Geplantes Ereignis gelöscht",
+      "deleted": "Plan gelöscht"
+    },
+    "scheduler": {
+      "noSlots": "Keine verfügbaren Zeitfenster zur Planung dieser Aufgabe",
+      "cannotFinish": "Diese Aufgabe kann nicht vor ihrem Fälligkeitsdatum abgeschlossen werden"
+    },
+    "settings": {
+      "updated": "Einstellungen aktualisiert",
+      "deleted": "Einstellungen gelöscht"
+    },
+    "user": {
+      "accountDeleted": "Konto gelöscht"
+    }
+  }
+}

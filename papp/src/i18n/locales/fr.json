@@ -1,0 +1,424 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "name": "Nom",
+    "color": "Couleur",
+    "none": "Aucune",
+    "loading": "Chargement…",
+    "saveChanges": "Sauvegarder les modifications",
+    "title": "Titre"
+  },
+  "landing": {
+    "hero": {
+      "line1": "Tout à sa",
+      "line2": "place et son heure",
+      "subtitle": "Calendriers, tâches et rappels en un seul espace. Conçu pour ceux qui ont besoin de clarté, pas de chaos.",
+      "note": "sans mot de passe · sans inscription · gratuit"
+    },
+    "preview": {
+      "general": "Général",
+      "navCalendar": "📅 Calendrier",
+      "navTasks": "✅ Tâches",
+      "navSettings": "⚙️ Paramètres",
+      "calendarsLabel": "Calendriers",
+      "personal": "🟣 Personnel",
+      "work": "🟢 Travail",
+      "family": "🟠 Famille",
+      "month": "Mars 2025",
+      "weekdays": ["L", "M", "M", "J", "V", "S", "D"],
+      "events": {
+        "meeting": "Réunion",
+        "gym": "Sport",
+        "dentist": "Dentiste",
+        "sprint": "Sprint",
+        "review": "Revue",
+        "dinner": "Dîner"
+      },
+      "tasksTitle": "Tâches",
+      "task1": "Revoir la PR",
+      "task2": "Préparer la démo",
+      "task3": "Mettre à jour les docs",
+      "task4": "Standup",
+      "task5": "Déploiement staging"
+    },
+    "features": {
+      "tag": "Fonctionnalités",
+      "titleLine1": "Conçu pour",
+      "titleLine2": "votre façon de travailler",
+      "calendarTitle": "Calendrier intelligent",
+      "calendarDesc": "Vue par jour, semaine ou mois. Événements récurrents, couleurs par calendrier et glisser pour réorganiser.",
+      "tasksTitle": "Liste de tâches",
+      "tasksDesc": "Gérez vos tâches à côté du calendrier. Sans changer d'onglet, sans perdre le fil.",
+      "multiCalTitle": "Plusieurs calendriers",
+      "multiCalDesc": "Personnel, travail, famille… chacun avec sa couleur. Activez ou masquez-les selon vos besoins.",
+      "recurringTitle": "Événements récurrents",
+      "recurringDesc": "Quotidien, hebdomadaire, mensuel ou annuel. Définissez quand la récurrence se termine ou avec combien d'occurrences.",
+      "googleTitle": "Accès sécurisé avec Google",
+      "googleDesc": "Plus de mots de passe à retenir. Connectez-vous avec votre compte Google en toute sécurité en un clic.",
+      "mobileTitle": "Adapté au mobile",
+      "mobileDesc": "Barre latérale et liste de tâches en panneaux coulissants. La même expérience sur tous les appareils."
+    },
+    "cta": {
+      "line1": "Commencez à",
+      "line2": "vous organiser aujourd'hui",
+      "subtitle": "Un seul clic avec votre compte Google. Rien de plus."
+    },
+    "footer": {
+      "logo": "Menti",
+      "made": "Fait avec ☕ — David Pedregal Ribas"
+    }
+  },
+  "login": {
+    "signIn": "Se connecter avec Google",
+    "error": "Erreur de connexion avec Google"
+  },
+  "navbar": {
+    "logo": "MentiPlan",
+    "changeLanguage": "Changer de langue",
+    "logout": "Se déconnecter"
+  },
+  "home": {
+    "sidebarAriaLabel": "Barre latérale",
+    "calendarAriaLabel": "Calendrier",
+    "taskListAriaLabel": "Liste de tâches",
+    "panelsAriaLabel": "Panneaux",
+    "openSettingsAriaLabel": "Ouvrir les paramètres",
+    "settingsTitle": "Paramètres",
+    "openTaskListAriaLabel": "Ouvrir la liste de tâches",
+    "tasksTitle": "Tâches"
+  },
+  "sidebar": {
+    "general": "Général",
+    "settings": "Paramètres",
+    "plan": "Planifier",
+    "tools": "Outils",
+    "toolsReplan": "Replanifier",
+    "toolsDeleteByLabel": "Supprimer par étiquette",
+    "deleteByLabelInputLabel": "Étiquette",
+    "deleteByLabelPlaceholder": "Entrez le nom de l'étiquette…",
+    "toolsImport": "Importer",
+    "toolsExport": "Exporter",
+    "defaultCalendars": "Calendriers par défaut",
+    "myCalendars": "Mes calendriers",
+    "newCalendar": "+ Nouveau calendrier",
+    "mySubjects": "Mes matières",
+    "newSubject": "+ Nouvelle matière",
+    "deleteCalendarTitle": "Supprimer le calendrier",
+    "deleteCalendarMsg": "Êtes-vous sûr de vouloir supprimer ce calendrier ? Cette action est irréversible.",
+    "cleanCalendarTitle": "Vider le calendrier",
+    "cleanCalendarMsg": "Êtes-vous sûr de vouloir supprimer tous les événements de ce calendrier ? Le calendrier lui-même sera conservé.",
+    "deleteSubjectTitle": "Supprimer la matière",
+    "deleteSubjectMsg": "Êtes-vous sûr de vouloir supprimer cette matière ? Cette action est irréversible.",
+    "statistics": "Statistiques"
+  },
+  "import": {
+    "file": "Fichier",
+    "filePlaceholder": "Cliquez pour sélectionner un fichier .csv ou .ics",
+    "calendar": "Importer dans le calendrier",
+    "label": "Étiquette (optionnel)",
+    "labelPlaceholder": "Ex. : Université 2026",
+    "submit": "Importer",
+    "success": "{{count}} événements importés avec succès"
+  },
+  "export": {
+    "selectCalendars": "Sélectionner les calendriers",
+    "labelFilter": "Étiquette (optionnel)",
+    "labelFilterPlaceholder": "Exporter uniquement les événements avec cette étiquette",
+    "format": "Format",
+    "download": "Télécharger CSV",
+    "colName": "Nom",
+    "colCalendar": "Calendrier",
+    "colStartDate": "Date de début",
+    "colStartTime": "Heure de début",
+    "colEndDate": "Date de fin",
+    "colEndTime": "Heure de fin"
+  },
+  "todo": {
+    "title": "Tâches",
+    "add": "Ajouter",
+    "noTasks": "Aucune tâche en attente",
+    "enjoyDay": "Profitez de votre journée !",
+    "overdue": "En retard ({{count}})",
+    "completed": "Terminées ({{count}})",
+    "deleteRecurringTitle": "Supprimer la tâche récurrente",
+    "deleteRecurringMsg": "Voulez-vous supprimer uniquement cette tâche ou toutes les tâches de la série ?",
+    "deleteConfirmTitle": "Supprimer la tâche",
+    "deleteConfirmMsg": "Êtes-vous sûr de vouloir supprimer cette tâche ? Cette action est irréversible."
+  },
+  "task": {
+    "newTitle": "Nouvelle tâche",
+    "editTitle": "Modifier la tâche",
+    "save": "Enregistrer la tâche",
+    "update": "Mettre à jour la tâche",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "Ajouter un titre…",
+    "description": "Description (optionnel)",
+    "descriptionPlaceholder": "Ajouter une description…",
+    "estimatedTime": "Temps estimé",
+    "hoursAriaLabel": "Heures",
+    "hoursUnit": "h",
+    "minutesAriaLabel": "Minutes",
+    "minutesUnit": "min",
+    "dueDate": "Date d'échéance",
+    "dueTime": "Heure d'échéance",
+    "givenDate": "Date d'enseignement",
+    "givenDateTooltip": "Date à laquelle les connaissances nécessaires à cette tâche ont été acquises",
+    "subject": "Matière (optionnel)",
+    "includePlanning": "Inclure dans la planification",
+    "addReviews": "Ajouter des révisions",
+    "updateRecurringTitle": "Mettre à jour la tâche récurrente",
+    "updateRecurringMsg": "Voulez-vous mettre à jour uniquement cette tâche ou toutes les tâches de la série ?",
+    "editAriaLabel": "Modifier la tâche",
+    "deleteAriaLabel": "Supprimer la tâche",
+    "createAriaLabel": "Créer une tâche",
+    "editDialogAriaLabel": "Modifier la tâche"
+  },
+  "event": {
+    "newTitle": "Nouvel événement",
+    "editTitle": "Modifier l'événement",
+    "loadingTitle": "Chargement…",
+    "save": "Enregistrer l'événement",
+    "update": "Mettre à jour l'événement",
+    "delete": "Supprimer l'événement",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "Ajouter un titre…",
+    "calendarLabel": "Calendrier",
+    "selectCalendarAriaLabel": "Sélectionner un calendrier",
+    "labelField": "Étiquette",
+    "labelPlaceholder": "Ajouter une étiquette (optionnel)…",
+    "customColor": "Utiliser une couleur personnalisée",
+    "startDateAriaLabel": "Date de début",
+    "startTimeAriaLabel": "Heure de début",
+    "endDateAriaLabel": "Date de fin",
+    "endTimeAriaLabel": "Heure de fin",
+    "deleteRecurringTitle": "Supprimer l'événement récurrent",
+    "deleteRecurringMsg": "Voulez-vous supprimer uniquement cet événement ou tous les événements de la série ?",
+    "deleteConfirmTitle": "Supprimer l'événement",
+    "deleteConfirmMsg": "Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.",
+    "updateRecurringTitle": "Mettre à jour l'événement récurrent",
+    "updateRecurringMsg": "Voulez-vous mettre à jour uniquement cet événement ou tous les événements de la série ?",
+    "createAriaLabel": "Créer un événement",
+    "editAriaLabel": "Modifier l'événement"
+  },
+  "calendar": {
+    "newTitle": "Nouveau calendrier",
+    "editTitle": "Modifier le calendrier",
+    "createAriaLabel": "Créer un calendrier",
+    "editAriaLabel": "Modifier le calendrier",
+    "save": "Enregistrer le calendrier",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Nom du calendrier…",
+    "colorLabel": "Couleur",
+    "plannable": "Planifiable",
+    "planned": "Planifié"
+  },
+  "subject": {
+    "newTitle": "Nouvelle matière",
+    "editTitle": "Modifier la matière",
+    "createAriaLabel": "Créer une matière",
+    "editAriaLabel": "Modifier la matière",
+    "save": "Enregistrer la matière",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Nom de la matière…"
+  },
+  "recurrence": {
+    "periodicity": "Périodicité",
+    "typeAriaLabel": "Type de périodicité",
+    "every": "Tous les",
+    "intervalAriaLabel": "Intervalle de répétition",
+    "weekdays": "Jours de la semaine",
+    "ends": "Se termine",
+    "onDay": "Le",
+    "endDateAriaLabel": "Date de fin de récurrence",
+    "afterOccurrences": "Après les occurrences",
+    "occurrencesAriaLabel": "Nombre d'occurrences",
+    "times": "fois",
+    "freq": {
+      "none": "Pas de répétition",
+      "day": "Quotidien",
+      "week": "Hebdomadaire",
+      "month": "Mensuel",
+      "year": "Annuel"
+    },
+    "interval": {
+      "day": "jour(s)",
+      "week": "semaine(s)",
+      "month": "mois",
+      "year": "an(s)",
+      "daily": "jour(s)",
+      "weekly": "semaine(s)",
+      "monthly": "mois",
+      "yearly": "an(s)"
+    },
+    "weekdaysShort": ["D", "L", "M", "M", "J", "V", "S"],
+    "weekdaysLong": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+  },
+  "recurrenceChoice": {
+    "single": "{{action}} uniquement cet événement",
+    "fromThis": "{{action}} à partir de cet événement",
+    "singleTask": "{{action}} uniquement cette tâche",
+    "fromThisTask": "{{action}} à partir de cette tâche",
+    "all": "{{action}} toute la série",
+    "actionDelete": "Supprimer",
+    "actionUpdate": "Mettre à jour"
+  },
+  "planResult": {
+    "ariaLabel": "Résultat de la planification",
+    "planning": "Planification…",
+    "resultTitle": "Résultat du plan",
+    "generating": "Génération de votre plan…",
+    "success": "Plan créé avec succès ! Toutes les tâches ont été planifiées.",
+    "partial_one": "Plan créé. 1 tâche n'a pas pu être planifiée.",
+    "partial_other": "Plan créé. {{count}} tâches n'ont pas pu être planifiées.",
+    "unplanned": "Tâches non planifiées",
+    "close": "Fermer"
+  },
+  "planEvent": {
+    "ariaLabel": "Modifier l'événement planifié",
+    "title": "Événement planifié",
+    "actualTime": "Temps réel consacré",
+    "actualTimeAriaLabel": "Temps réel consacré",
+    "markCompleted": "Marquer comme terminé",
+    "completed": "Terminé ✓",
+    "alreadyCompleted": "Cet événement est déjà terminé",
+    "review": {
+      "ariaLabel": "Compléter la révision",
+      "title": "Révision planifiée",
+      "ratingLabel": "Comment ça s'est passé ?",
+      "ratingRequired": "Sélectionnez une note pour continuer",
+      "ratings": {
+        "0": "Trou noir total — je n'ai rien rappelé",
+        "1": "Incorrect, mais la réponse semblait familière une fois révélée",
+        "2": "Incorrect, mais la réponse était facile à rappeler",
+        "3": "Correct, mais avec beaucoup d'effort",
+        "4": "Correct, avec quelques hésitations",
+        "5": "Correct, sans effort"
+      }
+    }
+  },
+  "fullcalendar": {
+    "today":    "Aujourd'hui",
+    "month":    "Mois",
+    "week":     "Semaine",
+    "day":      "Jour",
+    "listWeek": "Agenda"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "appearance": "Apparence",
+    "theme": "Thème",
+    "themeDark": "Sombre",
+    "themeLight": "Clair",
+    "systemColor": "Couleur d'accentuation",
+    "calendar": "Calendrier",
+    "defaultView": "Vue par défaut",
+    "startHour": "Heure de début",
+    "endHour": "Heure de fin",
+    "hourError": "L'heure de début doit être inférieure à l'heure de fin",
+    "back": "Retour",
+    "account": "Compte",
+    "deleteAccount": "Supprimer le compte",
+    "deleteAccountBtn": "Supprimer le compte",
+    "deleteAccountTitle": "Supprimer le compte",
+    "deleteAccountMsg": "Cela supprimera définitivement votre compte et toutes vos données. Cette action est irréversible.",
+    "slotDuration": "Durée des créneaux",
+    "slotDurations": {
+      "15min": "15 minutes",
+      "30min": "30 minutes",
+      "1hour": "1 heure"
+    },
+    "views": {
+      "dayGridMonth": "Mois",
+      "timeGridWeek": "Semaine",
+      "timeGridDay": "Jour",
+      "listWeek": "Agenda"
+    }
+  },
+  "statistics": {
+    "title": "Statistiques",
+    "data": "Données",
+    "chartType": "Type de graphique",
+    "dateRange": "Plage de dates",
+    "generate": "Générer",
+    "noData": "Aucune donnée pour la période sélectionnée.",
+    "noSubject": "Sans matière",
+    "subject": "Matière",
+    "time": "Temps",
+    "planned": "Planifié",
+    "actual": "Réel",
+    "download": "Télécharger",
+    "dataTypes": {
+      "subjectTime": "Temps par matière",
+      "comparisonTime": "Temps planifié vs réel"
+    },
+    "chartTypes": {
+      "pie": "Graphique circulaire",
+      "bar": "Graphique en barres"
+    }
+  },
+  "api": {
+    "auth": {
+      "failed": "Échec de l'authentification",
+      "notGoogle": "Non authentifié avec Google",
+      "unauthorized": "Non autorisé",
+      "userNotFound": "Utilisateur introuvable",
+      "invalidToken": "Jeton invalide"
+    },
+    "error": {
+      "internal": "Erreur interne du serveur",
+      "connectionFailed": "Impossible de se connecter au serveur"
+    },
+    "calendar": {
+      "created": "Calendrier créé",
+      "deleted": "Calendrier supprimé",
+      "cleaned": "Calendrier vidé",
+      "updated": "Calendrier mis à jour",
+      "visibilityChanged": "Visibilité du calendrier mise à jour"
+    },
+    "task": {
+      "created": "Tâche créée",
+      "updated": "Tâche mise à jour",
+      "forwarded": "Tâche mise à jour à partir de ce point",
+      "allUpdated": "Toutes les tâches de la série mises à jour",
+      "toggled": "Statut de la tâche mis à jour",
+      "deleted": "Tâche supprimée",
+      "forwardDeleted": "Tâches supprimées à partir de ce point",
+      "allDeleted": "Toutes les tâches de la série supprimées"
+    },
+    "event": {
+      "created": "Événement créé",
+      "updated": "Événement mis à jour",
+      "forwardUpdated": "Événement mis à jour à partir de ce point",
+      "allUpdated": "Tous les événements de la série mis à jour",
+      "labelDeleted": "Événements avec cette étiquette supprimés",
+      "deleted": "Événement supprimé",
+      "forwardDeleted": "Événements supprimés à partir de ce point",
+      "allDeleted": "Tous les événements de la série supprimés"
+    },
+    "subject": {
+      "created": "Matière créée",
+      "deleted": "Matière supprimée",
+      "updated": "Matière mise à jour"
+    },
+    "plan": {
+      "created": "Plan créé",
+      "eventUpdated": "Événement planifié mis à jour",
+      "eventDeleted": "Événement planifié supprimé",
+      "deleted": "Plan supprimé"
+    },
+    "scheduler": {
+      "noSlots": "Aucun créneau disponible pour planifier cette tâche",
+      "cannotFinish": "Impossible de terminer cette tâche avant sa date d'échéance"
+    },
+    "settings": {
+      "updated": "Paramètres mis à jour",
+      "deleted": "Paramètres supprimés"
+    },
+    "user": {
+      "accountDeleted": "Compte supprimé"
+    }
+  }
+}

@@ -10,6 +10,8 @@ import "./Navbar.css";
 const LANGUAGES = [
     { code: "en", label: "English" },
     { code: "es", label: "Español" },
+    { code: "fr", label: "Français" },
+    { code: "de", label: "Deutsch" },
 ];
 
 export default function Navbar() {

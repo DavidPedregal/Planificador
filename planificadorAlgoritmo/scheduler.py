@@ -150,17 +150,35 @@ def resolver(tasks, available_blocks):
                 model.Add(c >= x[i, j] + x[i, j + 1] - 1) # type: ignore
                 continuity_terms.append(-continuity_weight * c)
 
+    # Penalización de dispersión: minimiza la distancia entre el primer y el último bloque
+    # asignado a cada tarea, evitando el patrón t1→t2→t1
+    span_weight = max(1, (distance_cap + 1) // (n_blocks + 1)) if n_blocks > 0 else 1
+    first_block = {}
+    last_block = {}
+    span_terms = []
+    for i in range(n_tasks):
+        ub = max(0, n_blocks - 1)
+        first_block[i] = model.NewIntVar(0, ub, f"first_block_{i}") # type: ignore
+        last_block[i] = model.NewIntVar(0, ub, f"last_block_{i}") # type: ignore
+        model.Add(last_block[i] >= first_block[i]) # type: ignore
+        for j in range(n_blocks):
+            model.Add(first_block[i] <= j).OnlyEnforceIf(x[i, j]) # type: ignore
+            model.Add(last_block[i] >= j).OnlyEnforceIf(x[i, j]) # type: ignore
+        span_terms.append(span_weight * (last_block[i] - first_block[i]))
+
     # Prioridad 1: maximizar tareas completadas
     # Prioridad 2: maximizar bloques asignados (incluso en tareas parciales)
-    # Prioridad 3: minimizar fragmentación (bloques consecutivos juntos)
-    # Prioridad 4: minimizar distancia a givenDate
+    # Prioridad 3: minimizar dispersión entre fragmentos de la misma tarea
+    # Prioridad 4: minimizar fragmentación interna (bloques consecutivos juntos)
+    # Prioridad 5: minimizar distancia a givenDate
     peso = n_tasks * n_blocks * distance_cap + 1
     partial_fill_weight = distance_cap + 1  # mayor que cualquier coste de distancia individual
     model.Minimize(
         sum(-peso * completada[i] for i in range(n_tasks)) +
         sum(-partial_fill_weight * x[i, j] for i in range(n_tasks) for j in range(n_blocks)) + # type: ignore
         sum(costs) +
-        sum(continuity_terms)
+        sum(continuity_terms) +
+        sum(span_terms)
     )
 
     solver = cp_model.CpSolver()

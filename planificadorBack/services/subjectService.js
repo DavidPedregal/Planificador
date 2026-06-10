@@ -9,6 +9,10 @@ const createSubject = async (userId,subjectData) => {
     if (!subjectData.name || subjectData.name.trim() === '') {
         throw new ValidationError('Subject name is required');
     }
+    const existing = await SubjectRepo.findSubjectByNameForUser(userId, subjectData.name);
+    if (existing) {
+        throw new ValidationError('Subject name must be unique');
+    }
     return await SubjectRepo.createSubject({ ...subjectData, userId });
 };
 

@@ -105,6 +105,27 @@ describe('subjectRepository', () => {
         });
     });
 
+    describe('findSubjectByNameForUser', () => {
+        it('should find an existing subject by name', async () => {
+            await SubjectRepo.createSubject(mockSubject);
+            const found = await SubjectRepo.findSubjectByNameForUser(mockUserId, 'Matemáticas');
+            expect(found).not.toBeNull();
+            expect(found.name).toBe('Matemáticas');
+        });
+
+        it('should return null if no subject with that name exists for the user', async () => {
+            const found = await SubjectRepo.findSubjectByNameForUser(mockUserId, 'Física');
+            expect(found).toBeNull();
+        });
+
+        it('should not return a subject with that name belonging to another user', async () => {
+            const otherUserId = new mongoose.Types.ObjectId();
+            await SubjectRepo.createSubject({ userId: otherUserId, name: 'Matemáticas' });
+            const found = await SubjectRepo.findSubjectByNameForUser(mockUserId, 'Matemáticas');
+            expect(found).toBeNull();
+        });
+    });
+
     describe('updateSubject', () => {
         it('should update the name of a subject', async () => {
             const created = await SubjectRepo.createSubject(mockSubject);
