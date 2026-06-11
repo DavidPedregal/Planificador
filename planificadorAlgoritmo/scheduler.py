@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from ortools.sat.python import cp_model
 from models import PlanRequest, PlanResponse, ScheduledBlock, Warning
+import time
 
 BLOCK_SIZE = 15  # minutos por bloque
 
@@ -183,8 +184,13 @@ def resolver(tasks, available_blocks):
 
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = 10.0
-    status = solver.Solve(model)
 
+    t0 = time.time()
+    status = solver.Solve(model)
+    t1 = time.time()
+    
+    print(f"[scheduler] Solver time: {t1 - t0:.3f}s | Status: {solver.StatusName(status)} | Tasks: {n_tasks} | Blocks: {n_blocks}")
+    
     scheduled = []
     warnings = []
 
