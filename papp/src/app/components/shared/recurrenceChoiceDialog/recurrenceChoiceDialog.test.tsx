@@ -36,65 +36,65 @@ describe("RecurrenceChoiceDialog - visibilidad", () => {
 });
 
 describe("RecurrenceChoiceDialog - etiquetas de botones para eventos", () => {
-    it("usa 'Update' como etiqueta cuando action=update, kind=event", () => {
+    it("usa 'Actualizar' como etiqueta cuando action=update, kind=event", () => {
         render(<RecurrenceChoiceDialog {...baseProps} action="update" kind="event" />);
-        expect(screen.getByText("Update only this event")).toBeInTheDocument();
-        expect(screen.getByText("Update from this event onwards")).toBeInTheDocument();
-        expect(screen.getByText("Update the entire series")).toBeInTheDocument();
+        expect(screen.getByText("Actualizar solo este evento")).toBeInTheDocument();
+        expect(screen.getByText("Actualizar a partir de este evento")).toBeInTheDocument();
+        expect(screen.getByText("Actualizar toda la serie")).toBeInTheDocument();
     });
 
-    it("usa 'Delete' como etiqueta cuando action=delete, kind=event", () => {
+    it("usa 'Eliminar' como etiqueta cuando action=delete, kind=event", () => {
         render(<RecurrenceChoiceDialog {...baseProps} action="delete" kind="event" />);
-        expect(screen.getByText("Delete only this event")).toBeInTheDocument();
-        expect(screen.getByText("Delete from this event onwards")).toBeInTheDocument();
-        expect(screen.getByText("Delete the entire series")).toBeInTheDocument();
+        expect(screen.getByText("Eliminar solo este evento")).toBeInTheDocument();
+        expect(screen.getByText("Eliminar a partir de este evento")).toBeInTheDocument();
+        expect(screen.getByText("Eliminar toda la serie")).toBeInTheDocument();
     });
 });
 
 describe("RecurrenceChoiceDialog - etiquetas de botones para tareas", () => {
     it("usa etiquetas de tarea cuando kind=task y action=update", () => {
         render(<RecurrenceChoiceDialog {...baseProps} kind="task" action="update" />);
-        expect(screen.getByText("Update only this task")).toBeInTheDocument();
-        expect(screen.getByText("Update from this task onwards")).toBeInTheDocument();
-        expect(screen.getByText("Update the entire series")).toBeInTheDocument();
+        expect(screen.getByText("Actualizar solo esta tarea")).toBeInTheDocument();
+        expect(screen.getByText("Actualizar a partir de esta tarea")).toBeInTheDocument();
+        expect(screen.getByText("Actualizar toda la serie")).toBeInTheDocument();
     });
 
     it("usa etiquetas de tarea cuando kind=task y action=delete", () => {
         render(<RecurrenceChoiceDialog {...baseProps} kind="task" action="delete" />);
-        expect(screen.getByText("Delete only this task")).toBeInTheDocument();
-        expect(screen.getByText("Delete from this task onwards")).toBeInTheDocument();
-        expect(screen.getByText("Delete the entire series")).toBeInTheDocument();
+        expect(screen.getByText("Eliminar solo esta tarea")).toBeInTheDocument();
+        expect(screen.getByText("Eliminar a partir de esta tarea")).toBeInTheDocument();
+        expect(screen.getByText("Eliminar toda la serie")).toBeInTheDocument();
     });
 });
 
 describe("RecurrenceChoiceDialog - callbacks", () => {
     it("llama a onChooseSingle al pulsar el primer botón", async () => {
         render(<RecurrenceChoiceDialog {...baseProps} />);
-        await userEvent.click(screen.getByText("Update only this event"));
+        await userEvent.click(screen.getByText("Actualizar solo este evento"));
         expect(baseProps.onChooseSingle).toHaveBeenCalledTimes(1);
     });
 
     it("llama a onChooseFromThis al pulsar el segundo botón", async () => {
         render(<RecurrenceChoiceDialog {...baseProps} />);
-        await userEvent.click(screen.getByText("Update from this event onwards"));
+        await userEvent.click(screen.getByText("Actualizar a partir de este evento"));
         expect(baseProps.onChooseFromThis).toHaveBeenCalledTimes(1);
     });
 
     it("llama a onChooseAll al pulsar el tercer botón", async () => {
         render(<RecurrenceChoiceDialog {...baseProps} />);
-        await userEvent.click(screen.getByText("Update the entire series"));
+        await userEvent.click(screen.getByText("Actualizar toda la serie"));
         expect(baseProps.onChooseAll).toHaveBeenCalledTimes(1);
     });
 
-    it("llama a onCancel al pulsar Cancel", async () => {
+    it("llama a onCancel al pulsar Cancelar", async () => {
         render(<RecurrenceChoiceDialog {...baseProps} />);
-        await userEvent.click(screen.getByText("Cancel"));
+        await userEvent.click(screen.getByText("Cancelar"));
         expect(baseProps.onCancel).toHaveBeenCalledTimes(1);
     });
 
     it("llama a onCancel al pulsar ✕", async () => {
         render(<RecurrenceChoiceDialog {...baseProps} />);
-        await userEvent.click(screen.getByLabelText("Close"));
+        await userEvent.click(screen.getByLabelText("Cerrar"));
         expect(baseProps.onCancel).toHaveBeenCalledTimes(1);
     });
 

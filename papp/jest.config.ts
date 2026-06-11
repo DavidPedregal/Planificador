@@ -24,6 +24,7 @@ const config: Config = {
             },
         ],
     },
+    verbose: true,
     // Ignorar .next y node_modules
     testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
     // Extensiones que Jest debe resolver

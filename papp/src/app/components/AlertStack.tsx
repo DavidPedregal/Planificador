@@ -34,7 +34,7 @@ export default function AlertStack() {
             {alerts.map(alert => {
                 const color = SEVERITY_COLOR[alert.severity] ?? SEVERITY_COLOR.info;
                 return (
-                    <div key={alert.id} style={{
+                    <div key={alert.id} role="alert" style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '10px',

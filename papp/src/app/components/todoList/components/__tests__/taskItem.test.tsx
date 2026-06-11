@@ -36,8 +36,8 @@ describe("TaskItem - renderizado", () => {
 
     it("muestra la fecha de entrega localizada", () => {
         render(<TaskItem {...baseProps} />);
-        const expectedDate = mockTask.finishDate.toLocaleDateString("en-US");
-        expect(screen.getByText(new RegExp(expectedDate))).toBeInTheDocument();
+        const expectedDate = mockTask.finishDate.toLocaleDateString("es-ES");
+        expect(screen.getByText(new RegExp(expectedDate.replace(/\//g, "\\/")))).toBeInTheDocument();
     });
 
     it("no tiene la clase 'completed' cuando la tarea no está completada", () => {
@@ -70,7 +70,7 @@ describe("TaskItem - callbacks", () => {
     it("llama a onEdit con el id correcto al pulsar editar", async () => {
         const onEdit = jest.fn();
         render(<TaskItem {...baseProps} onEdit={onEdit} />);
-        await userEvent.click(screen.getByLabelText("Edit task"));
+        await userEvent.click(screen.getByLabelText("Editar tarea"));
         expect(onEdit).toHaveBeenCalledWith(42);
         expect(onEdit).toHaveBeenCalledTimes(1);
     });
@@ -78,7 +78,7 @@ describe("TaskItem - callbacks", () => {
     it("llama a onDelete con el id y recurring correcto al pulsar eliminar", async () => {
         const onDelete = jest.fn();
         render(<TaskItem {...baseProps} onDelete={onDelete} />);
-        await userEvent.click(screen.getByLabelText("Delete task"));
+        await userEvent.click(screen.getByLabelText("Eliminar tarea"));
         expect(onDelete).toHaveBeenCalledWith(42, false);
         expect(onDelete).toHaveBeenCalledTimes(1);
     });
@@ -88,10 +88,10 @@ describe("TaskItem - callbacks", () => {
         const onDelete = jest.fn();
         render(<TaskItem {...baseProps} onEdit={onEdit} onDelete={onDelete} />);
 
-        await userEvent.click(screen.getByLabelText("Edit task"));
+        await userEvent.click(screen.getByLabelText("Editar tarea"));
         expect(onDelete).not.toHaveBeenCalled();
 
-        await userEvent.click(screen.getByLabelText("Delete task"));
+        await userEvent.click(screen.getByLabelText("Eliminar tarea"));
         expect(onEdit).toHaveBeenCalledTimes(1);
     });
 });
