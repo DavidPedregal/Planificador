@@ -2,6 +2,7 @@ const PlanRepo = require('../repository/planRepository');
 const EventService = require('../services/eventService.js');
 const TaskService = require('../services/taskService.js');
 const CalendarService = require('../services/calendarService.js');
+const SettingsService = require('../services/settingsService.js');
 const { mapPreviousPlan, mapSlots, mapTasks, mapPlanData } = require('./business/planHelper.js');
 const { ValidationError, NotFoundError } = require('../errors/AppError');
 
@@ -21,12 +22,13 @@ const getDataToPlan = async (userId) => {
     const previousPlan = await getPlanForUser(userId);
     const plannableSlots = await EventService.getPlannableEventsForUser(userId);
     const tasks = await TaskService.getTasksToPlan(userId);
+    const maxTime = await SettingsService.getMaxTimeForPlanning(userId);
 
     const mappedPreviousPlan = mapPreviousPlan(previousPlan);
     const mappedPlannableSlots = mapSlots(plannableSlots);
     const mappedTasks = mapTasks(tasks);
 
-    return { mappedPreviousPlan, mappedPlannableSlots, mappedTasks };
+    return { mappedPreviousPlan, mappedPlannableSlots, mappedTasks, maxTime };
 };
 
 const addPlan = async (planEvents, userId, taskIsReviewMap = {}) => {

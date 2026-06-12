@@ -22,6 +22,8 @@ export default function SettingsPage() {
     const [startHour, setStartHour] = useState(8);
     const [endHour, setEndHour] = useState(20);
     const [hourError, setHourError] = useState("");
+    const [maxTime, setMaxTime] = useState(10);
+    const [maxTimeError, setMaxTimeError] = useState("");
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     const colorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -30,6 +32,7 @@ export default function SettingsPage() {
         if (settings) {
             setStartHour(settings.startHour);
             setEndHour(settings.endHour);
+            setMaxTime(settings.maxTime ?? 10);
         }
     }, [settings]);
 
@@ -45,6 +48,15 @@ export default function SettingsPage() {
 
     const handleViewChange = (view: string) => {
         updateField("defaultCalendarView", view as any);
+    };
+
+    const validateAndSaveMaxTime = (value: number) => {
+        if (!Number.isInteger(value) || value < 1) {
+            setMaxTimeError(t("settings.maxTimeError"));
+            return;
+        }
+        setMaxTimeError("");
+        if (value !== settings?.maxTime) updateField("maxTime", value);
     };
 
     const validateAndSaveHours = (newStart: number, newEnd: number) => {
@@ -180,6 +192,32 @@ export default function SettingsPage() {
                             <button
                                 className="settings-save-btn"
                                 onClick={() => validateAndSaveHours(startHour, endHour)}
+                            >
+                                {t("common.saveChanges")}
+                            </button>
+                        </div>
+                    </section>
+
+                    {/* Planner */}
+                    <section className="settings-section">
+                        <h2 className="settings-section-title">{t("settings.planner")}</h2>
+                        <div className="settings-row">
+                            <span className="settings-label">{t("settings.maxTime")}</span>
+                            <input
+                                type="number"
+                                className="settings-number-input"
+                                min={1}
+                                value={maxTime}
+                                onChange={e => setMaxTime(Number(e.target.value))}
+                            />
+                        </div>
+
+                        {maxTimeError && <p className="settings-error">{maxTimeError}</p>}
+
+                        <div className="settings-hours-save-row">
+                            <button
+                                className="settings-save-btn"
+                                onClick={() => validateAndSaveMaxTime(maxTime)}
                             >
                                 {t("common.saveChanges")}
                             </button>

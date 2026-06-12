@@ -19,6 +19,7 @@ export interface UserSettings {
     startHour: number;
     endHour: number;
     slotDuration: string; // e.g. "00:30:00"
+    maxTime: number; // in seconds
 }
 
 interface AppContextType {

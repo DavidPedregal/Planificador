@@ -10,6 +10,7 @@ def schedule(request: PlanRequest) -> PlanResponse:
     tasks = request.tasks
     plannable_slots = request.plannableSlots
     previous_plan = request.previousPlan
+    max_time = request.maxTime
 
     # 1. Calcular tiempo restante por tarea
     tasks_with_remaining = calcular_tiempo_restante(tasks, previous_plan)
@@ -25,7 +26,7 @@ def schedule(request: PlanRequest) -> PlanResponse:
         return PlanResponse(scheduled=[], warnings=warnings)
 
     # 3. Resolver con cp_model
-    scheduled, warnings = resolver(tasks_with_remaining, available_blocks)
+    scheduled, warnings = resolver(tasks_with_remaining, available_blocks, max_time)
 
     return PlanResponse(scheduled=scheduled, warnings=warnings)
 
@@ -72,7 +73,7 @@ def generar_bloques_disponibles(plannable_slots, previous_plan):
 
     return sorted(bloques)
 
-def resolver(tasks, available_blocks):
+def resolver(tasks, available_blocks, max_time):
     model = cp_model.CpModel()
     n_tasks = len(tasks)
     n_blocks = len(available_blocks)
@@ -183,7 +184,7 @@ def resolver(tasks, available_blocks):
     )
 
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 10.0
+    solver.parameters.max_time_in_seconds = max_time
 
     t0 = time.time()
     status = solver.Solve(model)

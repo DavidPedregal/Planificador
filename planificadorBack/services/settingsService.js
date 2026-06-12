@@ -10,7 +10,7 @@ const getSettingsForUser = async (userId) => {
 };
 
 const updateSettings = async (userId, updateData) => {
-    const allowedFields = ['systemColor', 'theme', 'defaultCalendarView', 'startHour', 'endHour', 'slotDuration'];
+    const allowedFields = ['systemColor', 'theme', 'defaultCalendarView', 'startHour', 'endHour', 'slotDuration', 'maxTime'];
     const updateFields = Object.keys(updateData);
     const isValidUpdate = updateFields.every(field => allowedFields.includes(field));
 
@@ -35,6 +35,10 @@ const updateSettings = async (userId, updateData) => {
         throw new ValidationError('slotDuration must be one of 00:15:00, 00:30:00, 01:00:00');
     }
 
+    if (updateData.maxTime !== undefined && (updateData.maxTime <= 0 || !Number.isInteger(updateData.maxTime))) {
+        throw new ValidationError('maxTime must be a positive integer');
+    }
+
     return settingsRepo.updateSettings(userId, updateData);
 };
 
@@ -42,8 +46,14 @@ const deleteSettings = async (userId) => {
     return settingsRepo.deleteSettings(userId);
 };
 
+const getMaxTimeForPlanning = async (userId) => {
+    const settings = await getSettingsForUser(userId);
+    return settings.maxTime || 10;
+};
+
 module.exports = {
     getSettingsForUser,
     updateSettings,
-    deleteSettings
+    deleteSettings,
+    getMaxTimeForPlanning
 };

@@ -324,6 +324,9 @@
     "deleteAccountBtn": "Delete account",
     "deleteAccountTitle": "Delete account",
     "deleteAccountMsg": "This will permanently delete your account and all your data. This action cannot be undone.",
+    "planner": "Planner",
+    "maxTime": "Max solver time (seconds)",
+    "maxTimeError": "Must be a positive whole number",
     "slotDuration": "Slot duration",
     "slotDurations": {
       "15min": "15 minutes",

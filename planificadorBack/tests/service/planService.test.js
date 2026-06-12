@@ -2,6 +2,7 @@ const PlanRepo = require('../../repository/planRepository');
 const EventService = require('../../services/eventService');
 const TaskService = require('../../services/taskService');
 const CalendarService = require('../../services/calendarService');
+const SettingsService = require('../../services/settingsService');
 const PlanService = require('../../services/planService');
 const { ValidationError, NotFoundError } = require('../../errors/AppError');
 
@@ -9,6 +10,7 @@ jest.mock('../../repository/planRepository');
 jest.mock('../../services/eventService');
 jest.mock('../../services/taskService');
 jest.mock('../../services/calendarService');
+jest.mock('../../services/settingsService');
 
 afterEach(() => {
     jest.clearAllMocks();
@@ -88,6 +90,7 @@ describe('planService', () => {
             PlanRepo.findPlanForUser.mockResolvedValue([mockPlanEvent]);
             EventService.getPlannableEventsForUser.mockResolvedValue([mockSlot]);
             TaskService.getTasksToPlan.mockResolvedValue([mockTask]);
+            SettingsService.getMaxTimeForPlanning.mockResolvedValue(10);
         });
 
         it('should return mapped data for the planner', async () => {
@@ -95,6 +98,17 @@ describe('planService', () => {
             expect(result).toHaveProperty('mappedPreviousPlan');
             expect(result).toHaveProperty('mappedPlannableSlots');
             expect(result).toHaveProperty('mappedTasks');
+        });
+
+        it('should include maxTime from settings', async () => {
+            SettingsService.getMaxTimeForPlanning.mockResolvedValue(30);
+            const result = await PlanService.getDataToPlan(mockUserId);
+            expect(result.maxTime).toBe(30);
+        });
+
+        it('should call getMaxTimeForPlanning with userId', async () => {
+            await PlanService.getDataToPlan(mockUserId);
+            expect(SettingsService.getMaxTimeForPlanning).toHaveBeenCalledWith(mockUserId);
         });
 
         it('should map tasks with correct fields', async () => {

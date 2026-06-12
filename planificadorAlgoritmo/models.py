@@ -23,6 +23,7 @@ class PlanRequest(BaseModel):
     tasks: list[Task]
     plannableSlots: list[PlannableSlot]
     previousPlan: list[PlannedBlock] = []
+    maxTime: int = 10 
 
 class ScheduledBlock(BaseModel):
     taskId: str

@@ -18,7 +18,8 @@ const mockSettings = {
     defaultCalendarView: 'timeGridWeek',
     startHour: 8,
     endHour: 20,
-    slotDuration: '00:30:00'
+    slotDuration: '00:30:00',
+    maxTime: 10
 };
 
 describe('settingsService', () => {
@@ -112,7 +113,8 @@ describe('settingsService', () => {
                 defaultCalendarView: 'dayGridMonth',
                 startHour: 7,
                 endHour: 19,
-                slotDuration: '00:15:00'
+                slotDuration: '00:15:00',
+                maxTime: 30
             };
             SettingsRepo.updateSettings.mockResolvedValue({ ...mockSettings, ...updateData });
 
@@ -121,6 +123,31 @@ describe('settingsService', () => {
             ).resolves.not.toThrow();
 
             expect(SettingsRepo.updateSettings).toHaveBeenCalledWith(mockUserId, updateData);
+        });
+
+        it('should accept a valid maxTime (positive integer)', async () => {
+            SettingsRepo.updateSettings.mockResolvedValue({ ...mockSettings, maxTime: 30 });
+            await expect(
+                SettingsService.updateSettings(mockUserId, { maxTime: 30 })
+            ).resolves.not.toThrow();
+        });
+
+        it('should throw ValidationError if maxTime is zero', async () => {
+            await expect(
+                SettingsService.updateSettings(mockUserId, { maxTime: 0 })
+            ).rejects.toThrow(ValidationError);
+        });
+
+        it('should throw ValidationError if maxTime is negative', async () => {
+            await expect(
+                SettingsService.updateSettings(mockUserId, { maxTime: -5 })
+            ).rejects.toThrow(ValidationError);
+        });
+
+        it('should throw ValidationError if maxTime is not an integer', async () => {
+            await expect(
+                SettingsService.updateSettings(mockUserId, { maxTime: 5.5 })
+            ).rejects.toThrow(ValidationError);
         });
 
         it('should throw ValidationError for invalid slotDuration', async () => {
@@ -136,6 +163,27 @@ describe('settingsService', () => {
                     SettingsService.updateSettings(mockUserId, { slotDuration: value })
                 ).resolves.not.toThrow();
             }
+        });
+    });
+
+    describe('getMaxTimeForPlanning', () => {
+        it('should return maxTime from settings when set', async () => {
+            SettingsRepo.findSettingsForUser.mockResolvedValue({ ...mockSettings, maxTime: 30 });
+            const result = await SettingsService.getMaxTimeForPlanning(mockUserId);
+            expect(result).toBe(30);
+        });
+
+        it('should return 10 as default when maxTime is not set', async () => {
+            SettingsRepo.findSettingsForUser.mockResolvedValue({ ...mockSettings, maxTime: null });
+            const result = await SettingsService.getMaxTimeForPlanning(mockUserId);
+            expect(result).toBe(10);
+        });
+
+        it('should create settings and return 10 if user has no settings yet', async () => {
+            SettingsRepo.findSettingsForUser.mockResolvedValue(null);
+            SettingsRepo.createSettings.mockResolvedValue({ ...mockSettings, maxTime: null });
+            const result = await SettingsService.getMaxTimeForPlanning(mockUserId);
+            expect(result).toBe(10);
         });
     });
 

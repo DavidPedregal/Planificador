@@ -31,6 +31,12 @@ describe('settingsRepository', () => {
             expect(settings.startHour).toBe(8);
             expect(settings.endHour).toBe(20);
             expect(settings.defaultCalendarView).toBe('timeGridWeek');
+            expect(settings.maxTime).toBe(10);
+        });
+
+        it('should create settings with a custom maxTime', async () => {
+            const settings = await SettingsRepo.createSettings({ userId: mockUserId, maxTime: 30 });
+            expect(settings.maxTime).toBe(30);
         });
 
         it('should fail if userId is missing', async () => {
@@ -79,6 +85,12 @@ describe('settingsRepository', () => {
 
             expect(updated.theme).toBe('light');
             expect(updated.startHour).toBe(7);
+        });
+
+        it('should update maxTime', async () => {
+            await SettingsRepo.createSettings({ userId: mockUserId });
+            const updated = await SettingsRepo.updateSettings(mockUserId, { maxTime: 60 });
+            expect(updated.maxTime).toBe(60);
         });
 
         it('should return null if user has no settings', async () => {

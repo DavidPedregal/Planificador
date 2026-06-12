@@ -324,6 +324,9 @@
     "deleteAccountBtn": "Eliminar cuenta",
     "deleteAccountTitle": "Eliminar cuenta",
     "deleteAccountMsg": "Esto eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer.",
+    "planner": "Planificador",
+    "maxTime": "Tiempo máximo del solver (segundos)",
+    "maxTimeError": "Debe ser un número entero positivo",
     "slotDuration": "Duración de ranura",
     "slotDurations": {
       "15min": "15 minutos",

@@ -56,7 +56,8 @@ const mockPythonResponse = {
 const mockMappedData = {
     mappedPreviousPlan: [],
     mappedPlannableSlots: [],
-    mappedTasks: []
+    mappedTasks: [],
+    maxTime: 10
 };
 
 describe('planRouter', () => {
@@ -141,6 +142,21 @@ describe('planRouter', () => {
             expect(res.body.data).toHaveLength(1);
         });
 
+        it('should forward maxTime to the Python planner', async () => {
+            PlanService.getDataToPlan.mockResolvedValue({ ...mockMappedData, maxTime: 30 });
+
+            await request(app)
+                .post('/plan')
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(global.fetch).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    body: expect.stringContaining('"maxTime":30')
+                })
+            );
+        });
+
         it('should return 500 if Python service fails', async () => {
             global.fetch.mockResolvedValue({ ok: false });
 
@@ -182,6 +198,21 @@ describe('planRouter', () => {
                 .set('Authorization', `Bearer ${validToken}`);
 
             expect(PlanService.deletePlan).toHaveBeenCalledWith(mockUserId);
+        });
+
+        it('should forward maxTime to the Python planner on reset', async () => {
+            PlanService.getDataToPlan.mockResolvedValue({ ...mockMappedData, maxTime: 60 });
+
+            await request(app)
+                .post('/plan/reset')
+                .set('Authorization', `Bearer ${validToken}`);
+
+            expect(global.fetch).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    body: expect.stringContaining('"maxTime":60')
+                })
+            );
         });
 
         it('should return 401 without token', async () => {
