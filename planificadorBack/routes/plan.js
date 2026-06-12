@@ -20,7 +20,8 @@ router.post('/', dbLimiter, authMiddleware, async function(req, res, next) {
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: mappedPreviousPlan, maxTime: maxTime })
+            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: mappedPreviousPlan, maxTime: maxTime }),
+            signal: AbortSignal.timeout((maxTime + 30) * 1000)
         });
         if (!response.ok) {
             throw new Error('Planner service failed');
@@ -42,7 +43,8 @@ router.post('/reset', dbLimiter, authMiddleware, async function(req, res, next) 
         const response = await fetch(`${process.env.PLANNER_URL}/plan`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: mappedPreviousPlan, maxTime: maxTime })
+            body: JSON.stringify({ tasks: mappedTasks, plannableSlots: mappedPlannableSlots, previousPlan: mappedPreviousPlan, maxTime: maxTime }),
+            signal: AbortSignal.timeout((maxTime + 30) * 1000)
         });
         if (!response.ok) {
             throw new Error('Planner service failed');
