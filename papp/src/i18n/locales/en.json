@@ -353,6 +353,15 @@
     "planned": "Planned",
     "actual": "Actual",
     "download": "Download",
+    "exportAll": "Export all data",
+    "export": {
+      "calendar": "Calendar",
+      "name": "Name",
+      "label": "Label",
+      "start": "Start",
+      "end": "End",
+      "actualTime": "Actual time (min)"
+    },
     "dataTypes": {
       "subjectTime": "Time per subject",
       "comparisonTime": "Planned vs actual time"

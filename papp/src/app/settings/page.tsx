@@ -207,6 +207,7 @@ export default function SettingsPage() {
                                 type="number"
                                 className="settings-number-input"
                                 min={1}
+                                max={270}
                                 value={maxTime}
                                 onChange={e => setMaxTime(Number(e.target.value))}
                             />

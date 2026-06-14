@@ -353,6 +353,15 @@
     "planned": "Planificado",
     "actual": "Real",
     "download": "Descargar",
+    "exportAll": "Exportar todos los datos",
+    "export": {
+      "calendar": "Calendario",
+      "name": "Nombre",
+      "label": "Etiqueta",
+      "start": "Inicio",
+      "end": "Fin",
+      "actualTime": "Tiempo real (min)"
+    },
     "dataTypes": {
       "subjectTime": "Tiempo por asignatura",
       "comparisonTime": "Tiempo planificado vs real"

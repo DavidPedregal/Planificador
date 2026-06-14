@@ -51,7 +51,7 @@ const EditEventDialog: React.FC<Props> = ({ open, eventId, onClose, onSave, onDe
         onClose();
     };
 
-    const handleSave   = recurring ? handleSaveClicked : () => onChooseSingle(() => handleSuccess("save"));
+    const handleSave   = () => handleSaveClicked(() => handleSuccess("save"));
     const handleDelete = recurring ? handleDeleteClicked : () => setConfirmDeleteOpen(true);
 
     return (

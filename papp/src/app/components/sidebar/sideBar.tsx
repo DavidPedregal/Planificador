@@ -148,24 +148,25 @@ export default function Sidebar({ onCalendarVisibilityChange, onCalendarDeleted,
 
                 {/* ── General ── */}
                 <span className="sidebar-label">{t("sidebar.general")}</span>
-                <button className="sidebar-nav-item" onClick={() => router.push("/settings")}>
-                    <SettingsIcon size="1.25rem" />
-                    {t("sidebar.settings")}
-                </button>
-                <button className="sidebar-nav-item" onClick={sendPlanRequest}>
-                    <AutoFixNormalIcon />
-                    {t("sidebar.plan")}
-                </button>
-                <ToolsMenu 
-                    onReplan={sendResetPlanRequest} 
-                    onDeleteByLabel={() => setDeleteByLabelOpen(true)} 
-                    onExport={() => setExportOpen(true)} 
-                    onImport={() => setImportOpen(true)} 
-                />
-                <button className="sidebar-nav-item" onClick={() => router.push("/statistics")}>
-                    <BarChartIcon />
-                    {t("sidebar.statistics")}
-                </button>
+                
+                    <button className="sidebar-nav-item" onClick={sendPlanRequest}>
+                        <AutoFixNormalIcon />
+                        {t("sidebar.plan")}
+                    </button>
+                    <ToolsMenu 
+                        onReplan={sendResetPlanRequest} 
+                        onDeleteByLabel={() => setDeleteByLabelOpen(true)} 
+                        onExport={() => setExportOpen(true)} 
+                        onImport={() => setImportOpen(true)} 
+                    />
+                    <button className="sidebar-nav-item" onClick={() => router.push("/statistics")}>
+                        <BarChartIcon />
+                        {t("sidebar.statistics")}
+                    </button>
+                    <button className="sidebar-nav-item" onClick={() => router.push("/settings")}>
+                        <SettingsIcon size="1.25rem" />
+                        {t("sidebar.settings")}
+                    </button>
 
                 <div className="sidebar-divider" />
 

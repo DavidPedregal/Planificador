@@ -35,8 +35,9 @@ const updateSettings = async (userId, updateData) => {
         throw new ValidationError('slotDuration must be one of 00:15:00, 00:30:00, 01:00:00');
     }
 
-    if (updateData.maxTime !== undefined && (updateData.maxTime <= 0 || !Number.isInteger(updateData.maxTime))) {
-        throw new ValidationError('maxTime must be a positive integer');
+    if (updateData.maxTime !== undefined && (updateData.maxTime <= 0 || !Number.isInteger(updateData.maxTime) || updateData.maxTime > 270)) {
+        throw new ValidationError('maxTime must be a positive integer no greater than 270');
+
     }
 
     return settingsRepo.updateSettings(userId, updateData);

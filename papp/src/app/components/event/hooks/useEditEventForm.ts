@@ -68,7 +68,7 @@ export function useEditEventForm({ open, eventId, calendars, pushAlert }: UseEdi
 
     // ── Guardar ──────────────────────────────────────────────────────────────
 
-    const handleSaveClicked = () => {
+    const handleSaveClicked = async (onSuccess?: () => void) => {
         if (!eventTitle.trim()) return;
 
         const updatedEvent = {
@@ -81,9 +81,24 @@ export function useEditEventForm({ open, eventId, calendars, pushAlert }: UseEdi
             useCalendarColor: !useCustomColor,
         };
 
-        setPendingEventData(updatedEvent);
-        setPendingAction("update");
-        setRecurrenceChoiceOpen(true);
+        if (recurring) {
+            setPendingEventData(updatedEvent);
+            setPendingAction("update");
+            setRecurrenceChoiceOpen(true);
+            return;
+        }
+
+        const url = buildUrl(eventId, "single");
+        const { ok, message } = await apiFetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(updatedEvent),
+        });
+        pushAlert(message, ok ? "success" : "error");
+        if (ok) onSuccess?.();
     };
 
     const performUpdate = async (mode: RecurrenceMode) => {
