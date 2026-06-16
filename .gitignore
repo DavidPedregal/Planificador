@@ -1,2 +1,7 @@
+node_modules/
+e2e/.auth/
+playwright-report/
+test-results/
 .claude
 .env
+CLAUDE.md
