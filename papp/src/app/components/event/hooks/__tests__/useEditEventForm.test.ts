@@ -17,6 +17,9 @@ const mockEventData = {
     isPlannedEvent: false,
 };
 
+// Same event but part of a recurring series — handleSaveClicked opens the recurrence dialog
+const mockRecurringEventData = { ...mockEventData, groupId: "group1" };
+
 const pushAlert = jest.fn();
 
 function makeHook(eventId = "evt1") {
@@ -39,6 +42,19 @@ function mockFetchSequence(actionResponse = { ok: true, message: "OK" }) {
         .mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve({ data: mockEventData, message: "OK" }),
+        })
+        .mockResolvedValueOnce({
+            ok: actionResponse.ok,
+            json: () => Promise.resolve({ data: {}, message: actionResponse.message }),
+        }) as jest.Mock;
+}
+
+// Igual pero devuelve un evento recurrente en el GET
+function mockRecurringFetchSequence(actionResponse = { ok: true, message: "OK" }) {
+    global.fetch = jest.fn()
+        .mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({ data: mockRecurringEventData, message: "OK" }),
         })
         .mockResolvedValueOnce({
             ok: actionResponse.ok,
@@ -144,7 +160,8 @@ describe("useEditEventForm - reset al abrir", () => {
 });
 
 describe("useEditEventForm - flujo de guardar", () => {
-    it("abre recurrenceChoiceOpen al llamar handleSaveClicked con título válido", async () => {
+    it("abre recurrenceChoiceOpen al llamar handleSaveClicked con título válido (recurrente)", async () => {
+        mockRecurringFetchSequence();
         const { result } = makeHook();
         await waitFor(() => expect(result.current.eventTitle).toBe("Reunión"));
 
@@ -162,14 +179,13 @@ describe("useEditEventForm - flujo de guardar", () => {
         expect(result.current.recurrenceChoiceOpen).toBe(false);
     });
 
-    it("hace PUT a /events/:id en modo single", async () => {
+    it("hace PUT a /events/:id directamente para evento no recurrente", async () => {
         mockFetchSequence();
         const onSuccess = jest.fn();
         const { result } = makeHook();
         await waitFor(() => expect(result.current.eventTitle).toBe("Reunión"));
 
-        act(() => { result.current.handleSaveClicked(); });
-        await act(async () => { await result.current.onChooseSingle(onSuccess); });
+        await act(async () => { await result.current.handleSaveClicked(onSuccess); });
 
         expect(global.fetch).toHaveBeenCalledWith(
             expect.stringContaining("/events/evt1"),
@@ -178,8 +194,8 @@ describe("useEditEventForm - flujo de guardar", () => {
         expect(onSuccess).toHaveBeenCalledTimes(1);
     });
 
-    it("hace PUT a /events/all/:id en modo all", async () => {
-        mockFetchSequence();
+    it("hace PUT a /events/all/:id en modo all (recurrente)", async () => {
+        mockRecurringFetchSequence();
         const { result } = makeHook();
         await waitFor(() => expect(result.current.eventTitle).toBe("Reunión"));
 
@@ -192,8 +208,8 @@ describe("useEditEventForm - flujo de guardar", () => {
         );
     });
 
-    it("hace PUT a /events/forward/:id en modo fromThis", async () => {
-        mockFetchSequence();
+    it("hace PUT a /events/forward/:id en modo fromThis (recurrente)", async () => {
+        mockRecurringFetchSequence();
         const { result } = makeHook();
         await waitFor(() => expect(result.current.eventTitle).toBe("Reunión"));
 

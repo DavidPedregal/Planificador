@@ -5,7 +5,7 @@ import { TaskItem } from "../taskItem";
 import { Task } from "../../hooks/useTasks";
 
 const mockTask: Task = {
-    id: 42,
+    id: "42",
     title: "Estudiar Matemáticas",
     estimatedTime: 90,
     finishDate: new Date("2026-06-01T00:00:00"),
@@ -37,7 +37,10 @@ describe("TaskItem - renderizado", () => {
     it("muestra la fecha de entrega localizada", () => {
         render(<TaskItem {...baseProps} />);
         const expectedDate = mockTask.finishDate.toLocaleDateString("es-ES");
-        expect(screen.getByText(new RegExp(expectedDate.replace(/\//g, "\\/")))).toBeInTheDocument();
+        expect(screen.getByText(
+                new RegExp(expectedDate.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+            )
+        ).toBeInTheDocument();
     });
 
     it("no tiene la clase 'completed' cuando la tarea no está completada", () => {
@@ -71,7 +74,7 @@ describe("TaskItem - callbacks", () => {
         const onEdit = jest.fn();
         render(<TaskItem {...baseProps} onEdit={onEdit} />);
         await userEvent.click(screen.getByLabelText("Editar tarea"));
-        expect(onEdit).toHaveBeenCalledWith(42);
+        expect(onEdit).toHaveBeenCalledWith("42");
         expect(onEdit).toHaveBeenCalledTimes(1);
     });
 
@@ -79,7 +82,7 @@ describe("TaskItem - callbacks", () => {
         const onDelete = jest.fn();
         render(<TaskItem {...baseProps} onDelete={onDelete} />);
         await userEvent.click(screen.getByLabelText("Eliminar tarea"));
-        expect(onDelete).toHaveBeenCalledWith(42, false);
+        expect(onDelete).toHaveBeenCalledWith("42", false);
         expect(onDelete).toHaveBeenCalledTimes(1);
     });
 

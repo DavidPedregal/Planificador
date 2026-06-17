@@ -6,14 +6,18 @@ const getSubjectsForUser = async (userId) => {
 }
 
 const createSubject = async (userId,subjectData) => {
-    if (!subjectData.name || subjectData.name.trim() === '') {
+    if (typeof subjectData.name !== 'string') {
         throw new ValidationError('Subject name is required');
     }
-    const existing = await SubjectRepo.findSubjectByNameForUser(userId, subjectData.name);
+    const normalizedName = subjectData.name.trim();
+    if (normalizedName === '') {
+        throw new ValidationError('Subject name is required');
+    }
+    const existing = await SubjectRepo.findSubjectByNameForUser(userId, normalizedName);
     if (existing) {
         throw new ValidationError('Subject name must be unique');
     }
-    return await SubjectRepo.createSubject({ ...subjectData, userId });
+    return await SubjectRepo.createSubject({ name: normalizedName, userId });
 };
 
 const deleteSubject = async (userId, subjectId) => {
@@ -25,11 +29,18 @@ const deleteSubject = async (userId, subjectId) => {
 };
 
 const updateSubject = async (userId, subjectId, updateData) => {
-    if (!updateData.name || updateData.name.trim() === '') {
+    if (typeof updateData.name !== 'string') {
         throw new ValidationError('Subject name is required');
     }
-
-    const updated = await SubjectRepo.updateSubject(userId, subjectId, {name: updateData.name});
+    const normalizedName = updateData.name.trim();
+    if (normalizedName === '') {
+        throw new ValidationError('Subject name is required');
+    }
+    const existing = await SubjectRepo.findSubjectByNameForUser(userId, normalizedName);
+    if (existing && existing._id.toString() !== subjectId) {
+        throw new ValidationError('Subject name must be unique');
+    }
+    const updated = await SubjectRepo.updateSubject(userId, subjectId, {name: normalizedName});
     if (!updated) {
         throw new NotFoundError('Subject not found');
     }

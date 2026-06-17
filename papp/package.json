@@ -27,7 +27,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.563.0",
     "mongoose": "^9.3.1",
-    "next": "^16.2.6",
+    "next": "^16.2.9",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "react": "19.2.3",
@@ -49,10 +49,10 @@
     "eslint": "^10.1.0",
     "eslint-config-next": "^0.2.4",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.3.0",
+    "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.3.0",
     "tailwindcss": "^4",
-    "ts-jest": "^29.4.9",
+    "ts-jest": "^27.0.3",
     "typescript": "^5"
   }
 }
