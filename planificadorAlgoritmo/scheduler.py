@@ -192,7 +192,7 @@ def resolver(tasks, available_blocks, max_time):
 
     totalTaskTime = sum(task["estimatedTime"] for task in tasks)
     
-    print(f"[scheduler] {t1 - t0:.3f};{solver.StatusName(status)};{n_tasks};{n_blocks};{totalTaskTime}")
+    print(f"[scheduler] {t1 - t0:.3f} {solver.StatusName(status)} {n_tasks} {n_blocks} {totalTaskTime}")
     
     scheduled = []
     warnings = []
