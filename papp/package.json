@@ -52,7 +52,7 @@
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.3.0",
     "tailwindcss": "^4",
-    "ts-jest": "^27.0.3",
+    "ts-jest": "^29.4.11",
     "typescript": "^5"
   }
 }
