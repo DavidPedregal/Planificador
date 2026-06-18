@@ -20,6 +20,8 @@ const config: Config = {
                     moduleResolution: "node",
                     module: "commonjs",
                     jsx: "react-jsx",
+                    rootDir: ".",
+                    ignoreDeprecations: "6.0",
                 },
             },
         ],
