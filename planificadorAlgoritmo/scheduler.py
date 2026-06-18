@@ -189,8 +189,10 @@ def resolver(tasks, available_blocks, max_time):
     t0 = time.time()
     status = solver.Solve(model)
     t1 = time.time()
+
+    totalTaskTime = sum(task["estimatedTime"] for task in tasks)
     
-    print(f"[scheduler] Solver time: {t1 - t0:.3f}s | Status: {solver.StatusName(status)} | Tasks: {n_tasks} | Blocks: {n_blocks}")
+    print(f"[scheduler] Solver time: {t1 - t0:.3f}s | Status: {solver.StatusName(status)} | Tasks: {n_tasks} | Blocks: {n_blocks} | Total Task Time: {totalTaskTime} min")
     
     scheduled = []
     warnings = []
