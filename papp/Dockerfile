@@ -1,7 +1,7 @@
 # ── Stage 1: install dependencies ────────────────────────────────────────────
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
-RUN npm install -g npm@11
+RUN npm install -g npm@11.6.2
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
