@@ -3,6 +3,8 @@ from ortools.sat.python import cp_model
 from models import PlanRequest, PlanResponse, ScheduledBlock, Warning
 import time
 
+from gap_limit import get_gap_limit
+
 BLOCK_SIZE = 15  # minutos por bloque
 
 
@@ -183,16 +185,25 @@ def resolver(tasks, available_blocks, max_time):
         sum(span_terms)
     )
 
+    totalTaskTime = sum(task["estimatedTime"] for task in tasks)
+ 
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = max_time
-
+    solver.parameters.relative_gap_limit = get_gap_limit(n_tasks, n_blocks, totalTaskTime)
+ 
     t0 = time.time()
     status = solver.Solve(model)
     t1 = time.time()
 
     totalTaskTime = sum(task["estimatedTime"] for task in tasks)
     
-    print(f"[scheduler] {t1 - t0:.3f} {solver.StatusName(status)} {n_tasks} {n_blocks} {totalTaskTime} {solver.ObjectiveValue()} {solver.BestObjectiveBound()}")
+    gap_limit_used = solver.parameters.relative_gap_limit
+    try:
+        obj = solver.ObjectiveValue()
+        bound = solver.BestObjectiveBound()
+    except Exception:
+        obj, bound = None, None
+    print(f"[scheduler] {t1 - t0:.3f} {solver.StatusName(status)} {n_tasks} {n_blocks} {totalTaskTime} {obj} {bound} gap_limit={gap_limit_used:.4f}")
     
     scheduled = []
     warnings = []
