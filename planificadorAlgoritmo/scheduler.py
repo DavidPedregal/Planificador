@@ -133,6 +133,8 @@ def resolver(tasks, available_blocks, max_time):
     else:
         distance_cap = 1
 
+    partial_fill_weight = distance_cap + 1
+
     for i in range(n_tasks):
         for j, block_time in enumerate(available_blocks):
             distance = int((block_time - given_dates[i]).total_seconds() // (BLOCK_SIZE * 60))
@@ -141,7 +143,7 @@ def resolver(tasks, available_blocks, max_time):
 
     # Bonus de continuidad: recompensa pares de bloques consecutivos asignados a la misma tarea
     # Desalienta la fragmentación sin impedir la asignación de bloques sueltos
-    continuity_weight = distance_cap
+    continuity_weight = partial_fill_weight * max(1, n_blocks // max(1, n_tasks))
     cont = {}
     continuity_terms = []
     for i in range(n_tasks):
@@ -176,7 +178,6 @@ def resolver(tasks, available_blocks, max_time):
     # Prioridad 4: minimizar fragmentación interna (bloques consecutivos juntos)
     # Prioridad 5: minimizar distancia a givenDate
     peso = n_tasks * n_blocks * distance_cap + 1
-    partial_fill_weight = distance_cap + 1  # mayor que cualquier coste de distancia individual
     model.Minimize(
         sum(-peso * completada[i] for i in range(n_tasks)) +
         sum(-partial_fill_weight * x[i, j] for i in range(n_tasks) for j in range(n_blocks)) + # type: ignore
