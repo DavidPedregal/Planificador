@@ -4,9 +4,9 @@ from models import PlanRequest, PlanResponse, ScheduledBlock, Warning
 import time
 
 from gap_limit import get_gap_limit
+from gap_progress_callback import GapProgressCallback
 
 BLOCK_SIZE = 15  # minutos por bloque
-
 
 def schedule(request: PlanRequest) -> PlanResponse:
     tasks = request.tasks
@@ -186,6 +186,13 @@ def resolver(tasks, available_blocks, max_time):
         sum(span_terms)
     )
 
+    def snapshot():
+        return {
+            i: [j for j in range(n_blocks) if callback.Value(x[i, j]) == 1]
+            for i in range(n_tasks)
+        }
+    
+    callback = GapProgressCallback(snapshot_fn=snapshot)
     totalTaskTime = sum(task["estimatedTime"] for task in tasks)
  
     solver = cp_model.CpSolver()
@@ -193,9 +200,10 @@ def resolver(tasks, available_blocks, max_time):
     solver.parameters.relative_gap_limit = get_gap_limit(n_tasks, n_blocks, totalTaskTime)
  
     t0 = time.time()
-    status = solver.Solve(model)
+    status = solver.Solve(model, callback)
     t1 = time.time()
 
+    callback.print_table()
     totalTaskTime = sum(task["estimatedTime"] for task in tasks)
     
     gap_limit_used = solver.parameters.relative_gap_limit
