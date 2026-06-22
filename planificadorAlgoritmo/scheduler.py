@@ -3,8 +3,6 @@ from ortools.sat.python import cp_model
 from models import PlanRequest, PlanResponse, ScheduledBlock, Warning
 import time
 
-from gap_limit import get_gap_limit
-from gap_progress_callback import GapProgressCallback
 from stagnation_stop import solve_with_stagnation_stop
 
 BLOCK_SIZE = 15  # minutos por bloque
@@ -188,32 +186,25 @@ def resolver(tasks, available_blocks, max_time):
     )
 
     totalTaskTime = sum(task["estimatedTime"] for task in tasks)
- 
-    solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = max_time
-    # solver.parameters.relative_gap_limit = get_gap_limit(n_tasks, n_blocks, totalTaskTime)
- 
+
     result = solve_with_stagnation_stop(
         model,
         max_time_seconds=max_time,
-        stagnation_seconds=5,           # empieza con algo conservador, ajusta luego
-        min_improvement_ratio=0.001,    # 0.1% — ignora ruido como el que viste en blocks=160
-        # solver_params={"relative_gap_limit": get_gap_limit(n_tasks, n_blocks, totalTaskTime)},  # comentado
+        stagnation_seconds=5,
+        min_improvement_ratio=0.001,
     )
 
+    solver = result.solver
     status = result.status
 
-    totalTaskTime = sum(task["estimatedTime"] for task in tasks)
-    
-    gap_limit_used = solver.parameters.relative_gap_limit
     try:
         obj = solver.ObjectiveValue()
         bound = solver.BestObjectiveBound()
         actual_gap = abs(obj - bound) / abs(obj) if obj != 0 else 0.0
     except Exception:
         obj, bound, actual_gap = None, None, None
-    print(f"[scheduler] {result.wall_time:.3f} {result.status_name} {n_tasks} {n_blocks} {totalTaskTime} "
-        f"{result.stopped_by_stagnation}")    
+    print(f"[scheduler] {result.wall_time:.3f} {result.status_name} tasks={n_tasks} blocks={n_blocks} taskTime={totalTaskTime} "
+        f"obj={obj} bound={bound} actual_gap={actual_gap} stagnation={result.stopped_by_stagnation}")    
     scheduled = []
     warnings = []
 

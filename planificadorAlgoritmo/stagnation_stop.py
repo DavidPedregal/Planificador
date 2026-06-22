@@ -87,6 +87,7 @@ class StagnationSolveResult:
     status: int
     status_name: str
     stopped_by_stagnation: bool
+    solver: cp_model.CpSolver = field(default_factory=cp_model.CpSolver)
     history: list = field(default_factory=list)
     wall_time: float = 0.0
 
@@ -169,6 +170,7 @@ def solve_with_stagnation_stop(
         status=status,  # type: ignore[arg-type]
         status_name=solver.StatusName(status),
         stopped_by_stagnation=stopped_by_stagnation.is_set(),
+        solver=solver,
         history=callback.history,
         wall_time=t1 - t0,
     )
