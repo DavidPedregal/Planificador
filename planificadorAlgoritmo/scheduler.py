@@ -202,9 +202,10 @@ def resolver(tasks, available_blocks, max_time):
     try:
         obj = solver.ObjectiveValue()
         bound = solver.BestObjectiveBound()
+        actual_gap = abs(obj - bound) / abs(obj) if obj != 0 else 0.0
     except Exception:
-        obj, bound = None, None
-    print(f"[scheduler] {t1 - t0:.3f} {solver.StatusName(status)} {n_tasks} {n_blocks} {totalTaskTime} {obj} {bound} gap_limit={gap_limit_used:.4f}")
+        obj, bound, actual_gap = None, None, None
+    print(f"[scheduler] {t1 - t0:.3f} {solver.StatusName(status)} {n_tasks} {n_blocks} {totalTaskTime} {obj} {bound} {actual_gap:.4f} {gap_limit_used:.4f}")
     
     scheduled = []
     warnings = []
