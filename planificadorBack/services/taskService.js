@@ -164,8 +164,8 @@ const generateReviewForNextInterval = async (task, rating, estimatedTime, date) 
     const baseDate = new Date(date);
     baseDate.setHours(0, 0, 0, 0);
     date = baseDate;
-    const ef = task.ef + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02));
-    const n = task.iteration + 1;
+    const ef = Math.max(1.3, task.ef + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02)));
+    const n = rating < 3 ? 1 : task.iteration + 1;
     const reviewDuration = calculateReviewDuration(estimatedTime, n, ef);
     const {interval, margin} = calculateNextReviewDate(task.interval, n, ef);
 
@@ -186,9 +186,10 @@ const generateReviewForNextInterval = async (task, rating, estimatedTime, date) 
         iteration: n
     };
 
-    const originalTask = await TaskRepo.getTaskById(task.userId, reviewTask.reviewOf); // Ensure original task exists before creating review
-    if (originalTask && originalTask.finishDate < reviewTask.finishDate) {
+    const originalTask = await TaskRepo.getTaskById(task.userId, reviewTask.reviewOf);
+    if (originalTask) {
         await TaskRepo.createTasks([reviewTask]);
+        console.log("New review task created:", reviewTask);
     }
 };
 

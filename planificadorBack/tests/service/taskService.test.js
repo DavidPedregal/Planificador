@@ -476,6 +476,187 @@ describe('taskService', () => {
 
             expect(TaskRepo.createTasks).not.toHaveBeenCalled();
         });
+
+        describe('SM-2 spaced repetition logic', () => {
+            const reviewDate = new Date('2026-06-23T10:00:00Z');
+            const originalTaskId = new mongoose.Types.ObjectId().toString();
+            const originalTask = {
+                _id: originalTaskId,
+                userId: mockUserId,
+                estimatedTime: 120,
+                finishDate: new Date('2026-07-30T00:00:00Z'),
+            };
+
+            function makeTask(overrides = {}) {
+                return {
+                    ...mockTask,
+                    includeReviews: true,
+                    isReview: false,
+                    completed: false,
+                    ef: 2.5,
+                    interval: 0,
+                    iteration: 0,
+                    estimatedTime: 120,
+                    finishDate: new Date('2026-07-30T00:00:00Z'),
+                    ...overrides,
+                };
+            }
+
+            function makeReviewTask(overrides = {}) {
+                return makeTask({
+                    isReview: true,
+                    reviewOf: originalTaskId,
+                    interval: 1,
+                    iteration: 1,
+                    ...overrides,
+                });
+            }
+
+            function setupNonReviewMocks(task) {
+                TaskRepo.getTaskById.mockResolvedValueOnce(task).mockResolvedValue(task);
+                TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+                TaskRepo.createTasks.mockResolvedValue([{}]);
+            }
+
+            function setupReviewMocks(reviewTask) {
+                TaskRepo.getTaskById
+                    .mockResolvedValueOnce(reviewTask)
+                    .mockResolvedValueOnce(originalTask)
+                    .mockResolvedValue(originalTask);
+                TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+                TaskRepo.createTasks.mockResolvedValue([{}]);
+            }
+
+            function getCreatedReview() {
+                return TaskRepo.createTasks.mock.calls[0][0][0];
+            }
+
+            it('first review always has iteration=1 and interval=1', async () => {
+                const task = makeTask();
+                setupNonReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, null, reviewDate);
+                const review = getCreatedReview();
+                expect(review.iteration).toBe(1);
+                expect(review.interval).toBe(1);
+            });
+
+            it('perfect rating (5) increases EF from 2.5 to 2.6', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 1, interval: 1 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 5, reviewDate);
+                expect(getCreatedReview().ef).toBeCloseTo(2.6, 5);
+            });
+
+            it('rating 4 leaves EF unchanged', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 1, interval: 1 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 4, reviewDate);
+                // ef = 2.5 + (0.1 - 1*(0.08+0.02)) = 2.5
+                expect(getCreatedReview().ef).toBeCloseTo(2.5, 5);
+            });
+
+            it('rating 3 decreases EF slightly', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 1, interval: 1 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 3, reviewDate);
+                // ef = 2.5 + (0.1 - 2*(0.08+0.04)) = 2.5 - 0.14 = 2.36
+                expect(getCreatedReview().ef).toBeCloseTo(2.36, 5);
+            });
+
+            it('second review with rating >= 3 progresses to iteration=2 and interval=6', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 1, interval: 1 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 4, reviewDate);
+                const review = getCreatedReview();
+                expect(review.iteration).toBe(2);
+                expect(review.interval).toBe(6);
+            });
+
+            it('third review with rating 5 gives interval = round(lastInterval × newEF)', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 2, interval: 6 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 5, reviewDate);
+                const review = getCreatedReview();
+                expect(review.iteration).toBe(3);
+                expect(review.interval).toBe(Math.round(6 * 2.6)); // 16
+            });
+
+            it('rating 2 (< 3) resets iteration to 1 and interval to 1', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 3, interval: 15 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 2, reviewDate);
+                const review = getCreatedReview();
+                expect(review.iteration).toBe(1);
+                expect(review.interval).toBe(1);
+            });
+
+            it('rating 1 resets regardless of how far the chain had progressed', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 5, interval: 60 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 1, reviewDate);
+                const review = getCreatedReview();
+                expect(review.iteration).toBe(1);
+                expect(review.interval).toBe(1);
+            });
+
+            it('rating 3 (boundary) does not reset — interval progresses to 6', async () => {
+                const task = makeReviewTask({ ef: 2.5, iteration: 1, interval: 1 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 3, reviewDate);
+                const review = getCreatedReview();
+                expect(review.iteration).toBe(2);
+                expect(review.interval).toBe(6);
+            });
+
+            it('EF is clamped to minimum 1.3 when rating is 0', async () => {
+                const task = makeReviewTask({ ef: 1.35, iteration: 1, interval: 1 });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 0, reviewDate);
+                // ef_raw = 1.35 + (0.1 - 5*0.18) = 0.55 → clamped to 1.3
+                expect(getCreatedReview().ef).toBeCloseTo(1.3, 5);
+            });
+
+            it('EF cannot drop below 1.3 even after two consecutive failures', async () => {
+                const task1 = makeReviewTask({ ef: 2.5, iteration: 1, interval: 1 });
+                setupReviewMocks(task1);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task1.estimatedTime, 0, reviewDate);
+                const review1 = getCreatedReview();
+                expect(review1.ef).toBeGreaterThanOrEqual(1.3);
+
+                jest.clearAllMocks();
+
+                const task2 = makeReviewTask({ ef: review1.ef, iteration: 1, interval: 1 });
+                setupReviewMocks(task2);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task2.estimatedTime, 0, reviewDate);
+                expect(getCreatedReview().ef).toBeCloseTo(1.3, 5);
+            });
+
+            it('review title is preserved when completing a review (no double-prefix)', async () => {
+                const task = makeReviewTask({ title: 'Review: Math Exam' });
+                setupReviewMocks(task);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 4, reviewDate);
+                expect(getCreatedReview().title).toBe('Review: Math Exam');
+            });
+
+            it('does not create a review if the original task no longer exists', async () => {
+                const task = makeTask();
+                TaskRepo.getTaskById.mockResolvedValueOnce(task).mockResolvedValue(null);
+                TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, null, reviewDate);
+                expect(TaskRepo.createTasks).not.toHaveBeenCalled();
+            });
+
+            it('givenDate is always strictly before finishDate for every rating', async () => {
+                for (const rating of [0, 1, 2, 3, 4, 5]) {
+                    jest.clearAllMocks();
+                    const task = makeReviewTask({ ef: 2.5, iteration: 2, interval: 6 });
+                    setupReviewMocks(task);
+                    await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, rating, reviewDate);
+                    const review = getCreatedReview();
+                    expect(new Date(review.givenDate) < new Date(review.finishDate)).toBe(true);
+                }
+            });
+        });
     });
 
     describe('deleteAllTasksInGroup', () => {

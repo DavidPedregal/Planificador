@@ -218,9 +218,6 @@ function calculateNextReviewDate(lastInterval, n, ef) {
     else if (n === 2) daysSM2 = 6;
     else daysSM2 = Math.round(lastInterval * ef);
 
-    const dateSM2 = new Date();
-    dateSM2.setDate(dateSM2.getDate() + daysSM2);
-
     const margin = Math.max(1, Math.round(daysSM2 * 0.2));
 
     return { interval: daysSM2, margin };

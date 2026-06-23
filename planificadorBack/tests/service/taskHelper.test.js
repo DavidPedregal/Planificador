@@ -59,5 +59,30 @@ describe('taskHelper', () => {
             const { interval: high } = calculateNextReviewDate(6, 3, 3.0);
             expect(high).toBeGreaterThan(low);
         });
+
+        it('should apply SM-2 formula for n=3: lastInterval=6, ef=2.5 → 15 days', () => {
+            const { interval } = calculateNextReviewDate(6, 3, 2.5);
+            expect(interval).toBe(15);
+        });
+
+        it('should round the interval to the nearest integer', () => {
+            const { interval } = calculateNextReviewDate(6, 3, 2.6);
+            expect(interval).toBe(Math.round(6 * 2.6)); // 16
+        });
+
+        it('should produce proportionally larger margin for longer intervals', () => {
+            const { margin: short } = calculateNextReviewDate(6, 3, 2.5);   // interval=15, margin=3
+            const { margin: long } = calculateNextReviewDate(50, 5, 2.5);   // interval=125, margin=25
+            expect(long).toBeGreaterThan(short);
+        });
+
+        it('should follow the full SM-2 chain: 1 → 6 → lastInterval*ef', () => {
+            const { interval: first }  = calculateNextReviewDate(0, 1, 2.5);
+            const { interval: second } = calculateNextReviewDate(first, 2, 2.5);
+            const { interval: third }  = calculateNextReviewDate(second, 3, 2.5);
+            expect(first).toBe(1);
+            expect(second).toBe(6);
+            expect(third).toBe(Math.round(6 * 2.5));
+        });
     });
 });
