@@ -337,6 +337,7 @@ describe('taskService', () => {
                 ef: 2.5,
                 interval: 0,
                 iteration: 0,
+                finishDate: new Date('2026-12-31T00:00:00Z'),
             };
             TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({});
@@ -364,6 +365,7 @@ describe('taskService', () => {
                 ef: 2.5,
                 interval: 0,
                 iteration: 0,
+                finishDate: new Date('2026-12-31T00:00:00Z'),
             };
             TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({});
@@ -384,6 +386,7 @@ describe('taskService', () => {
                 ef: 2.5,
                 interval: 0,
                 iteration: 0,
+                finishDate: new Date('2026-12-31T00:00:00Z'),
             };
             TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({});
@@ -407,6 +410,7 @@ describe('taskService', () => {
                 ef: 2.5,
                 interval: 0,
                 iteration: 0,
+                finishDate: new Date('2026-12-31T00:00:00Z'),
             };
             TaskRepo.getTaskById.mockResolvedValue(reviewableTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({});
@@ -439,9 +443,11 @@ describe('taskService', () => {
                 ...mockTask,
                 _id: originalTaskId,
                 estimatedTime: 120,
+                finishDate: new Date('2026-12-31T00:00:00Z'),
             };
             TaskRepo.getTaskById
                 .mockResolvedValueOnce(reviewTask)
+                .mockResolvedValueOnce(originalTask)
                 .mockResolvedValueOnce(originalTask);
             TaskRepo.markTaskAsCompleted.mockResolvedValue({});
             TaskRepo.createTasks.mockResolvedValue([{}]);
@@ -643,6 +649,43 @@ describe('taskService', () => {
                 TaskRepo.getTaskById.mockResolvedValueOnce(task).mockResolvedValue(null);
                 TaskRepo.markTaskAsCompleted.mockResolvedValue({});
                 await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, null, reviewDate);
+                expect(TaskRepo.createTasks).not.toHaveBeenCalled();
+            });
+
+            it('does not create a review when the next givenDate falls after the original task finishDate', async () => {
+                // Original task was due yesterday — the next review would start tomorrow, which is past the deadline
+                const pastFinishDate = new Date(reviewDate.getTime() - 24 * 60 * 60 * 1000); // yesterday
+                const task = makeTask();
+                const expiredOriginal = { ...originalTask, finishDate: pastFinishDate };
+                TaskRepo.getTaskById.mockResolvedValueOnce(task).mockResolvedValue(expiredOriginal);
+                TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, null, reviewDate);
+                expect(TaskRepo.createTasks).not.toHaveBeenCalled();
+            });
+
+            it('creates a review when the next givenDate is before the original task finishDate', async () => {
+                // Original task finishDate is far in the future — review is valid
+                const futureFinishDate = new Date(reviewDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+                const task = makeTask();
+                const activeOriginal = { ...originalTask, finishDate: futureFinishDate };
+                TaskRepo.getTaskById.mockResolvedValueOnce(task).mockResolvedValue(activeOriginal);
+                TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+                TaskRepo.createTasks.mockResolvedValue([{}]);
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, null, reviewDate);
+                expect(TaskRepo.createTasks).toHaveBeenCalled();
+            });
+
+            it('does not create a review when a long interval pushes the givenDate past the original finishDate', async () => {
+                // Third review at n=3 with ef=2.5 gives interval=15 days — if finishDate is only 5 days away, skip it
+                const nearFinishDate = new Date(reviewDate.getTime() + 5 * 24 * 60 * 60 * 1000);
+                const task = makeReviewTask({ ef: 2.5, iteration: 2, interval: 6 });
+                const nearDeadlineOriginal = { ...originalTask, finishDate: nearFinishDate };
+                TaskRepo.getTaskById
+                    .mockResolvedValueOnce(task)
+                    .mockResolvedValueOnce(nearDeadlineOriginal)
+                    .mockResolvedValue(nearDeadlineOriginal);
+                TaskRepo.markTaskAsCompleted.mockResolvedValue({});
+                await TaskService.updateTaskAfterPlanEventCompletion(mockUserId, mockTaskId, task.estimatedTime, 5, reviewDate);
                 expect(TaskRepo.createTasks).not.toHaveBeenCalled();
             });
 

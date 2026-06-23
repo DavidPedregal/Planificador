@@ -187,7 +187,7 @@ const generateReviewForNextInterval = async (task, rating, estimatedTime, date) 
     };
 
     const originalTask = await TaskRepo.getTaskById(task.userId, reviewTask.reviewOf);
-    if (originalTask) {
+    if (originalTask && reviewTask.givenDate < originalTask.finishDate) {
         await TaskRepo.createTasks([reviewTask]);
         console.log("New review task created:", reviewTask);
     }
