@@ -41,6 +41,7 @@ router.post('/login', authLimiter, async function(req, res, next) {
       }
       });
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
