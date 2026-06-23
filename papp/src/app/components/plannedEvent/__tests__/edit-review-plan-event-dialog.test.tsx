@@ -11,7 +11,7 @@ beforeEach(() => {
     jest.spyOn(Storage.prototype, "getItem").mockReturnValue("mock-token");
     global.fetch = jest.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ message: "OK", data: {} }),
+        json: () => Promise.resolve({ message: "OK", data: { scheduledTime: 90, userTime: null } }),
     }) as jest.Mock;
 });
 
@@ -69,8 +69,10 @@ describe("EditReviewPlanEventDialog - estado pending", () => {
         expect(screen.getByText("Marcar como completado")).toBeDisabled();
     });
 
-    it("el botón sigue deshabilitado con valoración pero sin tiempo", () => {
+    it("el botón sigue deshabilitado con valoración pero sin tiempo", async () => {
         render(<EditReviewPlanEventDialog {...baseProps} />);
+        await waitFor(() => expect(screen.getByLabelText("Tiempo real dedicado")).toHaveValue("01:30"));
+        fireEvent.change(screen.getByLabelText("Tiempo real dedicado"), { target: { value: "" } });
         fireEvent.click(screen.getByRole("radio", { name: /^4/ }));
         expect(screen.getByText("Marcar como completado")).toBeDisabled();
     });
@@ -132,6 +134,7 @@ describe("EditReviewPlanEventDialog - estado completed", () => {
 describe("EditReviewPlanEventDialog - marcar como completado", () => {
     it("envía userTime, rating y status en el cuerpo de la petición", async () => {
         render(<EditReviewPlanEventDialog {...baseProps} />);
+        await waitFor(() => expect(screen.getByLabelText("Tiempo real dedicado")).toHaveValue("01:30"));
         fireEvent.change(screen.getByLabelText("Tiempo real dedicado"), {
             target: { value: "01:30" },
         });
@@ -165,6 +168,7 @@ describe("EditReviewPlanEventDialog - marcar como completado", () => {
         const onSave = jest.fn();
         const onClose = jest.fn();
         render(<EditReviewPlanEventDialog {...baseProps} onSave={onSave} onClose={onClose} />);
+        await waitFor(() => expect(screen.getByLabelText("Tiempo real dedicado")).toHaveValue("01:30"));
         fireEvent.change(screen.getByLabelText("Tiempo real dedicado"), {
             target: { value: "00:30" },
         });
