@@ -21,10 +21,7 @@ afterEach(async () => {
 describe('userRepository', () => {
     const mockUser = {
         email: 'test@test.com',
-        fullName: 'Test User',
-        name: 'Test',
-        familyName: 'User',
-        profilePicture: 'https://example.com/pic.jpg'
+        name: 'Test'
     };
 
     describe('create', () => {
@@ -33,10 +30,7 @@ describe('userRepository', () => {
 
             expect(user._id).toBeDefined();
             expect(user.email).toBe(mockUser.email);
-            expect(user.fullName).toBe(mockUser.fullName);
             expect(user.name).toBe(mockUser.name);
-            expect(user.familyName).toBe(mockUser.familyName);
-            expect(user.profilePicture).toBe(mockUser.profilePicture);
             expect(user.createdAt).toBeDefined();
         });
 
@@ -45,26 +39,10 @@ describe('userRepository', () => {
             await expect(UserRepo.create(withoutEmail)).rejects.toThrow();
         });
 
-        it('should fail if fullName is missing', async () => {
-            const { fullName, ...withoutFullName } = mockUser;
-            await expect(UserRepo.create(withoutFullName)).rejects.toThrow();
-        });
 
         it('should fail if name is missing', async () => {
             const { name, ...withoutName } = mockUser;
             await expect(UserRepo.create(withoutName)).rejects.toThrow();
-        });
-
-        it('should fail if familyName is missing', async () => {
-            const { familyName, ...withoutFamilyName } = mockUser;
-            await expect(UserRepo.create(withoutFamilyName)).rejects.toThrow();
-        });
-
-        it('should create a user without profilePicture (optional)', async () => {
-            const { profilePicture, ...withoutPicture } = mockUser;
-            const user = await UserRepo.create(withoutPicture);
-            expect(user._id).toBeDefined();
-            expect(user.profilePicture).toBeUndefined();
         });
     });
 

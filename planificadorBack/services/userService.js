@@ -20,10 +20,7 @@ async function login(userData) {
         const newUser = await UserRepo.create(
             {
                 email: userData.email, 
-                fullName: userData.name, 
                 name: userData.given_name,
-                familyName: userData.family_name,
-                profilePicture: userData.picture
             });
         await createDefaultCalendarsForUser(newUser._id);
         return newUser;

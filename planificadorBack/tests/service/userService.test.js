@@ -14,18 +14,12 @@ afterEach(() => {
 const mockGooglePayload = {
     email: 'test@test.com',
     name: 'Test User',
-    given_name: 'Test',
-    family_name: 'User',
-    picture: 'https://example.com/pic.jpg'
 };
 
 const mockDbUser = {
     _id: '507f1f77bcf86cd799439011',
     email: 'test@test.com',
-    fullName: 'Test User',
     name: 'Test',
-    familyName: 'User',
-    profilePicture: 'https://example.com/pic.jpg'
 };
 
 describe('userService', () => {
@@ -66,10 +60,7 @@ describe('userService', () => {
 
                 expect(UserRepo.create).toHaveBeenCalledWith({
                     email: mockGooglePayload.email,
-                    fullName: mockGooglePayload.name,
                     name: mockGooglePayload.given_name,
-                    familyName: mockGooglePayload.family_name,
-                    profilePicture: mockGooglePayload.picture
                 });
             });
 
