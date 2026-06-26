@@ -386,7 +386,8 @@
       "toggled": "Aufgabenstatus aktualisiert",
       "deleted": "Aufgabe gelöscht",
       "forwardDeleted": "Aufgaben ab diesem Punkt gelöscht",
-      "allDeleted": "Alle Aufgaben der Serie gelöscht"
+      "allDeleted": "Alle Aufgaben der Serie gelöscht",
+      "recurrenceEndDate": "Ein Enddatum ist erforderlich, wenn die Wiederholung an einem bestimmten Datum endet"
     },
     "event": {
       "created": "Ereignis erstellt",
@@ -396,7 +397,8 @@
       "labelDeleted": "Ereignisse mit dieser Beschriftung gelöscht",
       "deleted": "Ereignis gelöscht",
       "forwardDeleted": "Ereignisse ab diesem Punkt gelöscht",
-      "allDeleted": "Alle Ereignisse der Serie gelöscht"
+      "allDeleted": "Alle Ereignisse der Serie gelöscht",
+      "recurrenceEndDate": "Ein Enddatum ist erforderlich, wenn die Wiederholung an einem bestimmten Datum endet"
     },
     "subject": {
       "created": "Fach erstellt",

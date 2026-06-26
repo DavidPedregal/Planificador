@@ -22,6 +22,10 @@ function validateEventData(data, options = {}) {
                 error: "Title, start, end and calendarId are required"
             };
         }
+        if (data.frequencyType && data.frequencyType !== 'none' &&
+            data.frequencyEndType === 'on' && !data.frequencyEndDate) {
+            return { valid: false, error: 'api.event.recurrenceEndDate' };
+        }
     }
 
     // Filter to allowed fields (for updates)
@@ -207,8 +211,8 @@ function generateRecurringEvents(baseEvent) {
             if (occurrencesLeft <= 0) {
                 shouldContinue = false;
             }
-        } else if (endType === "on" && endDate) {
-            if (nextStart > endDate) {
+        } else if (endType === "on") {
+            if (!endDate || nextStart > endDate) {
                 shouldContinue = false;
             }
         }

@@ -6,6 +6,7 @@ import { useEventForm } from "./hooks/useEventForm";
 import { EventDateStrip } from "./components/EventDateStrip";
 import { EventColorPicker } from "./components/EventColorPicker";
 import { RecurrenceForm } from "@/app/components/shared/recurrenceForm/recurrenceForm";
+import { FREQUENCY_TYPE } from "@/app/components/shared/lib/recurrence";
 import { useApp } from "@/context/AppContext";
 
 interface Props {
@@ -37,7 +38,11 @@ const AddEventDialog: React.FC<Props> = ({ open, start: propsStart, end: propsEn
 
     const selectedCalendar = calendars.find(c => c.id === calendarId);
     const isPlannableCalendar = selectedCalendar?.name === "calendar.plannable";
-    const canSave = !!eventTitle.trim() || isPlannableCalendar;
+    const recurrenceEndDateMissing =
+        recurrence.frequencyType !== FREQUENCY_TYPE.NONE &&
+        recurrence.frequencyEndType === "on" &&
+        !recurrence.frequencyEndDate;
+    const canSave = (!!eventTitle.trim() || isPlannableCalendar) && !recurrenceEndDateMissing;
 
     const onClickSave = async () => {
         const ok = await handleSave();

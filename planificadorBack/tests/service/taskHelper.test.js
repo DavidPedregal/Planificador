@@ -1,4 +1,4 @@
-const { calculateReviewDuration, calculateNextReviewDate } = require('../../services/business/taskHelper');
+const { calculateReviewDuration, calculateNextReviewDate, validateData, generateRecurringTasks } = require('../../services/business/taskHelper');
 
 describe('taskHelper', () => {
     describe('calculateReviewDuration', () => {
@@ -83,6 +83,64 @@ describe('taskHelper', () => {
             expect(first).toBe(1);
             expect(second).toBe(6);
             expect(third).toBe(Math.round(6 * 2.5));
+        });
+    });
+
+    describe('validateData', () => {
+        const base = { title: 'Test', estimatedTime: 60, finishDate: '2026-12-31', givenDate: '2026-01-01' };
+
+        it('returns valid for a non-recurring task (frequencyType none)', () => {
+            const result = validateData({ ...base, frequencyType: 'none', frequencyEndType: 'on', frequencyEndDate: '' }, true);
+            expect(result.valid).toBe(true);
+        });
+
+        it('returns error when end type is "on" and end date is empty', () => {
+            const result = validateData({ ...base, frequencyType: 'day', frequencyInterval: 1, frequencyEndType: 'on', frequencyEndDate: '' }, true);
+            expect(result.valid).toBe(false);
+            expect(result.error).toBe('api.task.recurrenceEndDate');
+        });
+
+        it('returns error when end type is "on" and end date is absent', () => {
+            const result = validateData({ ...base, frequencyType: 'week', frequencyInterval: 1, frequencyEndType: 'on' }, true);
+            expect(result.valid).toBe(false);
+            expect(result.error).toBe('api.task.recurrenceEndDate');
+        });
+
+        it('returns valid when end type is "on" and end date is set', () => {
+            const result = validateData({ ...base, frequencyType: 'day', frequencyInterval: 1, frequencyEndType: 'on', frequencyEndDate: '2026-06-30' }, true);
+            expect(result.valid).toBe(true);
+        });
+
+        it('returns valid when end type is "after" with no end date', () => {
+            const result = validateData({ ...base, frequencyType: 'day', frequencyInterval: 1, frequencyEndType: 'after', frequencyOccurrencesLeft: 5 }, true);
+            expect(result.valid).toBe(true);
+        });
+
+        it('does not check recurrence when checkRecurrence is false', () => {
+            const result = validateData({ ...base, frequencyType: 'day', frequencyEndType: 'on', frequencyEndDate: '' });
+            expect(result.valid).toBe(true);
+        });
+    });
+
+    describe('generateRecurringTasks', () => {
+        const base = {
+            title: 'Test',
+            estimatedTime: 60,
+            finishDate: new Date('2026-01-01'),
+            givenDate: new Date('2026-01-01'),
+            frequencyInterval: 1,
+        };
+
+        it('returns only the base task when end date is missing (infinite-loop guard)', () => {
+            const task = { ...base, frequencyType: 'day', frequencyEndType: 'on', frequencyEndDate: '' };
+            const result = generateRecurringTasks(task);
+            expect(result).toHaveLength(1);
+        });
+
+        it('generates multiple tasks when a valid end date is provided', () => {
+            const task = { ...base, frequencyType: 'day', frequencyEndType: 'on', frequencyEndDate: '2026-01-05' };
+            const result = generateRecurringTasks(task);
+            expect(result.length).toBeGreaterThan(1);
         });
     });
 });

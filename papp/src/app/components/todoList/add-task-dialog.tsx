@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/context/AppContext";
 import { useTaskForm } from "./hooks/useTaskForm";
 import { RecurrenceForm } from "@/app/components/shared/recurrenceForm/recurrenceForm";
+import { FREQUENCY_TYPE } from "@/app/components/shared/lib/recurrence";
 import { useSubjects } from "../shared/hooks/useSubjects";
 
 interface Props {
@@ -37,6 +38,11 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
     } = useTaskForm({ open, pushAlert });
 
     if (!open) return null;
+
+    const recurrenceEndDateMissing =
+        recurrence.frequencyType !== FREQUENCY_TYPE.NONE &&
+        recurrence.frequencyEndType === "on" &&
+        !recurrence.frequencyEndDate;
 
     const onClickSave = async () => {
         const created = await handleSave();
@@ -224,8 +230,8 @@ const AddTaskDialog: React.FC<Props> = ({ open, onClose, onSave }) => {
                     <button
                         className="atd-btn atd-btn-save"
                         onClick={onClickSave}
-                        disabled={!title.trim()}
-                        style={!title.trim() ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                        disabled={!title.trim() || recurrenceEndDateMissing}
+                        style={!title.trim() || recurrenceEndDateMissing ? { opacity: 0.45, cursor: "not-allowed" } : {}}
                     >
                         {t("task.save")}
                     </button>

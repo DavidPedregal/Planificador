@@ -386,7 +386,8 @@
       "toggled": "Statut de la tâche mis à jour",
       "deleted": "Tâche supprimée",
       "forwardDeleted": "Tâches supprimées à partir de ce point",
-      "allDeleted": "Toutes les tâches de la série supprimées"
+      "allDeleted": "Toutes les tâches de la série supprimées",
+      "recurrenceEndDate": "Une date de fin est requise lorsque la récurrence se termine à une date précise"
     },
     "event": {
       "created": "Événement créé",
@@ -396,7 +397,8 @@
       "labelDeleted": "Événements avec cette étiquette supprimés",
       "deleted": "Événement supprimé",
       "forwardDeleted": "Événements supprimés à partir de ce point",
-      "allDeleted": "Tous les événements de la série supprimés"
+      "allDeleted": "Tous les événements de la série supprimés",
+      "recurrenceEndDate": "Une date de fin est requise lorsque la récurrence se termine à une date précise"
     },
     "subject": {
       "created": "Matière créée",

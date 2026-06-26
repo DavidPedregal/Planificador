@@ -398,7 +398,8 @@
       "toggled": "Estado de la tarea actualizado",
       "deleted": "Tarea eliminada",
       "forwardDeleted": "Tareas eliminadas desde este punto",
-      "allDeleted": "Todas las tareas de la serie eliminadas"
+      "allDeleted": "Todas las tareas de la serie eliminadas",
+      "recurrenceEndDate": "Se requiere una fecha de fin cuando la recurrencia termina en un día concreto"
     },
     "event": {
       "created": "Evento creado",
@@ -408,7 +409,8 @@
       "labelDeleted": "Eventos con esa etiqueta eliminados",
       "deleted": "Evento eliminado",
       "forwardDeleted": "Eventos eliminados desde este punto",
-      "allDeleted": "Todos los eventos de la serie eliminados"
+      "allDeleted": "Todos los eventos de la serie eliminados",
+      "recurrenceEndDate": "Se requiere una fecha de fin cuando la recurrencia termina en un día concreto"
     },
     "subject": {
       "created": "Asignatura creada",

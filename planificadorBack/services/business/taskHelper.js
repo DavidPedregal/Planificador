@@ -94,8 +94,8 @@ function generateRecurringTasks(baseTask) {
             if (occurrencesLeft <= 0) {
                 shouldContinue = false;
             }
-        } else if (endType === "on" && endDate) {
-            if (nextFinishDate > endDate) {
+        } else if (endType === "on") {
+            if (!endDate || nextFinishDate > endDate) {
                 shouldContinue = false;
             }
         }
@@ -134,6 +134,10 @@ function validateData(data, checkRecurrence = false) {
             if (Object.prototype.hasOwnProperty.call(data, field)) {
                 updateData[field] = data[field];
             }
+        }
+        if (updateData.frequencyType && updateData.frequencyType !== 'none' &&
+            updateData.frequencyEndType === 'on' && !updateData.frequencyEndDate) {
+            return { valid: false, error: 'api.task.recurrenceEndDate' };
         }
     }
 
