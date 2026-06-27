@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mentiplan — Frontend (`papp/`)
 
-## Getting Started
+Frontend de la aplicación web Mentiplan. Construido con Next.js 16, React Compiler y TypeScript.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** con App Router
+- **TypeScript**
+- **FullCalendar** — calendario interactivo
+- **i18next** — internacionalización (español e inglés)
+- **CSS plano** con variables CSS para theming
+
+## Páginas
+
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Pantalla de login con Google Sign-In |
+| `/home` | Vista principal: calendario + sidebar + to-do list |
+| `/settings` | Configuración de la cuenta y preferencias |
+| `/statistics` | Estadísticas de tiempo de estudio por asignatura |
+
+Las páginas protegidas (`/home`, `/settings`, `/statistics`) llaman a `useAuthGuard()` al montarse. El hook verifica el token con el backend y redirige a `/` si la sesión no es válida.
+
+## Estructura de código
+
+```
+src/
+├── app/
+│   ├── components/
+│   │   ├── calendar/        # Componente FullCalendar y lógica de eventos
+│   │   ├── event/           # Diálogos de añadir y editar eventos
+│   │   ├── plannedEvent/    # Diálogos de eventos planificados
+│   │   ├── sidebar/         # Barra lateral, menú de herramientas, importar/exportar
+│   │   ├── todoList/        # Lista de tareas pendientes
+│   │   └── navbar/          # Barra de navegación
+│   ├── home/                # Página /home
+│   ├── settings/            # Página /settings
+│   ├── statistics/          # Página /statistics
+│   └── config/config.ts     # URL del backend
+├── context/AppContext.tsx   # Estado global (usuario, tema, alertas)
+├── hooks/useAuthGuard.ts    # Protección de rutas
+├── i18n/                    # Configuración i18next + locales (en, es)
+└── lib/api.ts               # Wrapper apiFetch
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Conceptos clave
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Llamadas a la API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Usar siempre `apiFetch` de `src/lib/api.ts` para endpoints JSON. Devuelve `{ ok, data, message }`. El campo `message` ya viene traducido (el backend envía claves i18n y `apiFetch` las resuelve).
 
-## Learn More
+Excepción: las subidas de archivos usan `fetch` nativo con `FormData`.
 
-To learn more about Next.js, take a look at the following resources:
+Todas las peticiones incluyen `Authorization: Bearer <token>` desde `localStorage`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Theming
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+El tema es `"dark"` (por defecto) o `"light"`, almacenado en `userSettings` y aplicado como `data-theme` en `<html>`. Todos los colores son variables CSS definidas en `globals.css`. Nunca hardcodear colores.
 
-## Deploy on Vercel
+### i18n
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Dos locales: `en` y `es`. Se autodetecta el idioma del navegador. Archivos de traducción en `src/i18n/locales/en.json` y `es.json`. Al añadir cualquier texto visible al usuario, añadirlo a **ambos** archivos.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Patrón de diálogos
+
+Todos los diálogos usan las clases CSS: `aed-overlay`, `aed-dialog`, `aed-header`, `aed-body`, `aed-footer`, `aed-field`, `aed-label`, `aed-input`, `aed-button`, `aed-button primary`. Ver `add-event-dialog.css` como referencia.
+
+## Desarrollo local
+
+```bash
+# Desde la raíz del proyecto
+docker compose up --build
+
+# O directamente (requiere .env con NEXT_PUBLIC_URL_BACK y NEXT_PUBLIC_GOOGLE_CLIENT_ID)
+cd papp
+npm install
+npm run dev
+```
+
+La aplicación corre en `http://localhost:3000`.

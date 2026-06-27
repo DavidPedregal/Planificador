@@ -1,121 +1,105 @@
-# Microservicio de Planificación Académica (OR-Tools)
+# Mentiplan — Microservicio de Planificación (`planificadorAlgoritmo/`)
 
-Este microservicio implementa el **algoritmo de planificación académica** de la aplicación web, encargándose de distribuir tareas de forma óptima en el calendario del usuario utilizando **Google OR-Tools**.
+Microservicio Python que implementa el algoritmo de planificación de sesiones de estudio usando Google OR-Tools. El backend principal lo invoca internamente; el frontend nunca llama a este servicio directamente.
 
-Su objetivo principal es **equilibrar la carga diaria de trabajo**, priorizar la **cercanía temporal a las clases relacionadas con cada tarea** y respetar las **restricciones de disponibilidad del usuario**, fechas límite y eventos ya existentes.
-
----
-
-## 📌 Responsabilidad del microservicio
-
-Este servicio **no gestiona usuarios, vistas ni persistencia**.  
-Únicamente:
-
-- Recibe información estructurada sobre:
-  - Horario académico
-  - Tareas pendientes
-  - Disponibilidad del usuario
-  - Eventos existentes
-- Ejecuta el algoritmo de planificación
-- Devuelve una planificación óptima o factible
-
----
-
-## ⚙️ Tecnologías utilizadas
+## Stack
 
 - **Python 3.11**
-- **Google OR-Tools**
-- **FastAPI** (API REST)
+- **FastAPI** — API REST
+- **Google OR-Tools** — optimización con restricciones
 - **Docker**
 
----
+## API
 
-## 🧠 Modelo del problema de planificación
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/health` | Comprobación de estado |
+| `POST` | `/plan` | Genera un plan de estudio |
 
-El algoritmo se formula como un **problema de optimización con restricciones**, donde:
+## Entrada — `POST /plan`
 
-### Variables principales
+```json
+{
+  "tasks": [
+    {
+      "taskId": "string",
+      "title": "string",
+      "estimatedTime": 120,
+      "finishDate": "2025-06-15T00:00:00",
+      "givenDate": "2025-06-01T00:00:00",
+      "includeReviews": false
+    }
+  ],
+  "plannableSlots": [
+    { "start": "2025-06-10T09:00:00", "end": "2025-06-10T11:00:00" }
+  ],
+  "previousPlan": [],
+  "maxTime": 10
+}
+```
 
-- Bloques de tiempo asignados a tareas
-- Día y franja horaria en la que se ejecuta cada tarea
+| Campo | Descripción |
+|-------|-------------|
+| `tasks` | Tareas a planificar, con tiempo estimado (minutos) y fecha límite |
+| `plannableSlots` | Franjas libres del usuario calculadas por el backend (sin solapamiento con eventos existentes ni fuera de la franja horaria configurada) |
+| `previousPlan` | Bloques ya planificados de planes anteriores (para planificación incremental) |
+| `maxTime` | Tiempo máximo de resolución en segundos (configurado por el usuario) |
 
-### Restricciones
+> El backend es responsable de calcular los `plannableSlots` (descontando eventos existentes del calendario y respetando la franja horaria del usuario). El microservicio asume que los datos llegan ya validados.
 
-- No solapamiento con:
-  - Clases
-  - Eventos existentes
-- Respeto de:
-  - Disponibilidad del usuario
-  - Fecha límite de cada tarea
-- Duración total asignada ≥ duración estimada de la tarea
-- Las tareas pueden dividirse en varios bloques (si se permite)
+## Salida
 
-### Función objetivo (a minimizar)
+```json
+{
+  "scheduled": [
+    {
+      "taskId": "string",
+      "title": "string",
+      "start": "2025-06-10T09:00:00",
+      "end": "2025-06-10T11:00:00",
+      "scheduledTime": 120
+    }
+  ],
+  "warnings": [
+    {
+      "taskId": "string",
+      "title": "string",
+      "message": "string"
+    }
+  ]
+}
+```
 
-- Desviación de la carga diaria (evitar picos)
-- Distancia temporal entre la tarea y la última clase de su asignatura
-- Penalización por uso de días cercanos a la fecha límite
-- Penalización por recalcular tareas ya fijadas (si aplica)
+- `scheduled` — bloques de estudio asignados (una tarea puede dividirse en varios bloques).
+- `warnings` — tareas que no pudieron planificarse completamente (por ejemplo, por falta de tiempo disponible antes de la fecha límite).
 
----
+## Modos de planificación
 
-## 🔄 Modos de planificación soportados
+**Planificación completa** (`previousPlan: []`) — se recalcula todo el calendario desde cero.
 
-El microservicio soporta dos modos de ejecución:
+**Planificación incremental** (`previousPlan: [...]`) — los bloques del plan previo se tratan como ocupados y solo se insertan las nuevas tareas sin modificar las ya asignadas.
 
-### 1️⃣ Replanificación completa
+## Modelo de optimización
 
-- Se ignora la planificación previa
-- Se recalcula todo el calendario desde cero
-- Recomendado cuando:
-  - Cambia la disponibilidad
-  - Hay errores grandes en la estimación
-  - Se incumplen tareas
+El algoritmo formula el problema como una optimización con restricciones (CP-SAT de OR-Tools) que:
 
-### 2️⃣ Planificación incremental
+- Respeta las fechas límite de cada tarea.
+- No asigna trabajo fuera de los `plannableSlots`.
+- Distribuye la carga diaria de forma homogénea.
+- Prioriza completar las tareas lo antes posible dentro del tiempo disponible.
+- Emite advertencias en lugar de fallar cuando no es posible planificar una tarea entera.
 
-- Se mantiene la planificación existente
-- Solo se insertan las nuevas tareas
-- No se modifican tareas ya asignadas
+## Desarrollo local
 
----
+```bash
+# Desde la raíz del proyecto
+docker compose up --build
 
-## 📥 Entrada del microservicio
+# O directamente
+cd planificadorAlgoritmo
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8001
 
-La API espera un JSON con la siguiente información (resumen):
-
-### Datos principales
-
-- **Calendario académico**
-  - Clases (asignatura, día, hora inicio/fin)
-- **Tareas**
-  - Nombre
-  - Asignatura
-  - Duración estimada (en minutos)
-  - Fecha límite
-- **Disponibilidad del usuario**
-  - Franjas horarias semanales
-- **Eventos existentes**
-  - Bloques ocupados no modificables
-- **Configuración**
-  - Modo de planificación
-
-> [!Warning] 
-> El microservicio asume que los datos ya vienen validados semánticamente desde el backend principal.
-
----
-
-## 📤 Salida
-
-El servicio devuelve:
-
-- Lista de tareas planificadas
-- Para cada tarea, una lista con periodos de estudio.
-- En cada periodo de estudio:
-  - Día
-  - Hora de inicio
-  - Hora de fin
-  - Identificador de tarea
-
-> [!Note]
-> Un periodo de estudio se refiere al intervalo de tiempo en el que se supone que el usuario estudiará. Un ejemplo de esto sería: `15-1-2025; 18:00; 20:00; 1`, en el que `1` es el identificador de la tarea que se va a realizar en ese día y hora.
+# Tests
+python -m pytest test_scheduler.py
+```
