@@ -10,7 +10,8 @@ const PlanEventModel = new mongoose.Schema({
         required: true,
     },
     calendarId : {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Calendar",
         required: true,
     },
     taskId: {

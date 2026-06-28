@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const calendarModel = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "UserModel",
         required: true,
     },
     name: {

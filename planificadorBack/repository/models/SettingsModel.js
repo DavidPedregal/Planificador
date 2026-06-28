@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
  
 const SettingsModel = new mongoose.Schema({
-    userId: { type: String, required: true, unique: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "UserModel", required: true, unique: true },
     systemColor: { type: String, default: "#7c6ff740" },
     theme: { type: String, default: "dark" },
     defaultCalendarView: { type: String, default: "timeGridWeek", enum: ["dayGridMonth", "timeGridWeek", "timeGridDay", "listWeek"] },

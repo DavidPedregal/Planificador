@@ -18,7 +18,9 @@ afterEach(async () => {
     await mongoose.connection.dropDatabase();
 });
 
-const mockUserId = 'user123';
+const mockUserId = new mongoose.Types.ObjectId();
+const otherUserId = new mongoose.Types.ObjectId();
+const nonexistentId = new mongoose.Types.ObjectId();
 
 describe('settingsRepository', () => {
     describe('createSettings', () => {
@@ -26,7 +28,7 @@ describe('settingsRepository', () => {
             const settings = await SettingsRepo.createSettings({ userId: mockUserId });
 
             expect(settings._id).toBeDefined();
-            expect(settings.userId).toBe(mockUserId);
+            expect(settings.userId.toString()).toBe(mockUserId.toString());
             expect(settings.theme).toBe('dark');
             expect(settings.startHour).toBe(8);
             expect(settings.endHour).toBe(20);
@@ -63,16 +65,16 @@ describe('settingsRepository', () => {
             const found = await SettingsRepo.findSettingsForUser(mockUserId);
 
             expect(found).not.toBeNull();
-            expect(found.userId).toBe(mockUserId);
+            expect(found.userId.toString()).toBe(mockUserId.toString());
         });
 
         it('should return null if user has no settings', async () => {
-            const found = await SettingsRepo.findSettingsForUser('nonexistent');
+            const found = await SettingsRepo.findSettingsForUser(nonexistentId);
             expect(found).toBeNull();
         });
 
         it('should not return settings belonging to another user', async () => {
-            await SettingsRepo.createSettings({ userId: 'otherUser' });
+            await SettingsRepo.createSettings({ userId: otherUserId });
             const found = await SettingsRepo.findSettingsForUser(mockUserId);
             expect(found).toBeNull();
         });
@@ -94,13 +96,13 @@ describe('settingsRepository', () => {
         });
 
         it('should return null if user has no settings', async () => {
-            const result = await SettingsRepo.updateSettings('nonexistent', { theme: 'light' });
+            const result = await SettingsRepo.updateSettings(nonexistentId, { theme: 'light' });
             expect(result).toBeNull();
         });
 
         it('should not update settings of another user', async () => {
             await SettingsRepo.createSettings({ userId: mockUserId });
-            const result = await SettingsRepo.updateSettings('otherUser', { theme: 'light' });
+            const result = await SettingsRepo.updateSettings(otherUserId, { theme: 'light' });
             expect(result).toBeNull();
         });
     });
@@ -115,7 +117,7 @@ describe('settingsRepository', () => {
         });
 
         it('should not throw if settings do not exist', async () => {
-            await expect(SettingsRepo.deleteSettings('nonexistent')).resolves.not.toThrow();
+            await expect(SettingsRepo.deleteSettings(nonexistentId)).resolves.not.toThrow();
         });
     });
 });

@@ -19,7 +19,8 @@ const calendarEventModel = new mongoose.Schema({
         default: "#000000",
     },
     calendarId : {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Calendar",
         required: true,
     },
     label : {

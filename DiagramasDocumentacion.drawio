@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8" pages="12">
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8" pages="14">
   <diagram name="Use Cases" id="9O23DRqKzcv--fBePR_D">
     <mxGraphModel dx="2037" dy="1270" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
@@ -1571,6 +1571,94 @@
         </mxCell>
         <mxCell id="lgxOyk79LB84af_y7I8t-5" value="API Endpoints" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="270" y="250" width="70" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="-B5waB9WcsZleGpbvYWa" name="DeploymentDiagram">
+    <mxGraphModel dx="1426" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-1" target="JQth3iGG7rd4xu_jN_l2-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-1" value="Client" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="160" y="350" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-2" target="JQth3iGG7rd4xu_jN_l2-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-2" value="Oracle Cloud VM — Ubuntu, ARM" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=200;height=20;" vertex="1" parent="1">
+          <mxGeometry x="350" y="270" width="390" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-3" target="JQth3iGG7rd4xu_jN_l2-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="385" />
+              <mxPoint x="560" y="385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-3" value="MongoDB Container" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="430" y="410" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-4" target="JQth3iGG7rd4xu_jN_l2-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="670" y="385" />
+              <mxPoint x="600" y="385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-4" value="Algorithm Microservice Container (FastAPI, port 8001)" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="610" y="410" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-5" target="JQth3iGG7rd4xu_jN_l2-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-5" target="JQth3iGG7rd4xu_jN_l2-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="385" />
+              <mxPoint x="490" y="385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-5" target="JQth3iGG7rd4xu_jN_l2-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="385" />
+              <mxPoint x="670" y="385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="Backend Container (Express.js, port 8000)" link="Backend Container (Express.js, port 8000)" id="JQth3iGG7rd4xu_jN_l2-5">
+          <mxCell style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+            <mxGeometry x="520" y="300" width="120" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="JQth3iGG7rd4xu_jN_l2-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="JQth3iGG7rd4xu_jN_l2-6" target="JQth3iGG7rd4xu_jN_l2-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="Frontend Container (Next.js, port 3000)" link="Frontend Container (Next.js, port 3000)" id="JQth3iGG7rd4xu_jN_l2-6">
+          <mxCell style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+            <mxGeometry x="360" y="300" width="120" height="60" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="zhs5CXZyhD6mz0QE7hqc" name="ERDiagram">
+    <mxGraphModel dx="1358" dy="847" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="HaY45ym8DL9-nVC8z_oI-77" value="Entity" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=50;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;arcSize=4;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="430" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="HaY45ym8DL9-nVC8z_oI-78" value="+Attribute1&#xa;+Attribute2&#xa;+Attribute3" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;fontSize=12;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;" vertex="1" parent="HaY45ym8DL9-nVC8z_oI-77">
+          <mxGeometry y="50" width="160" height="70" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
