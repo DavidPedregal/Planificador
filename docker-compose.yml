@@ -28,6 +28,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
+      DB_RATE_LIMIT: "100000"
 
   # ── Next.js frontend ───────────────────────────────────────────────────────
   front:

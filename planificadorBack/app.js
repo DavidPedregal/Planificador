@@ -32,7 +32,7 @@ app.use(express.json());
 var RateLimit = require('express-rate-limit');
 var limiter = RateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000,
+  max: parseInt(process.env.DB_RATE_LIMIT) || 1000,
 });
 
 app.use(limiter);
